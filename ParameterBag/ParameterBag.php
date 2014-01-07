@@ -76,9 +76,9 @@ class ParameterBag implements ParameterBagInterface
     }
 
     /**
-     * Gets a service container parameter.
+     * Gets a service container parameter by path or by name.
      *
-     * @param string $name The parameter name
+     * @param string $name The parameter path, separated by a colon ":" or the parameter name
      *
      * @return mixed  The parameter value
      *
@@ -89,6 +89,9 @@ class ParameterBag implements ParameterBagInterface
     public function get($name)
     {
         $name = strtolower($name);
+        
+        $nodes = explode(':', $name); // Converting parameters path to array
+        $name = array_shift($nodes); // First node of parameter value path
 
         if (!array_key_exists($name, $this->parameters)) {
             if (!$name) {
@@ -105,8 +108,13 @@ class ParameterBag implements ParameterBagInterface
 
             throw new ParameterNotFoundException($name, null, null, null, $alternatives);
         }
+        
+        $value = $this->parameters[$name];
+        foreach ($nodes as $node) {
+            $value = $value[$node];
+        }
 
-        return $this->parameters[$name];
+        return $value;
     }
 
     /**
