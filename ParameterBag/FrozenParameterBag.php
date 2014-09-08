@@ -42,8 +42,6 @@ class FrozenParameterBag extends ParameterBag
 
     /**
      * {@inheritdoc}
-     *
-     * @api
      */
     public function clear()
     {
@@ -52,8 +50,6 @@ class FrozenParameterBag extends ParameterBag
 
     /**
      * {@inheritdoc}
-     *
-     * @api
      */
     public function add(array $parameters)
     {
@@ -62,8 +58,6 @@ class FrozenParameterBag extends ParameterBag
 
     /**
      * {@inheritdoc}
-     *
-     * @api
      */
     public function set($name, $value)
     {
@@ -72,8 +66,6 @@ class FrozenParameterBag extends ParameterBag
 
     /**
      * {@inheritdoc}
-     *
-     * @api
      */
     public function remove($name)
     {
