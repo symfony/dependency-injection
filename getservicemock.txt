@@ -33,3 +33,23 @@
         }
         return $mock;
     }
+
+    /**
+     * Given an array of arguments that were given to a container definition, resolves all values.
+     *
+     * @param array $argumentDefinitions
+     * @return array
+     */
+    protected function resolveArguments(array $argumentDefinitions)
+    {
+        $argumentArray = array();
+        foreach ($argumentDefinitions as $thisArgument) {
+            if ($thisArgument instanceof Symfony\Component\DependencyInjection\Reference) {
+                /** @var \Symfony\Component\DependencyInjection\Reference $thisArgument */
+                $argumentArray[] = $this->getContainer()->get((string) $thisArgument);
+            } else {
+                $argumentArray[] = $thisArgument;
+            }
+        }
+        return $argumentArray;
+    }
