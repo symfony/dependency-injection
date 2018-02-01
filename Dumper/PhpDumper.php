@@ -1424,7 +1424,9 @@ EOF;
             }
 
             return sprintf('array(%s)', implode(', ', $code));
-        } elseif ($value instanceof ArgumentInterface) {
+        }
+
+        if ($value instanceof ArgumentInterface) {
             $scope = array($this->definitionVariables, $this->referenceVariables, $this->variableCount);
             $this->definitionVariables = $this->referenceVariables = null;
 
@@ -1550,15 +1552,15 @@ EOF;
                 // we do this to deal with non string values (Boolean, integer, ...)
                 // the preg_replace_callback converts them to strings
                 return $this->dumpParameter($match[1]);
-            } else {
-                $replaceParameters = function ($match) {
-                    return "'.".$this->dumpParameter($match[2]).".'";
-                };
-
-                $code = str_replace('%%', '%', preg_replace_callback('/(?<!%)(%)([^%]+)\1/', $replaceParameters, $this->export($value)));
-
-                return $code;
             }
+
+            $replaceParameters = function ($match) {
+                return "'.".$this->dumpParameter($match[2]).".'";
+            };
+
+            $code = str_replace('%%', '%', preg_replace_callback('/(?<!%)(%)([^%]+)\1/', $replaceParameters, $this->export($value)));
+
+            return $code;
         } elseif (is_object($value) || is_resource($value)) {
             throw new RuntimeException('Unable to dump a service container if a parameter is an object or a resource.');
         }
