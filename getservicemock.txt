@@ -1,0 +1,55 @@
+    /**
+     * Easily create a mock of any service in the DI container.
+     *
+     * @param string $id
+     * @param array $mockedMethodNames
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getServiceMock($id, $mockedMethodNames = array())
+    {
+        $definition = $this->getContainer()->getDefinition($id);
+        $argumentArray = $this->resolveArguments($definition->getArguments());
+
+        // Create the mock.
+        $mock = $this->getMock(
+            $definition->getClass(),
+            $mockedMethodNames,
+            $argumentArray
+        );
+
+        // Call all of the functions which were requested at instantiation time.
+        foreach ($definition->getMethodCalls() as $thisMethodCall) {
+            $methodName = $thisMethodCall[0];
+            $argumentDefinitions = $thisMethodCall[1];
+            $argumentArray = $this->resolveArguments($argumentDefinitions);
+
+            call_user_func_array(
+                array(
+                    $mock,
+                    $methodName,
+                ),
+                $argumentArray
+            );
+        }
+        return $mock;
+    }
+
+    /**
+     * Given an array of arguments that were given to a container definition, resolves all values.
+     *
+     * @param array $argumentDefinitions
+     * @return array
+     */
+    protected function resolveArguments(array $argumentDefinitions)
+    {
+        $argumentArray = array();
+        foreach ($argumentDefinitions as $thisArgument) {
+            if ($thisArgument instanceof Symfony\Component\DependencyInjection\Reference) {
+                /** @var \Symfony\Component\DependencyInjection\Reference $thisArgument */
+                $argumentArray[] = $this->getContainer()->get((string) $thisArgument);
+            } else {
+                $argumentArray[] = $thisArgument;
+            }
+        }
+        return $argumentArray;
+    }
