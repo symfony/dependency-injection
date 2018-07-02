@@ -223,7 +223,8 @@ EOF;
                 $files[$file] = "<?php\n".$c;
             }
             $files[$options['class'].'.php'] = $code.$this->endClass();
-            $hash = ucfirst(strtr(ContainerBuilder::hash($files), '._', 'xx'));
+            $toHash = $this->container->getParameter('kernel.container_build_time') ?? $files;
+            $hash = ucfirst(strtr(ContainerBuilder::hash($toHash), '._', 'xx'));
             $code = array();
 
             foreach ($files as $file => $c) {
