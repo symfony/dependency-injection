@@ -23,14 +23,14 @@ class ResolvePrivatesPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        foreach ($container->getDefinitions() as $id => $definition) {
+        foreach ($container->getDefinitions() as $definition) {
             if ($definition->isPrivate()) {
                 $definition->setPublic(false);
                 $definition->setPrivate(true);
             }
         }
 
-        foreach ($container->getAliases() as $id => $alias) {
+        foreach ($container->getAliases() as $alias) {
             if ($alias->isPrivate()) {
                 $alias->setPublic(false);
                 $alias->setPrivate(true);
