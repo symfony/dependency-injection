@@ -240,7 +240,7 @@ class AutowirePass extends AbstractRecursivePass
                 return $value;
             };
 
-            if ($this->decoratedClass && $isDecorated = is_a($this->decoratedClass, $type, true)) {
+            if ($this->decoratedClass && is_a($this->decoratedClass, $type, true)) {
                 if ($this->getPreviousValue) {
                     // The inner service is injected only if there is only 1 argument matching the type of the decorated class
                     // across all arguments of all autowired methods.
