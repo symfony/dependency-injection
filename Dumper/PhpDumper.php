@@ -324,7 +324,9 @@ if (in_array(PHP_SAPI, ['cli', 'phpdbg'], true)) {
 }
 
 require $autoloadFile;
+if (!class_exists({$options['class']})) {
 require __DIR__.'/Container{$hash}/{$options['class']}.php';
+}
 
 \$classes = [];
 
