@@ -29,13 +29,17 @@ use Symfony\Component\DependencyInjection\Tests\Fixtures\Attribute\CustomMethodA
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Attribute\CustomParameterAttribute;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Attribute\CustomPropertyAttribute;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\BarTagClass;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\FooBarClassWithDefaultIndexMethod;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\FooBarTaggedClass;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\FooBarTaggedForDefaultPriorityClass;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\FooTagClass;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\FooTagClassWithDefaultIndexMethod;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\IteratorConsumer;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\IteratorConsumerWithDefaultIndexMethod;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\LocatorConsumer;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\LocatorConsumerConsumer;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\LocatorConsumerFactory;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\LocatorConsumerWithDefaultIndexMethod;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\LocatorConsumerWithoutIndex;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\TaggedService1;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\TaggedService2;
@@ -351,6 +355,30 @@ class IntegrationTest extends TestCase
         $this->assertSame(['bar_tab_class_with_defaultmethod' => $container->get(BarTagClass::class), 'foo' => $container->get(FooTagClass::class)], $param);
     }
 
+    public function testTaggedServiceWithDefaultIndexMethodConfiguredViaAttribute()
+    {
+        $container = new ContainerBuilder();
+        $container->register(BarTagClass::class)
+            ->setPublic(true)
+            ->addTag('foo_bar')
+        ;
+        $container->register(FooTagClass::class)
+            ->setPublic(true)
+            ->addTag('foo_bar')
+        ;
+        $container->register(IteratorConsumerWithDefaultIndexMethod::class)
+            ->setAutowired(true)
+            ->setPublic(true)
+        ;
+
+        $container->compile();
+
+        $s = $container->get(IteratorConsumerWithDefaultIndexMethod::class);
+
+        $param = iterator_to_array($s->getParam()->getIterator());
+        $this->assertSame(['bar_tag_class' => $container->get(BarTagClass::class), 'foo_tag_class' => $container->get(FooTagClass::class)], $param);
+    }
+
     public function testTaggedIteratorWithMultipleIndexAttribute()
     {
         $container = new ContainerBuilder();
@@ -430,6 +458,35 @@ class IntegrationTest extends TestCase
         $locator = $s->getLocator();
         self::assertSame($container->get(BarTagClass::class), $locator->get(BarTagClass::class));
         self::assertSame($container->get(FooTagClass::class), $locator->get(FooTagClass::class));
+    }
+
+    /**
+     * @requires PHP 8
+     */
+    public function testTaggedLocatorWithDefaultIndexMethodConfiguredViaAttribute()
+    {
+        $container = new ContainerBuilder();
+        $container->register(BarTagClass::class)
+            ->setPublic(true)
+            ->addTag('foo_bar')
+        ;
+        $container->register(FooTagClass::class)
+            ->setPublic(true)
+            ->addTag('foo_bar')
+        ;
+        $container->register(LocatorConsumerWithDefaultIndexMethod::class)
+            ->setAutowired(true)
+            ->setPublic(true)
+        ;
+
+        $container->compile();
+
+        /** @var LocatorConsumerWithoutIndex $s */
+        $s = $container->get(LocatorConsumerWithDefaultIndexMethod::class);
+
+        $locator = $s->getLocator();
+        self::assertSame($container->get(BarTagClass::class), $locator->get('bar_tag_class'));
+        self::assertSame($container->get(FooTagClass::class), $locator->get('foo_tag_class'));
     }
 
     /**
