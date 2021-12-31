@@ -1413,7 +1413,11 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             return $result;
         }
 
-        if (!\is_string($value) || 38 > \strlen($value)) {
+        if (
+            !\is_string($value)
+            || 38 > \strlen($value)
+            || !\preg_match('/env[_(]/m', $value)
+        ) {
             return $value;
         }
         $envPlaceholders = $bag instanceof EnvPlaceholderParameterBag ? $bag->getEnvPlaceholders() : $this->envPlaceholders;
