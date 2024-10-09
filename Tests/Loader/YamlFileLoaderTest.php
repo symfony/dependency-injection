@@ -11,8 +11,9 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Loader;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\PhpUnit\ExpectUserDeprecationMessageTrait;
 use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
 use Symfony\Component\Config\Exception\LoaderLoadException;
 use Symfony\Component\Config\FileLocator;
@@ -48,8 +49,6 @@ use Symfony\Component\Yaml\Yaml;
 
 class YamlFileLoaderTest extends TestCase
 {
-    use ExpectUserDeprecationMessageTrait;
-
     protected static string $fixturesPath;
 
     public static function setUpBeforeClass(): void
@@ -1212,9 +1211,8 @@ class YamlFileLoaderTest extends TestCase
         $this->assertEquals((new Definition('stdClass'))->setFactory([null, 'create']), $definition);
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testDeprecatedTagged()
     {
         $container = new ContainerBuilder();

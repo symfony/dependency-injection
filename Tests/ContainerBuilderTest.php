@@ -15,8 +15,9 @@ require_once __DIR__.'/Fixtures/includes/autowiring_classes.php';
 require_once __DIR__.'/Fixtures/includes/classes.php';
 require_once __DIR__.'/Fixtures/includes/ProjectExtension.php';
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\PhpUnit\ExpectUserDeprecationMessageTrait;
 use Symfony\Component\Config\Resource\DirectoryResource;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Resource\ResourceInterface;
@@ -65,8 +66,6 @@ use Symfony\Component\ExpressionLanguage\Expression;
 
 class ContainerBuilderTest extends TestCase
 {
-    use ExpectUserDeprecationMessageTrait;
-
     public function testDefaultRegisteredDefinitions()
     {
         $builder = new ContainerBuilder();
@@ -108,10 +107,10 @@ class ContainerBuilderTest extends TestCase
     }
 
     /**
-     * The test should be kept in the group as it always expects a deprecation.
-     *
-     * @group legacy
+     * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testDeprecateParameter()
     {
         $builder = new ContainerBuilder();
@@ -125,10 +124,10 @@ class ContainerBuilderTest extends TestCase
     }
 
     /**
-     * The test should be kept in the group as it always expects a deprecation.
-     *
-     * @group legacy
+     * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testParameterDeprecationIsTrgiggeredWhenCompiled()
     {
         $builder = new ContainerBuilder();
@@ -856,9 +855,8 @@ class ContainerBuilderTest extends TestCase
         $this->assertSame([AsTaggedItem::class => [$c1, $c2]], $container->getAttributeAutoconfigurators());
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testGetAutoconfiguredAttributes()
     {
         $container = new ContainerBuilder();
@@ -2011,10 +2009,10 @@ class ContainerBuilderTest extends TestCase
     }
 
     /**
-     * The test should be kept in the group as it always expects a deprecation.
-     *
-     * @group legacy
+     * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testDirectlyAccessingDeprecatedPublicService()
     {
         $this->expectUserDeprecationMessage('Since foo/bar 3.8: Accessing the "Symfony\Component\DependencyInjection\Tests\A" service directly from the container is deprecated, use dependency injection instead.');

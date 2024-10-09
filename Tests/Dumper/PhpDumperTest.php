@@ -11,9 +11,10 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Dumper;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Symfony\Bridge\PhpUnit\ExpectUserDeprecationMessageTrait;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
@@ -79,8 +80,6 @@ require_once __DIR__.'/../Fixtures/includes/fixture_app_services.php';
 
 class PhpDumperTest extends TestCase
 {
-    use ExpectUserDeprecationMessageTrait;
-
     protected static string $fixturesPath;
 
     public static function setUpBeforeClass(): void
@@ -480,10 +479,10 @@ class PhpDumperTest extends TestCase
     }
 
     /**
-     * The test should be kept in the group as it always expects a deprecation.
-     *
-     * @group legacy
+     * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testDeprecatedParameters()
     {
         $container = include self::$fixturesPath.'/containers/container_deprecated_parameters.php';
@@ -497,10 +496,10 @@ class PhpDumperTest extends TestCase
     }
 
     /**
-     * The test should be kept in the group as it always expects a deprecation.
-     *
-     * @group legacy
+     * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testDeprecatedParametersAsFiles()
     {
         $container = include self::$fixturesPath.'/containers/container_deprecated_parameters.php';
@@ -1801,10 +1800,10 @@ PHP
     }
 
     /**
-     * The test should be kept in the group as it always expects a deprecation.
-     *
-     * @group legacy
+     * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testDirectlyAccessingDeprecatedPublicService()
     {
         $this->expectUserDeprecationMessage('Since foo/bar 3.8: Accessing the "bar" service directly from the container is deprecated, use dependency injection instead.');

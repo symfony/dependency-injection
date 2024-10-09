@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -96,14 +98,13 @@ class ResolveClassPassTest extends TestCase
         (new ResolveClassPass())->process($container);
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testInvalidClassNameDefinition()
     {
         // $this->expectException(InvalidArgumentException::class);
         // $this->expectExceptionMessage('Service id "Acme\UnknownClass" looks like a FQCN but no corresponding class or interface exists. To resolve this ambiguity, please rename this service to a non-FQCN (e.g. using dots), or create the missing class or interface.');
-        $this->expectDeprecation('Since symfony/dependency-injection 7.4: Service id "Acme\UnknownClass" looks like a FQCN but no corresponding class or interface exists. To resolve this ambiguity, please rename this service to a non-FQCN (e.g. using dots), or create the missing class or interface.');
+        $this->expectUserDeprecationMessage('Since symfony/dependency-injection 7.4: Service id "Acme\UnknownClass" looks like a FQCN but no corresponding class or interface exists. To resolve this ambiguity, please rename this service to a non-FQCN (e.g. using dots), or create the missing class or interface.');
         $container = new ContainerBuilder();
         $container->register('Acme\UnknownClass');
 
