@@ -66,7 +66,7 @@ class ProjectServiceContainer extends Container
     protected static function getBazService($container, $lazyLoad = true)
     {
         if (true === $lazyLoad) {
-            return $container->services['baz'] = new \ReflectionClass('stdClass')->newLazyProxy(static fn () => self::getBazService($container, false));
+            return $container->services['baz'] = $container->createProxy('stdClassProxyAa01f12', static fn () => \stdClassProxyAa01f12::createLazyProxy(static fn () => self::getBazService($container, false)));
         }
 
         return \foo_bar();
@@ -80,7 +80,7 @@ class ProjectServiceContainer extends Container
     protected static function getBuzService($container, $lazyLoad = true)
     {
         if (true === $lazyLoad) {
-            return $container->services['buz'] = new \ReflectionClass('stdClass')->newLazyProxy(static fn () => self::getBuzService($container, false));
+            return $container->services['buz'] = $container->createProxy('stdClassProxyAa01f12', static fn () => \stdClassProxyAa01f12::createLazyProxy(static fn () => self::getBuzService($container, false)));
         }
 
         return \foo_bar();
@@ -100,3 +100,14 @@ class ProjectServiceContainer extends Container
         return $lazyLoad;
     }
 }
+
+class stdClassProxyAa01f12 extends \stdClass implements \Symfony\Component\VarExporter\LazyObjectInterface
+{
+    use \Symfony\Component\VarExporter\Internal\LazyDecoratorTrait;
+
+    private const LAZY_OBJECT_PROPERTY_SCOPES = [];
+}
+
+// Help opcache.preload discover always-needed symbols
+class_exists(\Symfony\Component\VarExporter\Internal\Hydrator::class);
+class_exists(\Symfony\Component\VarExporter\Internal\LazyObjectRegistry::class);
