@@ -1150,7 +1150,7 @@ class ContainerBuilderTest extends TestCase
         $container->setResourceTracking(false);
         $container->addObjectResource(new \BarClass());
 
-        $this->assertEmpty($container->getResources(), 'No resources get registered without resource tracking');
+        $this->assertSame([], $container->getResources(), 'No resources get registered without resource tracking');
 
         $container->setResourceTracking(true);
         $container->addObjectResource(new \BarClass());
@@ -1173,7 +1173,7 @@ class ContainerBuilderTest extends TestCase
         $container->setResourceTracking(false);
         $r1 = $container->getReflectionClass('BarClass');
 
-        $this->assertEmpty($container->getResources(), 'No resources get registered without resource tracking');
+        $this->assertSame([], $container->getResources(), 'No resources get registered without resource tracking');
 
         $container->setResourceTracking(true);
         $r2 = $container->getReflectionClass('BarClass');
@@ -1213,7 +1213,7 @@ class ContainerBuilderTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $this->assertEmpty($container->getResources(), 'No resources get registered without resource tracking');
+        $this->assertSame([], $container->getResources(), 'No resources get registered without resource tracking');
 
         $container->register('foo', 'BarClass')->setPublic(true);
         $container->getDefinition('foo')->setLazy(true);
@@ -1372,7 +1372,7 @@ class ContainerBuilderTest extends TestCase
         $container = new ContainerBuilder();
 
         $configs = $container->getExtensionConfig('foo');
-        $this->assertEmpty($configs);
+        $this->assertSame([], $configs);
 
         $first = ['foo' => 'bar'];
         $container->prependExtensionConfig('foo', $first);

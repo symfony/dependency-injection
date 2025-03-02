@@ -986,7 +986,7 @@ class PhpDumperTest extends TestCase
             }
         }
 
-        $this->assertEmpty(iterator_to_array($lazyContext->lazyEmptyValues));
+        $this->assertSame([], iterator_to_array($lazyContext->lazyEmptyValues));
     }
 
     public function testNormalizedId()
