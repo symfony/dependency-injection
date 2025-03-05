@@ -9,6 +9,7 @@ CHANGELOG
  * Don't skip classes with private constructor when autodiscovering
  * Add `Definition::addExcludeTag()` and `ContainerBuilder::findExcludedServiceIds()`
    for auto-configuration of classes excluded from the service container
+ * Leverage native lazy objects when possible for lazy services
 
 7.2
 ---

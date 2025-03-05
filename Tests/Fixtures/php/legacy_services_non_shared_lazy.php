@@ -67,10 +67,10 @@ class ProjectServiceContainer extends Container
     {
         $container->factories['service_container']['foo'] ??= self::getFooService(...);
 
-        if (true === $lazyLoad) {
-            return new \ReflectionClass('stdClass')->newLazyGhost(static function ($proxy) use ($container) { self::getFooService($container, $proxy); });
-        }
+        // lazy factory for stdClass
 
-        return $lazyLoad;
+        return new \stdClass();
     }
 }
+
+// proxy code for stdClass

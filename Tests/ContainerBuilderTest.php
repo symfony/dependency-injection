@@ -1919,8 +1919,12 @@ class ContainerBuilderTest extends TestCase
         $container->compile();
 
         $wither = $container->get('wither');
+        if (\PHP_VERSION_ID >= 80400) {
+            $this->assertTrue((new \ReflectionClass($wither))->isUninitializedLazyObject($wither));
+        } else {
+            $this->assertTrue($wither->resetLazyObject());
+        }
         $this->assertInstanceOf(Foo::class, $wither->foo);
-        $this->assertTrue($wither->resetLazyObject());
         $this->assertInstanceOf(Wither::class, $wither->withFoo1($wither->foo));
     }
 
