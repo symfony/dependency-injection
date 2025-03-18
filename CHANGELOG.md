@@ -9,6 +9,7 @@ CHANGELOG
  * Don't skip classes with private constructor when autodiscovering
  * Add `Definition::addResourceTag()` and `ContainerBuilder::findTaggedResourceIds()`
    for auto-configuration of classes excluded from the service container
+ * Accept multiple auto-configuration callbacks for the same attribute class
  * Leverage native lazy objects when possible for lazy services
 
 7.2

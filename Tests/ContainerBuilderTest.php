@@ -25,6 +25,7 @@ use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
+use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -34,6 +35,7 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\BadMethodCallException;
 use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Exception\ParameterCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
@@ -827,6 +829,36 @@ class ContainerBuilderTest extends TestCase
         $this->expectExceptionMessage('"AInterface" has already been autoconfigured and merge() does not support merging autoconfiguration for the same class/interface.');
 
         $container->merge($config);
+    }
+
+    public function testMergeAttributeAutoconfiguration()
+    {
+        $container = new ContainerBuilder();
+        $container->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c1 = static function (Definition $definition) {});
+        $config = new ContainerBuilder();
+        $config->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c2 = function (Definition $definition) {});
+
+        $container->merge($config);
+        $this->assertSame([AsTaggedItem::class => [$c1, $c2]], $container->getAttributeAutoconfigurators());
+    }
+
+    /**
+     * @group legacy
+     */
+    public function testGetAutoconfiguredAttributes()
+    {
+        $container = new ContainerBuilder();
+        $container->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c = static function () {});
+
+        $this->expectUserDeprecationMessage('Since symfony/dependency-injection 7.3: The "Symfony\Component\DependencyInjection\ContainerBuilder::getAutoconfiguredAttributes()" method is deprecated, use "getAttributeAutoconfigurators()" instead.');
+        $configurators = $container->getAutoconfiguredAttributes();
+        $this->assertSame($c, $configurators[AsTaggedItem::class]);
+
+        // Method call fails with more than one configurator for a given attribute
+        $container->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c = static function () {});
+
+        $this->expectException(LogicException::class);
+        $container->getAutoconfiguredAttributes();
     }
 
     public function testResolveEnvValues()
