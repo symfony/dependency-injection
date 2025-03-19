@@ -1356,9 +1356,9 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
      *
      *  Example:
      *
-     *      $container->register('foo')->addExcludeTag('my.tag', ['hello' => 'world'])
+     *      $container->register('foo')->addResourceTag('my.tag', ['hello' => 'world'])
      *
-     *      $serviceIds = $container->findExcludedServiceIds('my.tag');
+     *      $serviceIds = $container->findTaggedResourceIds('my.tag');
      *      foreach ($serviceIds as $serviceId => $tags) {
      *          foreach ($tags as $tag) {
      *              echo $tag['hello'];
@@ -1367,14 +1367,14 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
      *
      * @return array<string, array> An array of tags with the tagged service as key, holding a list of attribute arrays
      */
-    public function findExcludedServiceIds(string $tagName): array
+    public function findTaggedResourceIds(string $tagName): array
     {
         $this->usedTags[] = $tagName;
         $tags = [];
         foreach ($this->getDefinitions() as $id => $definition) {
             if ($definition->hasTag($tagName)) {
                 if (!$definition->hasTag('container.excluded')) {
-                    throw new InvalidArgumentException(\sprintf('The service "%s" tagged "%s" is missing the "container.excluded" tag.', $id, $tagName));
+                    throw new InvalidArgumentException(\sprintf('The resource "%s" tagged "%s" is missing the "container.excluded" tag.', $id, $tagName));
                 }
                 $tags[$id] = $definition->getTag($tagName);
             }

@@ -1095,21 +1095,21 @@ class ContainerBuilderTest extends TestCase
         $builder->findTaggedServiceIds('foo', true);
     }
 
-    public function testFindExcludedServiceIds()
+    public function testFindTaggedResourceIds()
     {
         $builder = new ContainerBuilder();
         $builder->register('myservice', 'Bar\FooClass')
             ->addTag('foo', ['foo' => 'foo'])
             ->addTag('bar', ['bar' => 'bar'])
             ->addTag('foo', ['foofoo' => 'foofoo'])
-            ->addExcludeTag('container.excluded');
+            ->addResourceTag('container.excluded');
 
         $expected = ['myservice' => [['foo' => 'foo'], ['foofoo' => 'foofoo']]];
-        $this->assertSame($expected, $builder->findExcludedServiceIds('foo'));
-        $this->assertSame([], $builder->findExcludedServiceIds('foofoo'));
+        $this->assertSame($expected, $builder->findTaggedResourceIds('foo'));
+        $this->assertSame([], $builder->findTaggedResourceIds('foofoo'));
     }
 
-    public function testFindExcludedServiceIdsThrowsWhenNotExcluded()
+    public function testFindTaggedResourceIdsThrowsWhenNotExcluded()
     {
         $builder = new ContainerBuilder();
         $builder->register('myservice', 'Bar\FooClass')
@@ -1118,8 +1118,8 @@ class ContainerBuilderTest extends TestCase
             ->addTag('foo', ['foofoo' => 'foofoo']);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The service "myservice" tagged "foo" is missing the "container.excluded" tag.');
-        $builder->findExcludedServiceIds('foo', true);
+        $this->expectExceptionMessage('The resource "myservice" tagged "foo" is missing the "container.excluded" tag.');
+        $builder->findTaggedResourceIds('foo');
     }
 
     public function testFindUnusedTags()

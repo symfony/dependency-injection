@@ -7,7 +7,7 @@ CHANGELOG
  * Make `#[AsTaggedItem]` repeatable
  * Support `@>` as a shorthand for `!service_closure` in yaml files
  * Don't skip classes with private constructor when autodiscovering
- * Add `Definition::addExcludeTag()` and `ContainerBuilder::findExcludedServiceIds()`
+ * Add `Definition::addResourceTag()` and `ContainerBuilder::findTaggedResourceIds()`
    for auto-configuration of classes excluded from the service container
  * Leverage native lazy objects when possible for lazy services
 
