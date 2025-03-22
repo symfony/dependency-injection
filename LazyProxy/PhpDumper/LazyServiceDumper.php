@@ -187,18 +187,28 @@ final class LazyServiceDumper implements DumperInterface
         $class = 'object' !== $definition->getClass() ? $definition->getClass() : 'stdClass';
         $class = new \ReflectionClass($class);
 
-        if (\PHP_VERSION_ID >= 80400) {
-            if ($asGhostObject) {
-                return $class->name;
-            }
+        if (\PHP_VERSION_ID < 80400) {
+            return preg_replace('/^.*\\\\/', '', $definition->getClass())
+                .($asGhostObject ? 'Ghost' : 'Proxy')
+                .ucfirst(substr(hash('xxh128', $this->salt.'+'.$class->name.'+'.serialize($definition->getTag('proxy'))), -7));
+        }
 
-            if (!$definition->hasTag('proxy') && !$class->isInterface()) {
+        if ($asGhostObject) {
+            return $class->name;
+        }
+
+        if (!$definition->hasTag('proxy') && !$class->isInterface()) {
+            $parent = $class;
+            do {
+                $extendsInternalClass = $parent->isInternal();
+            } while (!$extendsInternalClass && $parent = $parent->getParentClass());
+
+            if (!$extendsInternalClass) {
                 return $class->name;
             }
         }
 
-        return preg_replace('/^.*\\\\/', '', $definition->getClass())
-            .($asGhostObject ? 'Ghost' : 'Proxy')
+        return preg_replace('/^.*\\\\/', '', $definition->getClass()).'Proxy'
             .ucfirst(substr(hash('xxh128', $this->salt.'+'.$class->name.'+'.serialize($definition->getTag('proxy'))), -7));
     }
 }

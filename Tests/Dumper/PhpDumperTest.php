@@ -2036,7 +2036,11 @@ PHP
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/lazy_autowire_attribute_with_intersection.php', $dumper->dump());
+        if (\PHP_VERSION_ID >= 80400) {
+            $this->assertStringEqualsFile(self::$fixturesPath.'/php/lazy_autowire_attribute_with_intersection.php', $dumper->dump());
+        } else {
+            $this->assertStringEqualsFile(self::$fixturesPath.'/php/legacy_lazy_autowire_attribute_with_intersection.php', $dumper->dump());
+        }
     }
 
     public function testCallableAdapterConsumer()
