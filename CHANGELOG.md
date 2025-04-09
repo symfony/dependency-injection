@@ -11,6 +11,7 @@ CHANGELOG
    for auto-configuration of classes excluded from the service container
  * Accept multiple auto-configuration callbacks for the same attribute class
  * Leverage native lazy objects when possible for lazy services
+ * Add `when` argument to `#[AsAlias]`
 
 7.2
 ---
