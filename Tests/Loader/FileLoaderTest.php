@@ -26,7 +26,6 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAliasBothEnv;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\BadClasses\MissingParent;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\Foo;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\FooInterface;
@@ -40,6 +39,7 @@ use Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\Sub\BarInterf
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\AliasBarInterface;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\AliasFooInterface;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAlias;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAliasBothEnv;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAliasDevEnv;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAliasIdMultipleInterface;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAliasInterface;
