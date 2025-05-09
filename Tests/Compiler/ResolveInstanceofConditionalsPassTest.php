@@ -376,6 +376,21 @@ class ResolveInstanceofConditionalsPassTest extends TestCase
         ], $container->getDefinition('decorator')->getTags());
         $this->assertFalse($container->hasParameter('container.behavior_describing_tags'));
     }
+
+    public function testSyntheticService()
+    {
+        $container = new ContainerBuilder();
+        $container->register('kernel', \stdClass::class)
+            ->setInstanceofConditionals([
+                \stdClass::class => (new ChildDefinition(''))
+                    ->addTag('container.excluded'),
+            ])
+            ->setSynthetic(true);
+
+        (new ResolveInstanceofConditionalsPass())->process($container);
+
+        $this->assertSame([], $container->getDefinition('kernel')->getTags());
+    }
 }
 
 class DecoratorWithBehavior implements ResetInterface, ResourceCheckerInterface, ServiceSubscriberInterface
