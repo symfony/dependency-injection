@@ -87,8 +87,7 @@ trait PriorityTaggedServiceTrait
                 if (null === $index && null === $defaultIndex && $defaultPriorityMethod && $class) {
                     $defaultIndex = PriorityTaggedServiceUtil::getDefault($container, $serviceId, $class, $defaultIndexMethod ?? 'getDefaultName', $tagName, $indexAttribute, $checkTaggedItem);
                 }
-                $decorated = $definition->getTag('container.decorator')[0]['id'] ?? null;
-                $index = $index ?? $defaultIndex ?? $defaultIndex = $decorated ?? $serviceId;
+                $index ??= $defaultIndex ??= $definition->getTag('container.decorator')[0]['id'] ?? $serviceId;
 
                 $services[] = [$priority, ++$i, $index, $serviceId, $class];
             }
