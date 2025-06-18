@@ -45,6 +45,7 @@ use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAs
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAliasInterface;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAliasMultiple;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithAsAliasProdEnv;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\PrototypeAsAlias\WithCustomAsAlias;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Utils\NotAService;
 
 class FileLoaderTest extends TestCase
@@ -368,6 +369,8 @@ class FileLoaderTest extends TestCase
     public static function provideResourcesWithAsAliasAttributes(): iterable
     {
         yield 'Private' => ['PrototypeAsAlias/{WithAsAlias,AliasFooInterface}.php', [AliasFooInterface::class => new Alias(WithAsAlias::class)]];
+        yield 'PrivateCustomAlias' => ['PrototypeAsAlias/{WithCustomAsAlias,AliasFooInterface}.php', [AliasFooInterface::class => new Alias(WithCustomAsAlias::class)], 'prod'];
+        yield 'PrivateCustomAliasNoMatch' => ['PrototypeAsAlias/{WithCustomAsAlias,AliasFooInterface}.php', [], 'dev'];
         yield 'Interface' => ['PrototypeAsAlias/{WithAsAliasInterface,AliasFooInterface}.php', [AliasFooInterface::class => new Alias(WithAsAliasInterface::class)]];
         yield 'Multiple' => ['PrototypeAsAlias/{WithAsAliasMultiple,AliasFooInterface}.php', [
             AliasFooInterface::class => new Alias(WithAsAliasMultiple::class, true),
