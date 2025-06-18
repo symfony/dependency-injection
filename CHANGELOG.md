@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+7.4
+---
+
+ * Allow `#[AsAlias]` to be extended
+
 7.3
 ---
 

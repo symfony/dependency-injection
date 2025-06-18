@@ -216,7 +216,7 @@ abstract class FileLoader extends BaseFileLoader
             }
             $r = $this->container->getReflectionClass($class);
             $defaultAlias = 1 === \count($interfaces) ? $interfaces[0] : null;
-            foreach ($r->getAttributes(AsAlias::class) as $attr) {
+            foreach ($r->getAttributes(AsAlias::class, \ReflectionAttribute::IS_INSTANCEOF) as $attr) {
                 /** @var AsAlias $attribute */
                 $attribute = $attr->newInstance();
                 $alias = $attribute->id ?? $defaultAlias;
