@@ -69,6 +69,9 @@ class InlineServiceDefinitionsPass extends AbstractRecursivePass
                     if (!$this->graph->hasNode($id)) {
                         continue;
                     }
+                    if ($definition->isPublic()) {
+                        $this->connectedIds[$id] = true;
+                    }
                     foreach ($this->graph->getNode($id)->getOutEdges() as $edge) {
                         if (isset($notInlinedIds[$edge->getSourceNode()->getId()])) {
                             $this->currentId = $id;
@@ -188,17 +191,13 @@ class InlineServiceDefinitionsPass extends AbstractRecursivePass
             return true;
         }
 
-        if ($definition->isPublic()) {
+        if ($definition->isPublic()
+            || $this->currentId === $id
+            || !$this->graph->hasNode($id)
+        ) {
             return false;
         }
 
-        if (!$this->graph->hasNode($id)) {
-            return true;
-        }
-
-        if ($this->currentId === $id) {
-            return false;
-        }
         $this->connectedIds[$id] = true;
 
         $srcIds = [];
