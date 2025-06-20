@@ -1489,27 +1489,6 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
     }
 
     /**
-     * @return array<class-string, callable>
-     *
-     * @deprecated Use {@see getAttributeAutoconfigurators()} instead
-     */
-    public function getAutoconfiguredAttributes(): array
-    {
-        trigger_deprecation('symfony/dependency-injection', '7.3', 'The "%s()" method is deprecated, use "getAttributeAutoconfigurators()" instead.', __METHOD__);
-
-        $autoconfiguredAttributes = [];
-        foreach ($this->autoconfiguredAttributes as $attribute => $configurators) {
-            if (count($configurators) > 1) {
-                throw new LogicException(\sprintf('The "%s" attribute has %d configurators. Use "getAttributeAutoconfigurators()" to get all of them.', $attribute, count($configurators)));
-            }
-
-            $autoconfiguredAttributes[$attribute] = $configurators[0];
-        }
-
-        return $autoconfiguredAttributes;
-    }
-
-    /**
      * @return array<class-string, callable[]>
      */
     public function getAttributeAutoconfigurators(): array

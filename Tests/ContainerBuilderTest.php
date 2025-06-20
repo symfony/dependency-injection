@@ -842,25 +842,6 @@ class ContainerBuilderTest extends TestCase
         $this->assertSame([AsTaggedItem::class => [$c1, $c2]], $container->getAttributeAutoconfigurators());
     }
 
-    /**
-     * @group legacy
-     */
-    public function testGetAutoconfiguredAttributes()
-    {
-        $container = new ContainerBuilder();
-        $container->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c = static function () {});
-
-        $this->expectUserDeprecationMessage('Since symfony/dependency-injection 7.3: The "Symfony\Component\DependencyInjection\ContainerBuilder::getAutoconfiguredAttributes()" method is deprecated, use "getAttributeAutoconfigurators()" instead.');
-        $configurators = $container->getAutoconfiguredAttributes();
-        $this->assertSame($c, $configurators[AsTaggedItem::class]);
-
-        // Method call fails with more than one configurator for a given attribute
-        $container->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c = static function () {});
-
-        $this->expectException(LogicException::class);
-        $container->getAutoconfiguredAttributes();
-    }
-
     public function testResolveEnvValues()
     {
         $_ENV['DUMMY_ENV_VAR'] = 'du%%y';
