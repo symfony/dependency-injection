@@ -462,6 +462,11 @@ class MyCallable
     public function __invoke(): void
     {
     }
+
+    public static function theMethodImpl(): int
+    {
+        return 124;
+    }
 }
 
 class MyInlineService
