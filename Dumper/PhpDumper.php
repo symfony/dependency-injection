@@ -1184,13 +1184,13 @@ EOTXT
                 throw new RuntimeException(\sprintf('Cannot dump definition because of invalid factory method (%s).', $callable[1] ?: 'n/a'));
             }
 
-            if (['...'] === $arguments && ($definition->isLazy() || 'Closure' !== ($definition->getClass() ?? 'Closure')) && (
+            if (['...'] === $arguments && ('Closure' !== ($class = $definition->getClass() ?: 'Closure') || $definition->isLazy() && (
                 $callable[0] instanceof Reference
                 || ($callable[0] instanceof Definition && !$this->definitionVariables->contains($callable[0]))
-            )) {
+            ))) {
                 $initializer = 'fn () => '.$this->dumpValue($callable[0]);
 
-                return $return.LazyClosure::getCode($initializer, $callable, $definition, $this->container, $id).$tail;
+                return $return.LazyClosure::getCode($initializer, $callable, $class, $this->container, $id).$tail;
             }
 
             if ($callable[0] instanceof Reference
