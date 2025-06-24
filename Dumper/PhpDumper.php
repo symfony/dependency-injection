@@ -542,7 +542,7 @@ EOF;
             return;
         }
         $file = $r->getFileName();
-        if (str_ends_with($file, ') : eval()\'d code')) {
+        if ($file && str_ends_with($file, ') : eval()\'d code')) {
             $file = substr($file, 0, strrpos($file, '(', -17));
         }
         if (!$file || $this->doExport($file) === $exportedFile = $this->export($file)) {
@@ -589,12 +589,13 @@ EOF;
                     continue;
                 }
                 do {
-                    $file = $r->getFileName();
-                    if (str_ends_with($file, ') : eval()\'d code')) {
-                        $file = substr($file, 0, strrpos($file, '(', -17));
-                    }
-                    if (is_file($file)) {
-                        $this->container->addResource(new FileResource($file));
+                    if ($file = $r->getFileName()) {
+                        if (str_ends_with($file, ') : eval()\'d code')) {
+                            $file = substr($file, 0, strrpos($file, '(', -17));
+                        }
+                        if (is_file($file)) {
+                            $this->container->addResource(new FileResource($file));
+                        }
                     }
                     $r = $r->getParentClass() ?: null;
                 } while ($r?->isUserDefined());
