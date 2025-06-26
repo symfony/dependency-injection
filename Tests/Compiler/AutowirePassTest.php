@@ -1122,6 +1122,20 @@ class AutowirePassTest extends TestCase
         $container = new ContainerBuilder();
 
         $container->register(BarInterface::class, BarInterface::class);
+        $container->register('.'.BarInterface::class.' $image.storage', BarInterface::class);
+        $container->register('with_target', WithTarget::class)
+            ->setAutowired(true);
+
+        (new AutowirePass())->process($container);
+
+        $this->assertSame('.'.BarInterface::class.' $image.storage', (string) $container->getDefinition('with_target')->getArgument(0));
+    }
+
+    public function testArgumentWithParsedTarget()
+    {
+        $container = new ContainerBuilder();
+
+        $container->register(BarInterface::class, BarInterface::class);
         $container->register(BarInterface::class.' $imageStorage', BarInterface::class);
         $container->register('with_target', WithTarget::class)
             ->setAutowired(true);
@@ -1159,6 +1173,20 @@ class AutowirePassTest extends TestCase
         $this->expectExceptionMessage('Cannot autowire service "with_target": argument "$baz" of method "Symfony\Component\DependencyInjection\Tests\Fixtures\WithTargetAnonymous::__construct()" has "#[Target(\'baz\')]" but no such target exists. Did you mean to target "bar" instead?');
 
         (new AutowirePass())->process($container);
+    }
+
+    public function testArgumentWithIdTarget()
+    {
+        $container = new ContainerBuilder();
+
+        $container->register('image.storage', BarInterface::class);
+        $container->registerAliasForArgument('image.storage', BarInterface::class, 'image');
+        $container->register('with_target', WithTarget::class)
+            ->setAutowired(true);
+
+        (new AutowirePass())->process($container);
+
+        $this->assertSame('image.storage', (string) $container->getDefinition('with_target')->getArgument(0));
     }
 
     public function testDecorationWithServiceAndAliasedInterface()
