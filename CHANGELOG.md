@@ -5,6 +5,7 @@ CHANGELOG
 ---
 
  * Allow `#[AsAlias]` to be extended
+ * Add argument `$target` to `ContainerBuilder::registerAliasForArgument()`
 
 7.3
 ---
