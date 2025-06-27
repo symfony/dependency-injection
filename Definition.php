@@ -820,4 +820,20 @@ class Definition
     {
         return (bool) $this->errors;
     }
+
+    public function __serialize(): array
+    {
+        $data = [];
+        foreach ((array) $this as $k => $v) {
+            if (false !== $i = strrpos($k, "\0")) {
+                $k = substr($k, 1 + $i);
+            }
+            if (!$v xor 'shared' === $k) {
+                continue;
+            }
+            $data[$k] = $v;
+        }
+
+        return $data;
+    }
 }
