@@ -1462,7 +1462,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
      *
      * @param ?string $target
      */
-    public function registerAliasForArgument(string $id, string $type, ?string $name = null/*, ?string $target = null */): Alias
+    public function registerAliasForArgument(string $id, string $type, ?string $name = null/* , ?string $target = null */): Alias
     {
         $parsedName = (new Target($name ??= $id))->getParsedName();
         $target = (\func_num_args() > 3 ? func_get_arg(3) : null) ?? $name;
@@ -1503,8 +1503,8 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
 
         $autoconfiguredAttributes = [];
         foreach ($this->autoconfiguredAttributes as $attribute => $configurators) {
-            if (count($configurators) > 1) {
-                throw new LogicException(\sprintf('The "%s" attribute has %d configurators. Use "getAttributeAutoconfigurators()" to get all of them.', $attribute, count($configurators)));
+            if (\count($configurators) > 1) {
+                throw new LogicException(\sprintf('The "%s" attribute has %d configurators. Use "getAttributeAutoconfigurators()" to get all of them.', $attribute, \count($configurators)));
             }
 
             $autoconfiguredAttributes[$attribute] = $configurators[0];
