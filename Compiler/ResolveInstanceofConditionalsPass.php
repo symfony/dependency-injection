@@ -112,8 +112,8 @@ class ResolveInstanceofConditionalsPass implements CompilerPassInterface
                 $definition = substr_replace($definition, '53', 2, 2);
                 $definition = substr_replace($definition, 'Child', 44, 0);
             }
-            $definition = unserialize($definition);
             /** @var ChildDefinition $definition */
+            $definition = unserialize($definition);
             $definition->setParent($parent);
 
             if (null !== $shared && !isset($definition->getChanges()['shared'])) {

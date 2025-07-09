@@ -1462,7 +1462,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
      *
      * @param ?string $target
      */
-    public function registerAliasForArgument(string $id, string $type, ?string $name = null/*, ?string $target = null */): Alias
+    public function registerAliasForArgument(string $id, string $type, ?string $name = null/* , ?string $target = null */): Alias
     {
         $parsedName = (new Target($name ??= $id))->getParsedName();
         $target = (\func_num_args() > 3 ? func_get_arg(3) : null) ?? $name;
