@@ -1500,8 +1500,8 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
 
         $autoconfiguredAttributes = [];
         foreach ($this->autoconfiguredAttributes as $attribute => $configurators) {
-            if (count($configurators) > 1) {
-                throw new LogicException(\sprintf('The "%s" attribute has %d configurators. Use "getAttributeAutoconfigurators()" to get all of them.', $attribute, count($configurators)));
+            if (\count($configurators) > 1) {
+                throw new LogicException(\sprintf('The "%s" attribute has %d configurators. Use "getAttributeAutoconfigurators()" to get all of them.', $attribute, \count($configurators)));
             }
 
             $autoconfiguredAttributes[$attribute] = $configurators[0];
