@@ -257,7 +257,7 @@ class RegisterServiceSubscribersPassTest extends TestCase
             $this->markTestSkipped('SubscribedService attribute not available.');
         }
 
-        $subscriber = new class() implements ServiceSubscriberInterface {
+        $subscriber = new class implements ServiceSubscriberInterface {
             use ServiceSubscriberTrait;
 
             #[SubscribedService]
@@ -277,7 +277,7 @@ class RegisterServiceSubscribersPassTest extends TestCase
             $this->markTestSkipped('SubscribedService attribute not available.');
         }
 
-        $subscriber = new class() implements ServiceSubscriberInterface {
+        $subscriber = new class implements ServiceSubscriberInterface {
             use ServiceSubscriberTrait;
 
             #[SubscribedService]
@@ -297,7 +297,7 @@ class RegisterServiceSubscribersPassTest extends TestCase
             $this->markTestSkipped('SubscribedService attribute not available.');
         }
 
-        $subscriber = new class() implements ServiceSubscriberInterface {
+        $subscriber = new class implements ServiceSubscriberInterface {
             use ServiceSubscriberTrait;
 
             #[SubscribedService]
@@ -368,7 +368,7 @@ class RegisterServiceSubscribersPassTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $subscriber = new class() implements ServiceSubscriberInterface {
+        $subscriber = new class implements ServiceSubscriberInterface {
             public static function getSubscribedServices(): array
             {
                 return [
@@ -417,7 +417,7 @@ class RegisterServiceSubscribersPassTest extends TestCase
 
         $container = new ContainerBuilder();
 
-        $subscriber = new class() implements ServiceSubscriberInterface {
+        $subscriber = new class implements ServiceSubscriberInterface {
             public static function getSubscribedServices(): array
             {
                 return [

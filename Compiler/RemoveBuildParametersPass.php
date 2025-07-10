@@ -33,7 +33,7 @@ class RemoveBuildParametersPass implements CompilerPassInterface
                 $this->removedParameters[$name] = $value;
 
                 $parameterBag->remove($name);
-                $container->log($this, sprintf('Removing build parameter "%s".', $name));
+                $container->log($this, \sprintf('Removing build parameter "%s".', $name));
             }
         }
     }

@@ -106,7 +106,7 @@ class ParameterBag implements ParameterBagInterface
     public function set(string $name, array|bool|string|int|float|\UnitEnum|null $value)
     {
         if (is_numeric($name)) {
-            trigger_deprecation('symfony/dependency-injection', '6.2', sprintf('Using numeric parameter name "%s" is deprecated and will throw as of 7.0.', $name));
+            trigger_deprecation('symfony/dependency-injection', '6.2', \sprintf('Using numeric parameter name "%s" is deprecated and will throw as of 7.0.', $name));
             // uncomment the following line in 7.0
             // throw new InvalidArgumentException(sprintf('The parameter name "%s" cannot be numeric.', $name));
         }
@@ -189,7 +189,7 @@ class ParameterBag implements ParameterBagInterface
             foreach ($value as $key => $v) {
                 $resolvedKey = \is_string($key) ? $this->resolveValue($key, $resolving) : $key;
                 if (!\is_scalar($resolvedKey) && !$resolvedKey instanceof \Stringable) {
-                    throw new RuntimeException(sprintf('Array keys must be a scalar-value, but found key "%s" to resolve to type "%s".', $key, get_debug_type($resolvedKey)));
+                    throw new RuntimeException(\sprintf('Array keys must be a scalar-value, but found key "%s" to resolve to type "%s".', $key, get_debug_type($resolvedKey)));
                 }
 
                 $args[$resolvedKey] = $this->resolveValue($v, $resolving);
@@ -245,7 +245,7 @@ class ParameterBag implements ParameterBagInterface
             $resolved = $this->get($key);
 
             if (!\is_string($resolved) && !is_numeric($resolved)) {
-                throw new RuntimeException(sprintf('A string value must be composed of strings and/or numbers, but found parameter "%s" of type "%s" inside string value "%s".', $key, get_debug_type($resolved), $value));
+                throw new RuntimeException(\sprintf('A string value must be composed of strings and/or numbers, but found parameter "%s" of type "%s" inside string value "%s".', $key, get_debug_type($resolved), $value));
             }
 
             $resolved = (string) $resolved;

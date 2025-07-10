@@ -343,7 +343,7 @@ class ParameterBagTest extends TestCase
         try {
             $this->assertEquals($expected, $bag->resolveString($test), $description);
         } catch (ParameterNotFoundException $e) {
-            $this->fail(sprintf('%s - "%s"', $description, $expected));
+            $this->fail(\sprintf('%s - "%s"', $description, $expected));
         }
     }
 

@@ -625,7 +625,7 @@ class EnvVarProcessorTest extends TestCase
             ['null', 'null'],
             ['Null', 'Null'],
             ['NULL', 'NULL'],
-         ];
+        ];
     }
 
     public function testRequireMissingFile()
@@ -802,13 +802,13 @@ CSV;
         $_ENV['BUZ_ENV_LOADER'] = '';
 
         $loaders = function () {
-            yield new class() implements EnvVarLoaderInterface {
+            yield new class implements EnvVarLoaderInterface {
                 public function loadEnvVars(): array
                 {
                     return [
                         'FOO_ENV_LOADER' => '123',
                         'BAZ_ENV_LOADER' => '',
-                        'LAZY_ENV_LOADER' => new class() {
+                        'LAZY_ENV_LOADER' => new class {
                             public function __toString()
                             {
                                 return '';
@@ -818,14 +818,14 @@ CSV;
                 }
             };
 
-            yield new class() implements EnvVarLoaderInterface {
+            yield new class implements EnvVarLoaderInterface {
                 public function loadEnvVars(): array
                 {
                     return [
                         'FOO_ENV_LOADER' => '234',
                         'BAR_ENV_LOADER' => '456',
                         'BAZ_ENV_LOADER' => '567',
-                        'LAZY_ENV_LOADER' => new class() {
+                        'LAZY_ENV_LOADER' => new class {
                             public function __toString()
                             {
                                 return '678';
@@ -872,7 +872,7 @@ CSV;
                 throw new ParameterCircularReferenceException(['FOO_CONTAINER']);
             }
 
-            yield new class() implements EnvVarLoaderInterface {
+            yield new class implements EnvVarLoaderInterface {
                 public function loadEnvVars(): array
                 {
                     return [

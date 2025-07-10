@@ -43,7 +43,7 @@ abstract class AbstractConfigurator
             return $this->{'set'.$method}(...$args);
         }
 
-        throw new \BadMethodCallException(sprintf('Call to undefined method "%s::%s()".', static::class, $method));
+        throw new \BadMethodCallException(\sprintf('Call to undefined method "%s::%s()".', static::class, $method));
     }
 
     public function __sleep(): array
@@ -98,7 +98,7 @@ abstract class AbstractConfigurator
         }
 
         if ($value instanceof self) {
-            throw new InvalidArgumentException(sprintf('"%s()" can be used only at the root of service configuration files.', $value::FACTORY));
+            throw new InvalidArgumentException(\sprintf('"%s()" can be used only at the root of service configuration files.', $value::FACTORY));
         }
 
         switch (true) {
@@ -118,6 +118,6 @@ abstract class AbstractConfigurator
                 }
         }
 
-        throw new InvalidArgumentException(sprintf('Cannot use values of type "%s" in service configuration files.', get_debug_type($value)));
+        throw new InvalidArgumentException(\sprintf('Cannot use values of type "%s" in service configuration files.', get_debug_type($value)));
     }
 }

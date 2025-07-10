@@ -59,7 +59,7 @@ class ProxyHelper
                     return null;
                 }
 
-                $types[] = sprintf('(%s)', $typeHint);
+                $types[] = \sprintf('(%s)', $typeHint);
 
                 continue;
             }

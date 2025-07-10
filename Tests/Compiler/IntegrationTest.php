@@ -750,7 +750,7 @@ class IntegrationTest extends TestCase
 
         /** @var ServiceLocator $serviceLocator */
         $serviceLocator = $s->getParam();
-        $this->assertTrue($s->getParam() instanceof ServiceLocator, sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
+        $this->assertTrue($s->getParam() instanceof ServiceLocator, \sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
 
         $same = [
             'bar' => $serviceLocator->get('bar'),
@@ -783,7 +783,7 @@ class IntegrationTest extends TestCase
 
         /** @var ServiceLocator $serviceLocator */
         $serviceLocator = $s->getParam();
-        $this->assertTrue($s->getParam() instanceof ServiceLocator, sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
+        $this->assertTrue($s->getParam() instanceof ServiceLocator, \sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
 
         $same = [
             'bar' => $serviceLocator->get('bar'),
@@ -815,7 +815,7 @@ class IntegrationTest extends TestCase
 
         /** @var ServiceLocator $serviceLocator */
         $serviceLocator = $s->getParam();
-        $this->assertTrue($s->getParam() instanceof ServiceLocator, sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
+        $this->assertTrue($s->getParam() instanceof ServiceLocator, \sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
 
         $same = [
             'bar_tab_class_with_defaultmethod' => $serviceLocator->get('bar_tab_class_with_defaultmethod'),
@@ -842,7 +842,7 @@ class IntegrationTest extends TestCase
 
         /** @var ServiceLocator $serviceLocator */
         $serviceLocator = $s->getParam();
-        $this->assertTrue($s->getParam() instanceof ServiceLocator, sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
+        $this->assertTrue($s->getParam() instanceof ServiceLocator, \sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
 
         $expected = [
             'bar_tag' => $container->get('bar_tag'),
@@ -868,7 +868,7 @@ class IntegrationTest extends TestCase
 
         /** @var ServiceLocator $serviceLocator */
         $serviceLocator = $s->getParam();
-        $this->assertTrue($s->getParam() instanceof ServiceLocator, sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
+        $this->assertTrue($s->getParam() instanceof ServiceLocator, \sprintf('Wrong instance, should be an instance of ServiceLocator, %s given', get_debug_type($serviceLocator)));
 
         $expected = [
             'baz' => $container->get('bar_tag'),

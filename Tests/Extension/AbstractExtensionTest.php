@@ -27,7 +27,7 @@ class AbstractExtensionTest extends TestCase
 {
     public function testConfiguration()
     {
-        $extension = new class() extends AbstractExtension {
+        $extension = new class extends AbstractExtension {
             public function configure(DefinitionConfigurator $definition): void
             {
                 // load one
@@ -56,7 +56,7 @@ class AbstractExtensionTest extends TestCase
 
     public function testPrependAppendExtensionConfig()
     {
-        $extension = new class() extends AbstractExtension {
+        $extension = new class extends AbstractExtension {
             public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
             {
                 // append config
@@ -80,7 +80,7 @@ class AbstractExtensionTest extends TestCase
 
     public function testLoadExtension()
     {
-        $extension = new class() extends AbstractExtension {
+        $extension = new class extends AbstractExtension {
             public function configure(DefinitionConfigurator $definition): void
             {
                 $definition->import('../Fixtures/config/definition/foo.php');
@@ -121,7 +121,7 @@ class AbstractExtensionTest extends TestCase
 
     protected function processPrependExtension(PrependExtensionInterface $extension): ContainerBuilder
     {
-        $thirdExtension = new class() extends AbstractExtension {
+        $thirdExtension = new class extends AbstractExtension {
             public function configure(DefinitionConfigurator $definition): void
             {
                 $definition->import('../Fixtures/config/definition/foo.php');
