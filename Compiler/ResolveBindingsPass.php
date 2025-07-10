@@ -228,7 +228,7 @@ class ResolveBindingsPass extends AbstractRecursivePass
 
             foreach ($names as $key => $name) {
                 if (\array_key_exists($name, $arguments) && (0 === $key || \array_key_exists($key - 1, $arguments))) {
-                    if (!array_key_exists($key, $arguments)) {
+                    if (!\array_key_exists($key, $arguments)) {
                         $arguments[$key] = $arguments[$name];
                     }
                     unset($arguments[$name]);

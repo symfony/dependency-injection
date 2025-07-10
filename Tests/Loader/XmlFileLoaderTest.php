@@ -1280,7 +1280,7 @@ class XmlFileLoaderTest extends TestCase
     public function testStaticConstructorWithFactoryThrows()
     {
         $container = new ContainerBuilder();
-        $loader = new XmlFileLoader($container, new FileLocator(self::$fixturesPath . '/xml'));
+        $loader = new XmlFileLoader($container, new FileLocator(self::$fixturesPath.'/xml'));
 
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('The "static_constructor" service cannot declare a factory as well as a constructor.');
@@ -1341,7 +1341,7 @@ class XmlFileLoaderTest extends TestCase
     public function testDeprecatedTagged()
     {
         $container = new ContainerBuilder();
-        $loader = new XmlFileLoader($container, new FileLocator(self::$fixturesPath . '/xml'));
+        $loader = new XmlFileLoader($container, new FileLocator(self::$fixturesPath.'/xml'));
 
         $this->expectUserDeprecationMessage(\sprintf('Since symfony/dependency-injection 7.2: Type "tagged" is deprecated for tag <argument>, use "tagged_iterator" instead in "%s/xml%sservices_with_deprecated_tagged.xml".', self::$fixturesPath, \DIRECTORY_SEPARATOR));
 
