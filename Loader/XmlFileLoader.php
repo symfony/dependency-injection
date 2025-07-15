@@ -823,7 +823,7 @@ EOF
     private function validateAlias(\DOMElement $alias, string $file): void
     {
         foreach ($alias->attributes as $name => $node) {
-            if (!\in_array($name, ['alias', 'id', 'public'])) {
+            if (!\in_array($name, ['alias', 'id', 'public'], true)) {
                 throw new InvalidArgumentException(\sprintf('Invalid attribute "%s" defined for alias "%s" in "%s".', $name, $alias->getAttribute('id'), $file));
             }
         }

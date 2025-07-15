@@ -162,7 +162,7 @@ final class LazyServiceDumper implements DumperInterface
             return $class->name;
         }
 
-        if (!$definition->hasTag('proxy') && !$class->isInterface()) {
+        if (!$definition->hasTag('proxy') && !$class->isAbstract()) {
             $parent = $class;
             do {
                 $extendsInternalClass = $parent->isInternal();

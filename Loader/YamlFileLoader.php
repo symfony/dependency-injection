@@ -433,7 +433,7 @@ class YamlFileLoader extends FileLoader
             }
 
             foreach ($service as $key => $value) {
-                if (!\in_array($key, ['alias', 'public', 'deprecated'])) {
+                if (!\in_array($key, ['alias', 'public', 'deprecated'], true)) {
                     throw new InvalidArgumentException(\sprintf('The configuration key "%s" is unsupported for the service "%s" which is defined as an alias in "%s". Allowed configuration keys for service aliases are "alias", "public" and "deprecated".', $key, $id, $file));
                 }
 
@@ -805,7 +805,7 @@ class YamlFileLoader extends FileLoader
         }
 
         foreach ($content as $namespace => $data) {
-            if (\in_array($namespace, ['imports', 'parameters', 'services']) || str_starts_with($namespace, 'when@')) {
+            if (\in_array($namespace, ['imports', 'parameters', 'services'], true) || str_starts_with($namespace, 'when@')) {
                 continue;
             }
 
@@ -953,7 +953,7 @@ class YamlFileLoader extends FileLoader
     private function loadFromExtensions(array $content): void
     {
         foreach ($content as $namespace => $values) {
-            if (\in_array($namespace, ['imports', 'parameters', 'services']) || str_starts_with($namespace, 'when@')) {
+            if (\in_array($namespace, ['imports', 'parameters', 'services'], true) || str_starts_with($namespace, 'when@')) {
                 continue;
             }
 
