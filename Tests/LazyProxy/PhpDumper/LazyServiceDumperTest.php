@@ -16,6 +16,7 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\LazyProxy\PhpDumper\LazyServiceDumper;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\AbstractSayClass;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\ReadOnlyClass;
 
 class LazyServiceDumperTest extends TestCase
@@ -38,6 +39,16 @@ class LazyServiceDumperTest extends TestCase
 
         $this->assertTrue($dumper->isProxyCandidate($definition));
         $this->assertStringContainsString('function get(', $dumper->getProxyCode($definition));
+    }
+
+    public function testAbstractClass()
+    {
+        $dumper = new LazyServiceDumper();
+        $definition = (new Definition(AbstractSayClass::class))
+            ->setLazy(true);
+
+        $this->assertTrue($dumper->isProxyCandidate($definition));
+        $this->assertNotSame(AbstractSayClass::class, $dumper->getProxyClass($definition, false));
     }
 
     public function testInvalidClass()
