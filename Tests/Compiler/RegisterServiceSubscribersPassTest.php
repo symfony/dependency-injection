@@ -219,10 +219,6 @@ class RegisterServiceSubscribersPassTest extends TestCase
 
     public function testServiceMethodsSubscriberTraitWithSubscribedServiceAttribute()
     {
-        if (!class_exists(SubscribedService::class)) {
-            $this->markTestSkipped('SubscribedService attribute not available.');
-        }
-
         $container = new ContainerBuilder();
 
         $container->register('foo', TestServiceSubscriberChild::class)
@@ -249,10 +245,6 @@ class RegisterServiceSubscribersPassTest extends TestCase
 
     public function testServiceMethodsSubscriberTraitWithSubscribedServiceAttributeOnStaticMethod()
     {
-        if (!class_exists(SubscribedService::class)) {
-            $this->markTestSkipped('SubscribedService attribute not available.');
-        }
-
         $subscriber = new class implements ServiceSubscriberInterface {
             use ServiceMethodsSubscriberTrait;
 
@@ -269,10 +261,6 @@ class RegisterServiceSubscribersPassTest extends TestCase
 
     public function testServiceMethodsSubscriberTraitWithSubscribedServiceAttributeOnMethodWithRequiredParameters()
     {
-        if (!class_exists(SubscribedService::class)) {
-            $this->markTestSkipped('SubscribedService attribute not available.');
-        }
-
         $subscriber = new class implements ServiceSubscriberInterface {
             use ServiceMethodsSubscriberTrait;
 
@@ -289,10 +277,6 @@ class RegisterServiceSubscribersPassTest extends TestCase
 
     public function testServiceMethodsSubscriberTraitWithSubscribedServiceAttributeOnMethodMissingReturnType()
     {
-        if (!class_exists(SubscribedService::class)) {
-            $this->markTestSkipped('SubscribedService attribute not available.');
-        }
-
         $subscriber = new class implements ServiceSubscriberInterface {
             use ServiceMethodsSubscriberTrait;
 
@@ -309,10 +293,6 @@ class RegisterServiceSubscribersPassTest extends TestCase
 
     public function testServiceMethodsSubscriberTraitWithUnionReturnType()
     {
-        if (!class_exists(SubscribedService::class)) {
-            $this->markTestSkipped('SubscribedService attribute not available.');
-        }
-
         $container = new ContainerBuilder();
 
         $container->register('foo', TestServiceSubscriberUnionWithTrait::class)
@@ -336,10 +316,6 @@ class RegisterServiceSubscribersPassTest extends TestCase
 
     public function testServiceMethodsSubscriberTraitWithIntersectionReturnType()
     {
-        if (!class_exists(SubscribedService::class)) {
-            $this->markTestSkipped('SubscribedService attribute not available.');
-        }
-
         $container = new ContainerBuilder();
 
         $container->register('foo', TestServiceSubscriberIntersectionWithTrait::class)
