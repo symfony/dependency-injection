@@ -1211,17 +1211,4 @@ class YamlFileLoaderTest extends TestCase
         $definition = $container->getDefinition('static_constructor');
         $this->assertEquals((new Definition('stdClass'))->setFactory([null, 'create']), $definition);
     }
-
-    /**
-     * @group legacy
-     */
-    public function testDeprecatedTagged()
-    {
-        $container = new ContainerBuilder();
-        $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
-
-        $this->expectUserDeprecationMessage(\sprintf('Since symfony/dependency-injection 7.2: Using "!tagged" is deprecated, use "!tagged_iterator" instead in "%s/yaml%stagged_deprecated.yml".', self::$fixturesPath, \DIRECTORY_SEPARATOR));
-
-        $loader->load('tagged_deprecated.yml');
-    }
 }
