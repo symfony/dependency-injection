@@ -1459,13 +1459,11 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
      * using camel case: "foo.bar" or "foo_bar" creates an alias bound to
      * "$fooBar"-named arguments with $type as type-hint. Such arguments will
      * receive the service $id when autowiring is used.
-     *
-     * @param ?string $target
      */
-    public function registerAliasForArgument(string $id, string $type, ?string $name = null/* , ?string $target = null */): Alias
+    public function registerAliasForArgument(string $id, string $type, ?string $name = null, ?string $target = null): Alias
     {
         $parsedName = (new Target($name ??= $id))->getParsedName();
-        $target = (\func_num_args() > 3 ? func_get_arg(3) : null) ?? $name;
+        $target ??= $name;
 
         if (!preg_match('/^[a-zA-Z_\x7f-\xff]/', $parsedName)) {
             if ($id !== $name) {

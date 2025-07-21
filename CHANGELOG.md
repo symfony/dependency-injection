@@ -7,6 +7,7 @@ CHANGELOG
  * Remove `#[TaggedIterator]` and `#[TaggedLocator]` attributes, replaced by `#[AutowireLocator]` and `#[AutowireIterator]`
  * Remove `ContainerBuilder::getAutoconfiguredAttributes()`, replaced by `ContainerBuilder::getAttributeAutoconfigurators()`
  * Remove `!tagged` tag, use `!tagged_iterator` instead
+ * Add argument `$target` to `ContainerBuilder::registerAliasForArgument()`
 
 7.4
 ---
