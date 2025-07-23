@@ -75,6 +75,7 @@ require_once __DIR__.'/../Fixtures/includes/autowiring_classes.php';
 require_once __DIR__.'/../Fixtures/includes/classes.php';
 require_once __DIR__.'/../Fixtures/includes/foo.php';
 require_once __DIR__.'/../Fixtures/includes/foo_lazy.php';
+require_once __DIR__.'/../Fixtures/includes/fixture_app_services.php';
 
 class PhpDumperTest extends TestCase
 {
@@ -1317,7 +1318,7 @@ class PhpDumperTest extends TestCase
             ->setProperty('bar', $bar)
             ->addArgument($bar);
 
-        $container->register('App\Foo')
+        $container->register('App\Foo', 'App\Foo')
             ->setPublic(true)
             ->addArgument($baz);
 
