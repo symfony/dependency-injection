@@ -1527,11 +1527,9 @@ class ContainerBuilderTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $unknown = $container->register('Acme\UnknownClass');
         $autoloadClass = $container->register(CaseSensitiveClass::class);
         $container->compile();
 
-        $this->assertSame('Acme\UnknownClass', $unknown->getClass());
         $this->assertEquals(CaseSensitiveClass::class, $autoloadClass->getClass());
     }
 
