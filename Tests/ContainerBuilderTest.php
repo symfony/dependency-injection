@@ -884,6 +884,7 @@ class ContainerBuilderTest extends TestCase
         $container->setParameter('bar', '%% %env(DUMMY_ENV_VAR)% %env(DUMMY_SERVER_VAR)% %env(HTTP_DUMMY_VAR)%');
         $container->setParameter('foo', '%env(FOO)%');
         $container->setParameter('baz', '%foo%');
+        $container->setParameter('qux', '%%quux%%');
         $container->setParameter('env(HTTP_DUMMY_VAR)', '123');
         $container->register('teatime', 'stdClass')
             ->setProperty('foo', '%env(DUMMY_ENV_VAR)%')
@@ -1128,7 +1129,7 @@ class ContainerBuilderTest extends TestCase
 
         $this->assertCount(1, $resources);
 
-        /** @var \Symfony\Component\Config\Resource\FileResource $resource */
+        /** @var FileResource $resource */
         $resource = end($resources);
 
         $this->assertInstanceOf(FileResource::class, $resource);
