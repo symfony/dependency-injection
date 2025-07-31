@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -27,9 +28,7 @@ class CrossCheckTest extends TestCase
         require_once self::$fixturesPath.'/includes/foo.php';
     }
 
-    /**
-     * @dataProvider crossCheckLoadersDumpers
-     */
+    #[DataProvider('crossCheckLoadersDumpers')]
     public function testCrossCheck($fixture, $type)
     {
         $loaderClass = 'Symfony\\Component\\DependencyInjection\\Loader\\'.ucfirst($type).'FileLoader';

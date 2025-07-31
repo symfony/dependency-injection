@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Dumper;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
@@ -110,9 +111,7 @@ class XmlDumperTest extends TestCase
 ", $dumper->dump());
     }
 
-    /**
-     * @dataProvider provideDecoratedServicesData
-     */
+    #[DataProvider('provideDecoratedServicesData')]
     public function testDumpDecoratedServices($expectedXmlDump, $container)
     {
         $dumper = new XmlDumper($container);
@@ -151,9 +150,7 @@ class XmlDumperTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provideCompiledContainerData
-     */
+    #[DataProvider('provideCompiledContainerData')]
     public function testCompiledContainerCanBeDumped($containerFile)
     {
         $fixturesPath = __DIR__.'/../Fixtures';
@@ -282,9 +279,7 @@ class XmlDumperTest extends TestCase
         $this->assertEquals(file_get_contents(self::$fixturesPath.'/xml/services_with_enumeration.xml'), $dumper->dump());
     }
 
-    /**
-     * @dataProvider provideDefaultClasses
-     */
+    #[DataProvider('provideDefaultClasses')]
     public function testDumpHandlesDefaultAttribute($class, $expectedFile)
     {
         $container = new ContainerBuilder();
