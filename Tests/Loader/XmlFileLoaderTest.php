@@ -53,6 +53,8 @@ use Symfony\Component\DependencyInjection\Tests\Fixtures\RemoteCallerHttp;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\RemoteCallerSocket;
 use Symfony\Component\ExpressionLanguage\Expression;
 
+#[IgnoreDeprecations]
+#[Group('legacy')]
 class XmlFileLoaderTest extends TestCase
 {
     protected static string $fixturesPath;
@@ -1345,8 +1347,6 @@ class XmlFileLoaderTest extends TestCase
         $loader->load('key_type_wrong_constant.xml');
     }
 
-    #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testDeprecatedTagged()
     {
         $container = new ContainerBuilder();

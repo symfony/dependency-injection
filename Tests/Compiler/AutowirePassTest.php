@@ -989,8 +989,12 @@ class AutowirePassTest extends TestCase
         }
     }
 
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testInlineServicesAreNotCandidates()
     {
+        $this->expectUserDeprecationMessage('Since symfony/dependency-injection 7.4: XML configuration format is deprecated, use YAML or PHP instead.');
+
         $container = new ContainerBuilder();
         $loader = new XmlFileLoader($container, new FileLocator(realpath(__DIR__.'/../Fixtures/xml')));
         $loader->load('services_inline_not_candidate.xml');
