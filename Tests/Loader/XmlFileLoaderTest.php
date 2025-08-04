@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Loader;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWithJson;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
 use Symfony\Component\Config\Exception\LoaderLoadException;
@@ -376,10 +378,8 @@ class XmlFileLoaderTest extends TestCase
         $this->assertEquals([new IteratorArgument(['k1' => new Reference('foo.baz'), 'k2' => new Reference('service_container')]), new IteratorArgument([])], $lazyDefinition->getArguments(), '->load() parses lazy arguments');
     }
 
-    /**
-     * @testWith ["foo_tag"]
-     *           ["bar_tag"]
-     */
+    #[TestWithJson('["foo_tag"]')]
+    #[TestWithJson('["bar_tag"]')]
     public function testParsesTags(string $tag)
     {
         $container = new ContainerBuilder();
@@ -812,9 +812,7 @@ class XmlFileLoaderTest extends TestCase
         $this->assertContains('reflection.Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\Sub\Bar', $resources);
     }
 
-    /**
-     * @dataProvider prototypeExcludeWithArrayDataProvider
-     */
+    #[DataProvider('prototypeExcludeWithArrayDataProvider')]
     public function testPrototypeExcludeWithArray(string $fileName)
     {
         $container = new ContainerBuilder();
@@ -1216,9 +1214,7 @@ class XmlFileLoaderTest extends TestCase
         $this->assertEquals((new Definition('Closure'))->setFactory(['Closure', 'fromCallable'])->addArgument(new Reference('bar')), $definition);
     }
 
-    /**
-     * @dataProvider dataForBindingsAndInnerCollections
-     */
+    #[DataProvider('dataForBindingsAndInnerCollections')]
     public function testBindingsAndInnerCollections($bindName, $expected)
     {
         $container = new ContainerBuilder();

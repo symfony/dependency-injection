@@ -11,8 +11,10 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\ParameterBag;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Exception\EmptyParameterValueException;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
@@ -82,10 +84,8 @@ class ParameterBagTest extends TestCase
         }
     }
 
-    /**
-     * @testWith [1001]
-     *           [10.0]
-     */
+    #[TestWith([1001])]
+    #[TestWith([10.0])]
     public function testSetNumericName(int|float $name)
     {
         $bag = new ParameterBag();
@@ -96,10 +96,8 @@ class ParameterBagTest extends TestCase
         $bag->set($name, 'foo');
     }
 
-    /**
-     * @testWith [1001]
-     *           [10.0]
-     */
+    #[TestWith([1001])]
+    #[TestWith([10.0])]
     public function testConstructorNumericName(int|float $name)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -108,9 +106,7 @@ class ParameterBagTest extends TestCase
         new ParameterBag([$name => 'foo']);
     }
 
-    /**
-     * @dataProvider provideGetThrowParameterNotFoundExceptionData
-     */
+    #[DataProvider('provideGetThrowParameterNotFoundExceptionData')]
     public function testGetThrowParameterNotFoundException($parameterKey, $exceptionMessage)
     {
         $bag = new ParameterBag([
@@ -379,9 +375,7 @@ class ParameterBagTest extends TestCase
         $this->assertEquals(['bar' => ['ding' => 'I\'m a bar %%foo %%bar', 'zero' => null]], $bag->get('foo'), '->escapeValue() escapes % by doubling it');
     }
 
-    /**
-     * @dataProvider stringsWithSpacesProvider
-     */
+    #[DataProvider('stringsWithSpacesProvider')]
     public function testResolveStringWithSpacesReturnsString($expected, $test, $description)
     {
         $bag = new ParameterBag(['foo' => 'bar']);

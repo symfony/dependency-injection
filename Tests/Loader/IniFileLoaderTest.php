@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Loader;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -34,9 +35,7 @@ class IniFileLoaderTest extends TestCase
         $this->assertEquals(['foo' => 'bar', 'bar' => '%foo%'], $this->container->getParameterBag()->all(), '->load() takes a single file name as its first argument');
     }
 
-    /**
-     * @dataProvider getTypeConversions
-     */
+    #[DataProvider('getTypeConversions')]
     public function testTypeConversions($key, $value, $supported)
     {
         $this->loader->load('types.ini');
@@ -45,9 +44,9 @@ class IniFileLoaderTest extends TestCase
     }
 
     /**
-     * @dataProvider getTypeConversions
-     * This test illustrates where our conversions differs from INI_SCANNER_TYPED introduced in PHP 5.6.1
+     * This test illustrates where our conversions differs from INI_SCANNER_TYPED introduced in PHP 5.6.1.
      */
+    #[DataProvider('getTypeConversions')]
     public function testTypeConversionsWithNativePhp($key, $value, $supported)
     {
         if (!$supported) {

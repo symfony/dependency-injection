@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -186,9 +187,7 @@ class DefinitionTest extends TestCase
         $this->assertSame('1.1', $deprecation['version']);
     }
 
-    /**
-     * @dataProvider invalidDeprecationMessageProvider
-     */
+    #[DataProvider('invalidDeprecationMessageProvider')]
     public function testSetDeprecatedWithInvalidDeprecationTemplate($message)
     {
         $def = new Definition('stdClass');

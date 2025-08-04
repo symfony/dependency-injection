@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Loader;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
 use Symfony\Component\Config\Exception\LoaderLoadException;
@@ -79,9 +80,7 @@ class YamlFileLoaderTest extends TestCase
         $m->invoke($loader, $path.'/parameters.ini');
     }
 
-    /**
-     * @dataProvider provideInvalidFiles
-     */
+    #[DataProvider('provideInvalidFiles')]
     public function testLoadInvalidFile($file)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -585,9 +584,7 @@ class YamlFileLoaderTest extends TestCase
         $this->assertContains('reflection.Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\Sub\Bar', $resources);
     }
 
-    /**
-     * @dataProvider prototypeWithNullOrEmptyNodeDataProvider
-     */
+    #[DataProvider('prototypeWithNullOrEmptyNodeDataProvider')]
     public function testPrototypeWithNullOrEmptyNode(string $fileName)
     {
         $this->expectException(InvalidArgumentException::class);

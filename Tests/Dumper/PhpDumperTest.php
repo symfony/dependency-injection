@@ -11,8 +11,11 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Dumper;
 
+use Bar\FooLazyClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Config\FileLocator;
@@ -326,7 +329,7 @@ class PhpDumperTest extends TestCase
         $container->setParameter('container.dumper.inline_class_loader', true);
 
         $container->register('lazy_foo', \Bar\FooClass::class)
-            ->addArgument(new Definition(\Bar\FooLazyClass::class))
+            ->addArgument(new Definition(FooLazyClass::class))
             ->setPublic(true)
             ->setLazy(true);
 
@@ -402,9 +405,7 @@ class PhpDumperTest extends TestCase
         $this->assertTrue(method_exists($class, 'getFoobar2Service'));
     }
 
-    /**
-     * @dataProvider provideInvalidFactories
-     */
+    #[DataProvider('provideInvalidFactories')]
     public function testInvalidFactories($factory)
     {
         $this->expectException(RuntimeException::class);
@@ -778,7 +779,7 @@ class PhpDumperTest extends TestCase
         $container = new ContainerBuilder();
 
         $container
-            ->register('foo', \Bar\FooLazyClass::class)
+            ->register('foo', FooLazyClass::class)
             ->setFile(realpath(self::$fixturesPath.'/includes/foo_lazy.php'))
             ->setShared(false)
             ->setLazy(true)
@@ -814,7 +815,7 @@ class PhpDumperTest extends TestCase
         $container = new ContainerBuilder();
 
         $container
-            ->register('non_shared_foo', \Bar\FooLazyClass::class)
+            ->register('non_shared_foo', FooLazyClass::class)
             ->setFile(realpath(self::$fixturesPath.'/includes/foo_lazy.php'))
             ->setShared(false)
             ->setLazy(true)
@@ -851,10 +852,8 @@ class PhpDumperTest extends TestCase
         $this->assertNotSame($foo1, $foo2);
     }
 
-    /**
-     * @testWith [false]
-     *           [true]
-     */
+    #[TestWith([false])]
+    #[TestWith([true])]
     public function testNonSharedLazyDefinitionReferences(bool $asGhostObject)
     {
         $container = new ContainerBuilder();
@@ -1202,9 +1201,7 @@ class PhpDumperTest extends TestCase
         $this->assertEquals(['foo1' => new \stdClass(), 'foo3' => new \stdClass()], iterator_to_array($bar->iter));
     }
 
-    /**
-     * @dataProvider provideAlmostCircular
-     */
+    #[DataProvider('provideAlmostCircular')]
     public function testAlmostCircular($visibility)
     {
         $container = include self::$fixturesPath.'/containers/container_almost_circular.php';
@@ -2075,9 +2072,7 @@ PHP
         $this->assertNotSame($fooService->factoredFromServiceWithParam, $barService->factoredFromServiceWithParam);
     }
 
-    /**
-     * @dataProvider getStripCommentsCodes
-     */
+    #[DataProvider('getStripCommentsCodes')]
     public function testStripComments(string $source, string $expected)
     {
         $reflection = new \ReflectionClass(PhpDumper::class);
