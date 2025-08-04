@@ -14,6 +14,7 @@ namespace Symfony\Component\DependencyInjection\Tests\Loader;
 require_once __DIR__.'/../Fixtures/includes/AcmeExtension.php';
 require_once __DIR__.'/../Fixtures/includes/fixture_app_services.php';
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Builder\ConfigBuilderGenerator;
 use Symfony\Component\Config\FileLocator;
@@ -104,9 +105,7 @@ class PhpFileLoaderTest extends TestCase
         $this->assertStringEqualsFile($fixtures.'/php/services_closure_argument_compiled.php', $dumper->dump());
     }
 
-    /**
-     * @dataProvider provideConfig
-     */
+    #[DataProvider('provideConfig')]
     public function testConfig($file)
     {
         $fixtures = realpath(__DIR__.'/../Fixtures');

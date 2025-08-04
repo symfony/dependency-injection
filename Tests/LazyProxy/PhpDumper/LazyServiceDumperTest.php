@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\LazyProxy\PhpDumper;
 
+use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -65,9 +66,7 @@ class LazyServiceDumperTest extends TestCase
         $dumper->getProxyCode($definition);
     }
 
-    /**
-     * @requires PHP 8.3
-     */
+    #[RequiresPhp('8.3')]
     public function testReadonlyClass()
     {
         $dumper = new LazyServiceDumper();

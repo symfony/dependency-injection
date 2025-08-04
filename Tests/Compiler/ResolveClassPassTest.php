@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
@@ -25,9 +26,7 @@ class ResolveClassPassTest extends TestCase
 {
     use ExpectDeprecationTrait;
 
-    /**
-     * @dataProvider provideValidClassId
-     */
+    #[DataProvider('provideValidClassId')]
     public function testResolveClassFromId($serviceId)
     {
         $container = new ContainerBuilder();
@@ -43,9 +42,7 @@ class ResolveClassPassTest extends TestCase
         yield [CaseSensitiveClass::class];
     }
 
-    /**
-     * @dataProvider provideInvalidClassId
-     */
+    #[DataProvider('provideInvalidClassId')]
     public function testWontResolveClassFromId($serviceId)
     {
         $container = new ContainerBuilder();

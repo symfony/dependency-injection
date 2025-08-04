@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Loader;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderResolver;
@@ -152,10 +154,8 @@ class FileLoaderTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [true]
-     *           [false]
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testRegisterClassesWithExcludeAttribute(bool $autoconfigure)
     {
         $container = new ContainerBuilder();
@@ -260,9 +260,7 @@ class FileLoaderTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider excludeTrailingSlashConsistencyProvider
-     */
+    #[DataProvider('excludeTrailingSlashConsistencyProvider')]
     public function testExcludeTrailingSlashConsistency(string $exclude, string $excludedId)
     {
         $container = new ContainerBuilder();
@@ -290,12 +288,10 @@ class FileLoaderTest extends TestCase
         yield ['Prototype/OtherDir/AnotherSub/DeeperBaz.php', DeeperBaz::class];
     }
 
-    /**
-     * @testWith ["prod", false]
-     *           ["dev", false]
-     *           ["bar", true]
-     *           [null, false]
-     */
+    #[TestWith(['prod', false])]
+    #[TestWith(['dev', false])]
+    #[TestWith(['bar', true])]
+    #[TestWith([null, false])]
     public function testRegisterClassesWithWhenEnv(?string $env, bool $expected)
     {
         $container = new ContainerBuilder();
@@ -309,9 +305,7 @@ class FileLoaderTest extends TestCase
         $this->assertSame($expected, $container->getDefinition(Foo::class)->hasTag('container.excluded'));
     }
 
-    /**
-     * @dataProvider provideEnvAndExpectedExclusions
-     */
+    #[DataProvider('provideEnvAndExpectedExclusions')]
     public function testRegisterWithNotWhenAttributes(string $env, bool $expectedNotFooExclusion)
     {
         $container = new ContainerBuilder();
@@ -350,9 +344,7 @@ class FileLoaderTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider provideResourcesWithAsAliasAttributes
-     */
+    #[DataProvider('provideResourcesWithAsAliasAttributes')]
     public function testRegisterClassesWithAsAlias(string $resource, array $expectedAliases, ?string $env = null)
     {
         $container = new ContainerBuilder();
@@ -391,9 +383,7 @@ class FileLoaderTest extends TestCase
         yield 'Test-env specific' => ['PrototypeAsAlias/WithAsAlias*Env.php', [], 'test'];
     }
 
-    /**
-     * @dataProvider provideResourcesWithDuplicatedAsAliasAttributes
-     */
+    #[DataProvider('provideResourcesWithDuplicatedAsAliasAttributes')]
     public function testRegisterClassesWithDuplicatedAsAlias(string $resource, string $expectedExceptionMessage)
     {
         $container = new ContainerBuilder();

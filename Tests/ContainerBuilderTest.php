@@ -15,6 +15,7 @@ require_once __DIR__.'/Fixtures/includes/autowiring_classes.php';
 require_once __DIR__.'/Fixtures/includes/classes.php';
 require_once __DIR__.'/Fixtures/includes/ProjectExtension.php';
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
@@ -312,18 +313,14 @@ class ContainerBuilderTest extends TestCase
         $this->assertNotSame($builder->get('bar'), $builder->get('bar'));
     }
 
-    /**
-     * @dataProvider provideBadId
-     */
+    #[DataProvider('provideBadId')]
     public function testBadAliasId($id)
     {
         $this->expectException(InvalidArgumentException::class);
         (new ContainerBuilder())->setAlias($id, 'foo');
     }
 
-    /**
-     * @dataProvider provideBadId
-     */
+    #[DataProvider('provideBadId')]
     public function testBadDefinitionId($id)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -1698,9 +1695,7 @@ class ContainerBuilderTest extends TestCase
         $this->assertEquals(['foo1' => new \stdClass(), 'foo3' => new \stdClass()], iterator_to_array($bar->iter));
     }
 
-    /**
-     * @dataProvider provideAlmostCircular
-     */
+    #[DataProvider('provideAlmostCircular')]
     public function testAlmostCircular($visibility)
     {
         $container = include __DIR__.'/Fixtures/containers/container_almost_circular.php';
