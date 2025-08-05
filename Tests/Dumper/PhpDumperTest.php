@@ -1877,7 +1877,7 @@ PHP
     {
         $container = new ContainerBuilder();
         $container->register('closure_proxy', SingleMethodInterface::class)
-            ->setPublic('true')
+            ->setPublic(true)
             ->setFactory(['Closure', 'fromCallable'])
             ->setArguments([[new Reference('foo'), 'cloneFoo']])
             ->setLazy(true);
@@ -1899,12 +1899,12 @@ PHP
     {
         $container = new ContainerBuilder();
         $container->register('closure', 'Closure')
-            ->setPublic('true')
+            ->setPublic(true)
             ->setFactory(['Closure', 'fromCallable'])
             ->setArguments([new Reference('bar')]);
         $container->register('bar', 'stdClass');
         $container->register('closure_of_service_closure', 'Closure')
-            ->setPublic('true')
+            ->setPublic(true)
             ->setFactory(['Closure', 'fromCallable'])
             ->setArguments([new ServiceClosureArgument(new Reference('bar2'))]);
         $container->register('bar2', 'stdClass');
@@ -1918,15 +1918,15 @@ PHP
     {
         $container = new ContainerBuilder();
         $container->register('foo', Foo::class)
-            ->setPublic('true');
+            ->setPublic(true);
         $container->register('my_callable', MyCallable::class)
-            ->setPublic('true');
+            ->setPublic(true);
         $container->register('baz', \Closure::class)
             ->setFactory(['Closure', 'fromCallable'])
             ->setArguments(['var_dump'])
-            ->setPublic('true');
+            ->setPublic(true);
         $container->register('bar', LazyClosureConsumer::class)
-            ->setPublic('true')
+            ->setPublic(true)
             ->setAutowired(true);
         $container->compile();
         $dumper = new PhpDumper($container);
@@ -1952,12 +1952,12 @@ PHP
     {
         $container = new ContainerBuilder();
         $container->register('closure1', 'Closure')
-            ->setPublic('true')
+            ->setPublic(true)
             ->setFactory(['Closure', 'fromCallable'])
             ->setLazy(true)
             ->setArguments([[new Reference('foo'), 'cloneFoo']]);
         $container->register('closure2', 'Closure')
-            ->setPublic('true')
+            ->setPublic(true)
             ->setFactory(['Closure', 'fromCallable'])
             ->setLazy(true)
             ->setArguments([[new Reference('foo_void'), '__invoke']]);
@@ -1991,10 +1991,10 @@ PHP
     {
         $container = new ContainerBuilder();
         $container->register('foo', Foo::class)
-            ->setPublic('true');
+            ->setPublic(true);
         $container->setAlias(Foo::class, 'foo');
         $container->register('bar', LazyServiceConsumer::class)
-            ->setPublic('true')
+            ->setPublic(true)
             ->setAutowired(true);
         $container->compile();
         $dumper = new PhpDumper($container);
@@ -2020,7 +2020,7 @@ PHP
     {
         $container = new ContainerBuilder();
         $container->register('foo', AAndIInterfaceConsumer::class)
-            ->setPublic('true')
+            ->setPublic(true)
             ->setAutowired(true);
 
         $container->compile();
@@ -2048,7 +2048,7 @@ PHP
         $container = new ContainerBuilder();
         $container->register('foo', Foo::class);
         $container->register('bar', CallableAdapterConsumer::class)
-            ->setPublic('true')
+            ->setPublic(true)
             ->setAutowired(true);
         $container->compile();
         $dumper = new PhpDumper($container);
