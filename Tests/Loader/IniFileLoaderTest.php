@@ -81,7 +81,7 @@ class IniFileLoaderTest extends TestCase
             ['zero', 0, true],
             ['0b0110_byte_string', bindec('0b0110'), false], // not supported by INI_SCANNER_TYPED
             ['11112222333344445555_great_number', '1111,2222,3333,4444,5555', true],
-            ['0777_number_starting_with_0', 0777, false], // not supported by INI_SCANNER_TYPED
+            ['0777_number_starting_with_0', 0o777, false], // not supported by INI_SCANNER_TYPED
             ['255_hexadecimal', 0xFF, false], // not supported by INI_SCANNER_TYPED
             ['100.0_exponential', 1e2, false], // not supported by INI_SCANNER_TYPED
             ['-120.0_exponential', -1.2E2, false], // not supported by INI_SCANNER_TYPED
