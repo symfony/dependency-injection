@@ -1421,25 +1421,25 @@ class PhpDumperTest extends TestCase
         $this->assertSame(FooUnitEnum::BAR, $container->getParameter('unit_enum'));
         $this->assertSame([FooUnitEnum::BAR, FooUnitEnum::FOO], $container->getParameter('enum_array'));
         $this->assertStringMatchesFormat(<<<'PHP'
-%A
-    protected static function getBarService($container)
-    {
-        return $container->services['bar'] = new \stdClass(\Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum::BAR, $container->getParameter('enum_array'));
-    }
-%A
-    private function getDynamicParameter(string $name)
-    {
-        $container = $this;
-        $value = match ($name) {
-            'unit_enum' => \Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum::BAR,
-            'enum_array' => [
-                0 => \Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum::BAR,
-                1 => \Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum::FOO,
-            ],
-            default => throw new ParameterNotFoundException($name),
-        };
-%A
-PHP
+            %A
+                protected static function getBarService($container)
+                {
+                    return $container->services['bar'] = new \stdClass(\Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum::BAR, $container->getParameter('enum_array'));
+                }
+            %A
+                private function getDynamicParameter(string $name)
+                {
+                    $container = $this;
+                    $value = match ($name) {
+                        'unit_enum' => \Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum::BAR,
+                        'enum_array' => [
+                            0 => \Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum::BAR,
+                            1 => \Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum::FOO,
+                        ],
+                        default => throw new ParameterNotFoundException($name),
+                    };
+            %A
+            PHP
             , $dumpedContainer
         );
     }
@@ -2140,74 +2140,74 @@ PHP
             ['<?php echo/** bar */\foo();', '<?php echo \foo();'],
             ['<?php /**/echo \foo();', '<?php echo \foo();'],
             [<<<'EOF'
-<?php
-include_once \dirname(__DIR__).'/foo.php';
+                <?php
+                include_once \dirname(__DIR__).'/foo.php';
 
-$string = 'string should not be   modified';
+                $string = 'string should not be   modified';
 
-$string = 'string should not be
+                $string = 'string should not be
 
-modified';
-
-
-$heredoc = <<<HD
+                modified';
 
 
-Heredoc should not be   modified {$a[1+$b]}
+                $heredoc = <<<HD
 
 
-HD;
-
-$nowdoc = <<<'ND'
+                Heredoc should not be   modified {$a[1+$b]}
 
 
-Nowdoc should not be   modified
+                HD;
+
+                $nowdoc = <<<'ND'
 
 
-ND;
+                Nowdoc should not be   modified
 
-/**
- * some class comments to strip
- */
-class TestClass
-{
-    /**
-     * some method comments to strip
-     */
-    public function doStuff()
-    {
-        // inline comment
-    }
-}
-EOF
+
+                ND;
+
+                /**
+                 * some class comments to strip
+                 */
+                class TestClass
+                {
+                    /**
+                     * some method comments to strip
+                     */
+                    public function doStuff()
+                    {
+                        // inline comment
+                    }
+                }
+                EOF
                 , <<<'EOF'
-<?php
-include_once \dirname(__DIR__).'/foo.php';
-$string = 'string should not be   modified';
-$string = 'string should not be
+                    <?php
+                    include_once \dirname(__DIR__).'/foo.php';
+                    $string = 'string should not be   modified';
+                    $string = 'string should not be
 
-modified';
-$heredoc = <<<HD
-
-
-Heredoc should not be   modified {$a[1+$b]}
+                    modified';
+                    $heredoc = <<<HD
 
 
-HD;
-$nowdoc = <<<'ND'
+                    Heredoc should not be   modified {$a[1+$b]}
 
 
-Nowdoc should not be   modified
+                    HD;
+                    $nowdoc = <<<'ND'
 
 
-ND;
-class TestClass
-{
-    public function doStuff()
-    {
-        }
-}
-EOF
+                    Nowdoc should not be   modified
+
+
+                    ND;
+                    class TestClass
+                    {
+                        public function doStuff()
+                        {
+                            }
+                    }
+                    EOF
             ],
         ];
     }

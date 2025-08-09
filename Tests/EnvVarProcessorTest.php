@@ -806,8 +806,8 @@ class EnvVarProcessorTest extends TestCase
     public static function validCsv()
     {
         $complex = <<<'CSV'
-,"""","foo""","\""",\,foo\
-CSV;
+            ,"""","foo""","\""",\,foo\
+            CSV;
 
         return [
             ['', []],

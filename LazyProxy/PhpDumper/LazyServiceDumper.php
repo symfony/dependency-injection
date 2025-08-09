@@ -90,44 +90,44 @@ final class LazyServiceDumper implements DumperInterface
         if (!$asGhostObject) {
             if ($definition->getClass() === $proxyClass) {
                 return <<<EOF
+                            if (true === \$lazyLoad) {
+                                $instantiation new \ReflectionClass('$proxyClass')->newLazyProxy(static fn () => $factoryCode);
+                            }
+
+
+                    EOF;
+            }
+
+            return <<<EOF
                         if (true === \$lazyLoad) {
-                            $instantiation new \ReflectionClass('$proxyClass')->newLazyProxy(static fn () => $factoryCode);
+                            $instantiation \$container->createProxy('$proxyClass', static fn () => \\$proxyClass::createLazyProxy(static fn () => $factoryCode));
                         }
 
 
                 EOF;
-            }
-
-            return <<<EOF
-                    if (true === \$lazyLoad) {
-                        $instantiation \$container->createProxy('$proxyClass', static fn () => \\$proxyClass::createLazyProxy(static fn () => $factoryCode));
-                    }
-
-
-            EOF;
         }
 
         if (\PHP_VERSION_ID < 80400) {
             $factoryCode = \sprintf('static fn ($proxy) => %s', $factoryCode);
 
             return <<<EOF
-                    if (true === \$lazyLoad) {
-                        $instantiation \$container->createProxy('$proxyClass', static fn () => \\$proxyClass::createLazyGhost($factoryCode));
-                    }
+                        if (true === \$lazyLoad) {
+                            $instantiation \$container->createProxy('$proxyClass', static fn () => \\$proxyClass::createLazyGhost($factoryCode));
+                        }
 
 
-            EOF;
+                EOF;
         }
 
         $factoryCode = \sprintf('static function ($proxy) use ($container) { %s; }', $factoryCode);
 
         return <<<EOF
-                if (true === \$lazyLoad) {
-                    $instantiation new \ReflectionClass('$proxyClass')->newLazyGhost($factoryCode);
-                }
+                    if (true === \$lazyLoad) {
+                        $instantiation new \ReflectionClass('$proxyClass')->newLazyGhost($factoryCode);
+                    }
 
 
-        EOF;
+            EOF;
     }
 
     public function getProxyCode(Definition $definition, ?string $id = null): string
