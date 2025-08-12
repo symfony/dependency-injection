@@ -403,7 +403,7 @@ class XmlDumper extends Dumper
 
     private function encode(string $value, int $flags = \ENT_COMPAT): string
     {
-        return htmlspecialchars($value, \ENT_XML1 | \ENT_SUBSTITUTE | $flags, 'UTF-8');
+        return str_replace("\r", '&#13;', htmlspecialchars($value, \ENT_XML1 | \ENT_SUBSTITUTE | $flags, 'UTF-8'));
     }
 
     private function escape(array $arguments): array
