@@ -68,6 +68,7 @@ use Symfony\Component\DependencyInjection\Tests\Fixtures\TestServiceSubscriber;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\WitherStaticReturnType;
 use Symfony\Component\DependencyInjection\TypedReference;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\VarExporter\Internal\LazyDecoratorTrait;
 use Symfony\Component\VarExporter\LazyObjectInterface;
 
 require_once __DIR__.'/../Fixtures/includes/autowiring_classes.php';
@@ -920,7 +921,9 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_dedup_lazy.php', $dumper->dump());
+        
+        $legacy = \PHP_VERSION_ID < 80400 || !trait_exists(LazyDecoratorTrait::class) ? 'legacy_' : '';
+        $this->assertStringEqualsFile(self::$fixturesPath.'/php/'.$legacy.'services_dedup_lazy.php', $dumper->dump());
     }
 
     public function testLazyArgumentProvideGenerator()
@@ -1616,7 +1619,8 @@ PHP
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Service_Wither_Lazy']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_wither_lazy.php', $dump);
+        $legacy = \PHP_VERSION_ID < 80400 || !trait_exists(LazyDecoratorTrait::class) ? 'legacy_' : '';
+        $this->assertStringEqualsFile(self::$fixturesPath.'/php/'.$legacy.'services_wither_lazy.php', $dump);
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Service_Wither_Lazy();
@@ -1641,7 +1645,8 @@ PHP
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Service_Wither_Lazy_Non_Shared']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_wither_lazy_non_shared.php', $dump);
+        $legacy = \PHP_VERSION_ID < 80400 || !trait_exists(LazyDecoratorTrait::class) ? 'legacy_' : '';
+        $this->assertStringEqualsFile(self::$fixturesPath.'/php/'.$legacy.'services_wither_lazy_non_shared.php', $dump);
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Service_Wither_Lazy_Non_Shared();
@@ -1978,9 +1983,10 @@ PHP
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/lazy_autowire_attribute.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Lazy_Autowire_Attribute']));
+        $legacy = \PHP_VERSION_ID < 80400 || !trait_exists(LazyDecoratorTrait::class) ? 'legacy_' : '';
+        $this->assertStringEqualsFile(self::$fixturesPath.'/php/'.$legacy.'lazy_autowire_attribute.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Lazy_Autowire_Attribute']));
 
-        require self::$fixturesPath.'/php/lazy_autowire_attribute.php';
+        require self::$fixturesPath.'/php/'.$legacy.'lazy_autowire_attribute.php';
 
         $container = new \Symfony_DI_PhpDumper_Test_Lazy_Autowire_Attribute();
 
@@ -2009,7 +2015,8 @@ PHP
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/lazy_autowire_attribute_with_intersection.php', $dumper->dump());
+        $legacy = \PHP_VERSION_ID < 80400 || !trait_exists(LazyDecoratorTrait::class) ? 'legacy_' : '';
+        $this->assertStringEqualsFile(self::$fixturesPath.'/php/'.$legacy.'lazy_autowire_attribute_with_intersection.php', $dumper->dump());
     }
 
     public function testCallableAdapterConsumer()

@@ -87,23 +87,12 @@ class Symfony_DI_PhpDumper_Test_Lazy_Autowire_Attribute extends Container
 
 class FooProxy4048957 extends \Symfony\Component\DependencyInjection\Tests\Compiler\Foo implements \Symfony\Component\VarExporter\LazyObjectInterface
 {
-    use \Symfony\Component\VarExporter\Internal\LazyDecoratorTrait;
+    use \Symfony\Component\VarExporter\LazyProxyTrait;
 
     private const LAZY_OBJECT_PROPERTY_SCOPES = [];
-
-    public function cloneFoo(?\stdClass $bar = null): static
-    {
-        ${0} = $this->lazyObjectState->realInstance;
-        ${1} = ${0}->cloneFoo(...\func_get_args());
-
-        return match (true) {
-            ${1} === ${0} => $this,
-            !${1} instanceof ${0} || !${0} instanceof ${1} => ${1},
-            null !== $this->lazyObjectState->cloneInstance =& ${1} => clone $this,
-        };
-    }
 }
 
 // Help opcache.preload discover always-needed symbols
 class_exists(\Symfony\Component\VarExporter\Internal\Hydrator::class);
 class_exists(\Symfony\Component\VarExporter\Internal\LazyObjectRegistry::class);
+class_exists(\Symfony\Component\VarExporter\Internal\LazyObjectState::class);
