@@ -1439,8 +1439,8 @@ class PhpDumperTest extends TestCase
                         default => throw new ParameterNotFoundException($name),
                     };
             %A
-            PHP
-            , $dumpedContainer
+            PHP,
+            $dumpedContainer
         );
     }
 
@@ -2139,48 +2139,49 @@ class PhpDumperTest extends TestCase
             ['<?php echo/**/\foo();', '<?php echo \foo();'],
             ['<?php echo/** bar */\foo();', '<?php echo \foo();'],
             ['<?php /**/echo \foo();', '<?php echo \foo();'],
-            [<<<'EOF'
-                <?php
-                include_once \dirname(__DIR__).'/foo.php';
+            [
+                <<<'EOF'
+                    <?php
+                    include_once \dirname(__DIR__).'/foo.php';
 
-                $string = 'string should not be   modified';
+                    $string = 'string should not be   modified';
 
-                $string = 'string should not be
+                    $string = 'string should not be
 
-                modified';
-
-
-                $heredoc = <<<HD
+                    modified';
 
 
-                Heredoc should not be   modified {$a[1+$b]}
+                    $heredoc = <<<HD
 
 
-                HD;
-
-                $nowdoc = <<<'ND'
+                    Heredoc should not be   modified {$a[1+$b]}
 
 
-                Nowdoc should not be   modified
+                    HD;
+
+                    $nowdoc = <<<'ND'
 
 
-                ND;
+                    Nowdoc should not be   modified
 
-                /**
-                 * some class comments to strip
-                 */
-                class TestClass
-                {
+
+                    ND;
+
                     /**
-                     * some method comments to strip
+                     * some class comments to strip
                      */
-                    public function doStuff()
+                    class TestClass
                     {
-                        // inline comment
+                        /**
+                         * some method comments to strip
+                         */
+                        public function doStuff()
+                        {
+                            // inline comment
+                        }
                     }
-                }
-                EOF
-                , <<<'EOF'
+                    EOF,
+                <<<'EOF'
                     <?php
                     include_once \dirname(__DIR__).'/foo.php';
                     $string = 'string should not be   modified';
@@ -2207,7 +2208,7 @@ class PhpDumperTest extends TestCase
                         {
                             }
                     }
-                    EOF
+                    EOF,
             ],
         ];
     }
