@@ -1026,8 +1026,7 @@ class PhpDumper extends Dumper
                         return $container->%1$s[%2$s];
                     }
 
-            EOTXT
-            ,
+            EOTXT,
             $this->container->getDefinition($id)->isPublic() ? 'services' : 'privates',
             $this->doExport($id)
         );
