@@ -459,26 +459,26 @@ class AutowirePass extends AbstractRecursivePass
         $name = $target = (array_filter($reference->getAttributes(), static fn ($a) => $a instanceof Target)[0] ?? null)?->name;
 
         if (null !== $name ??= $reference->getName()) {
-            if ($this->container->has($alias = $type.' $'.$name) && !$this->container->findDefinition($alias)->isAbstract()) {
+            if ($this->container->has($alias = $type.' $'.$name) && $this->canDefinitionBeAutowired($alias)) {
                 return new TypedReference($alias, $type, $reference->getInvalidBehavior());
             }
 
-            if (null !== ($alias = $this->getCombinedAlias($type, $name)) && !$this->container->findDefinition($alias)->isAbstract()) {
+            if (null !== ($alias = $this->getCombinedAlias($type, $name)) && $this->canDefinitionBeAutowired($alias)) {
                 return new TypedReference($alias, $type, $reference->getInvalidBehavior());
             }
 
             $parsedName = (new Target($name))->getParsedName();
 
-            if ($this->container->has($alias = $type.' $'.$parsedName) && !$this->container->findDefinition($alias)->isAbstract()) {
+            if ($this->container->has($alias = $type.' $'.$parsedName) && $this->canDefinitionBeAutowired($alias)) {
                 return new TypedReference($alias, $type, $reference->getInvalidBehavior());
             }
 
-            if (null !== ($alias = $this->getCombinedAlias($type, $parsedName)) && !$this->container->findDefinition($alias)->isAbstract()) {
+            if (null !== ($alias = $this->getCombinedAlias($type, $parsedName)) && $this->canDefinitionBeAutowired($alias)) {
                 return new TypedReference($alias, $type, $reference->getInvalidBehavior());
             }
 
-            if (($this->container->has($n = $name) && !$this->container->findDefinition($n)->isAbstract())
-                || ($this->container->has($n = $parsedName) && !$this->container->findDefinition($n)->isAbstract())
+            if (($this->container->has($n = $name) && $this->canDefinitionBeAutowired($n))
+                || ($this->container->has($n = $parsedName) && $this->canDefinitionBeAutowired($n))
             ) {
                 foreach ($this->container->getAliases() as $id => $alias) {
                     if ($n === (string) $alias && str_starts_with($id, $type.' $')) {
@@ -492,15 +492,22 @@ class AutowirePass extends AbstractRecursivePass
             }
         }
 
-        if ($this->container->has($type) && !$this->container->findDefinition($type)->isAbstract()) {
+        if ($this->container->has($type) && $this->canDefinitionBeAutowired($type)) {
             return new TypedReference($type, $type, $reference->getInvalidBehavior());
         }
 
-        if (null !== ($alias = $this->getCombinedAlias($type)) && !$this->container->findDefinition($alias)->isAbstract()) {
+        if (null !== ($alias = $this->getCombinedAlias($type)) && $this->canDefinitionBeAutowired($alias)) {
             return new TypedReference($alias, $type, $reference->getInvalidBehavior());
         }
 
         return null;
+    }
+
+    private function canDefinitionBeAutowired(string $id): bool
+    {
+        $definition = $this->container->findDefinition($id);
+
+        return !$definition->isAbstract() && !$definition->hasTag('container.excluded');
     }
 
     /**
