@@ -1350,7 +1350,7 @@ class AutowirePassTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $container->register(Foo::class)->setAbstract(true)->addTag('container.excluded', ['source' => 'for tests']);
+        $container->register(Foo::class)->addTag('container.excluded', ['source' => 'for tests']);
         $aDefinition = $container->register('a', NotGuessableArgument::class);
         $aDefinition->setAutowired(true);
 
@@ -1367,7 +1367,7 @@ class AutowirePassTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $container->register(__NAMESPACE__)->setAbstract(true)->addTag('container.excluded');
+        $container->register(__NAMESPACE__)->addTag('container.excluded');
         $aDefinition = $container->register('a', NotGuessableArgument::class);
         $aDefinition->setAutowired(true);
 
