@@ -83,25 +83,25 @@ class PhpFileLoader extends FileLoader
             }
 
             if (\is_object($result) && \is_callable($result)) {
-                $result = $this->executeCallback($result, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
+                $result = $this->callConfigurator($result, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
             }
             if ($result instanceof ConfigBuilderInterface) {
-                $this->loadExtensionConfig($result->getExtensionAlias(), ContainerConfigurator::processValue($result->toArray()));
+                $this->loadExtensionConfig($result->getExtensionAlias(), ContainerConfigurator::processValue($result->toArray()), $path);
             } elseif (is_iterable($result)) {
                 foreach ($result as $key => $config) {
                     if ($config instanceof ConfigBuilderInterface) {
                         if (\is_string($key) && $config->getExtensionAlias() !== $key) {
                             throw new InvalidArgumentException(\sprintf('The extension alias "%s" of the "%s" config builder does not match the key "%s" in file "%s".', $config->getExtensionAlias(), get_debug_type($config), $key, $path));
                         }
-                        $this->loadExtensionConfig($config->getExtensionAlias(), ContainerConfigurator::processValue($config->toArray()));
+                        $this->loadExtensionConfig($config->getExtensionAlias(), ContainerConfigurator::processValue($config->toArray()), $path);
                     } elseif (!\is_string($key) || !\is_array($config)) {
                         throw new InvalidArgumentException(\sprintf('The configuration returned in file "%s" must yield only string-keyed arrays or ConfigBuilderInterface values.', $path));
                     } else {
-                        $this->loadExtensionConfig($key, ContainerConfigurator::processValue($config));
+                        $this->loadExtensionConfig($key, ContainerConfigurator::processValue($config), $path);
                     }
                 }
             } elseif (null !== $result) {
-                throw new InvalidArgumentException(\sprintf('The return value in config file "%s" is invalid.', $path));
+                throw new InvalidArgumentException(\sprintf('The return value in config file "%s" is invalid: "%s" given.', $path, get_debug_type($result)));
             }
 
             $this->loadExtensionConfigs();
@@ -129,7 +129,7 @@ class PhpFileLoader extends FileLoader
     /**
      * Resolve the parameters to the $callback and execute it.
      */
-    private function executeCallback(callable $callback, ContainerConfigurator $containerConfigurator, string $path): mixed
+    private function callConfigurator(callable $callback, ContainerConfigurator $containerConfigurator, string $path): mixed
     {
         $callback = $callback(...);
         $arguments = [];
@@ -202,7 +202,9 @@ class PhpFileLoader extends FileLoader
 
         ++$this->importing;
         try {
-            return $callback(...$arguments);
+            $result = $callback(...$arguments);
+
+            return \in_array($result, $configBuilders, true) ? null : $result;
         } catch (\Throwable $e) {
             $configBuilders = [];
             throw $e;

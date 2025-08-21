@@ -144,6 +144,7 @@ class PhpFileLoaderTest extends TestCase
         yield ['closure'];
         yield ['from_callable'];
         yield ['env_param'];
+        yield ['array_config'];
     }
 
     public function testResourceTags()
