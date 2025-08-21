@@ -31,6 +31,7 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\FooClassWithEnumAttribute;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum;
+use Symfony\Config\ServicesConfig;
 
 class PhpFileLoaderTest extends TestCase
 {
@@ -50,6 +51,16 @@ class PhpFileLoaderTest extends TestCase
         $loader->load(__DIR__.'/../Fixtures/php/simple.php');
 
         $this->assertEquals('foo', $container->getParameter('foo'), '->load() loads a PHP file resource');
+
+        $this->assertTrue(class_exists(ServicesConfig::class));
+        $this->assertTrue(\function_exists('Symfony\Config\service'));
+        $this->assertTrue(\function_exists('Symfony\Component\DependencyInjection\Loader\Configurator\service'));
+
+        $configCode = explode("\n/**", file_get_contents(\dirname(__DIR__, 2).'/Loader/Config/functions.php'), 2);
+        $configuratorCode = explode("\n/**", file_get_contents(\dirname(__DIR__, 2).'/Loader/Configurator/functions.php'), 2);
+
+        $this->assertStringEqualsFile(\dirname(__DIR__, 2).'/Loader/Config/functions.php', $configCode[0]."\n/**".$configuratorCode[1]);
+        $this->assertStringEqualsFile(\dirname(__DIR__, 2).'/Loader/Configurator/functions.php', $configuratorCode[0]."\n/**".$configCode[1]);
     }
 
     public function testPrependExtensionConfigWithLoadMethod()
@@ -145,6 +156,8 @@ class PhpFileLoaderTest extends TestCase
         yield ['from_callable'];
         yield ['env_param'];
         yield ['array_config'];
+        yield ['object_array_config'];
+        yield ['return_when_env'];
     }
 
     public function testResourceTags()

@@ -12,6 +12,7 @@ CHANGELOG
  * Allow multiple `#[AsDecorator]` attributes
  * Handle returning arrays and config-builders from config files
  * Handle declaring services using PHP arrays that follow the same shape as corresponding yaml files
+ * Add `ServicesConfig` to help writing PHP configs using yaml-like array-shapes
  * Deprecate using `$this` or its internal scope from PHP config files; use the `$loader` variable instead
  * Deprecate XML configuration format, use YAML or PHP instead
  * Deprecate `ExtensionInterface::getXsdValidationBasePath()` and `getNamespace()`
