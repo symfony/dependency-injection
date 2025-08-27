@@ -249,6 +249,7 @@
         "properties": { "type": "object", "additionalProperties": { "$ref": "#/$defs/parameterValue" } },
         "calls": { "$ref": "#/$defs/calls" },
         "tags": { "$ref": "#/$defs/tags" },
+        "resource_tags": { "$ref": "#/$defs/tags" },
         "decorates": { "type": "string" },
         "decoration_inner_name": { "type": "string" },
         "decoration_priority": { "type": "integer" },
@@ -285,6 +286,7 @@
         "configurator": { "$ref": "#/$defs/callable" },
         "calls": { "$ref": "#/$defs/calls" },
         "tags": { "$ref": "#/$defs/tags" },
+        "resource_tags": { "$ref": "#/$defs/tags" },
         "autowire": { "type": "boolean" },
         "autoconfigure": { "type": "boolean" },
         "bind": { "type": "object", "additionalProperties": { "$ref": "#/$defs/parameterValue" } },
@@ -322,6 +324,7 @@
       "properties": {
         "public": { "type": "boolean" },
         "tags": { "$ref": "#/$defs/tags" },
+        "resource_tags": { "$ref": "#/$defs/tags" },
         "autowire": { "type": "boolean" },
         "autoconfigure": { "type": "boolean" },
         "bind": {
@@ -342,6 +345,7 @@
         "configurator": { "$ref": "#/$defs/callable" },
         "calls": { "$ref": "#/$defs/calls" },
         "tags": { "$ref": "#/$defs/tags" },
+        "resource_tags": { "$ref": "#/$defs/tags" },
         "autowire": { "type": "boolean" },
         "bind": { "type": "object", "additionalProperties": { "$ref": "#/$defs/parameterValue" } },
         "constructor": { "type": "string" }
