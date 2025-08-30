@@ -144,6 +144,21 @@ class PhpFileLoaderTest extends TestCase
         yield ['env_param'];
     }
 
+    public function testResourceTags()
+    {
+        $fixtures = realpath(__DIR__.'/../Fixtures');
+        $loader = new PhpFileLoader($container = new ContainerBuilder(), new FileLocator());
+        $loader->load($fixtures.'/config/resource_tags.php');
+
+        $def = $container->getDefinition('foo');
+        $this->assertTrue($def->hasTag('container.excluded'));
+        $this->assertTrue($def->hasTag('my.tag'));
+        $this->assertTrue($def->hasTag('another.tag'));
+        $this->assertSame([['foo' => 'bar']], $def->getTag('my.tag'));
+        $this->assertSame([[]], $def->getTag('another.tag'));
+        $this->assertTrue($def->isAbstract());
+    }
+
     public function testAutoConfigureAndChildDefinition()
     {
         $fixtures = realpath(__DIR__.'/../Fixtures');
