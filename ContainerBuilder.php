@@ -835,7 +835,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             if ('.' === ($id[0] ?? '-')) {
                 continue;
             }
-            if (!$definition->isPublic() || $definition->isPrivate()) {
+            if ($definition->isPrivate()) {
                 $this->removedIds[$id] = true;
             }
         }

@@ -346,28 +346,31 @@ class XmlFileLoader extends FileLoader
             );
         }
 
-        $tags = $this->getChildren($service, 'tag');
-
-        foreach ($tags as $tag) {
-            $tagNameComesFromAttribute = $tag->childElementCount || '' === $tag->nodeValue;
-            if ('' === $tagName = $tagNameComesFromAttribute ? $tag->getAttribute('name') : $tag->nodeValue) {
-                throw new InvalidArgumentException(\sprintf('The tag name for service "%s" in "%s" must be a non-empty string.', $service->getAttribute('id'), $file));
-            }
-
-            $parameters = $this->getTagAttributes($tag, \sprintf('The attribute name of tag "%s" for service "%s" in %s must be a non-empty string.', $tagName, $service->getAttribute('id'), $file));
-            foreach ($tag->attributes as $name => $node) {
-                if ($tagNameComesFromAttribute && 'name' === $name) {
-                    continue;
+        foreach (['tag', 'resource-tag'] as $type) {
+            foreach ($this->getChildren($service, $type) as $tag) {
+                $tagNameComesFromAttribute = $tag->childElementCount || '' === $tag->nodeValue;
+                if ('' === $tagName = $tagNameComesFromAttribute ? $tag->getAttribute('name') : $tag->nodeValue) {
+                    throw new InvalidArgumentException(\sprintf('The tag name for service "%s" in "%s" must be a non-empty string.', $service->getAttribute('id'), $file));
                 }
 
-                if (str_contains($name, '-') && !str_contains($name, '_') && !\array_key_exists($normalizedName = str_replace('-', '_', $name), $parameters)) {
-                    $parameters[$normalizedName] = XmlUtils::phpize($node->nodeValue);
-                }
-                // keep not normalized key
-                $parameters[$name] = XmlUtils::phpize($node->nodeValue);
-            }
+                $parameters = $this->getTagAttributes($tag, \sprintf('The attribute name of tag "%s" for service "%s" in %s must be a non-empty string.', $tagName, $service->getAttribute('id'), $file));
+                foreach ($tag->attributes as $name => $node) {
+                    if ($tagNameComesFromAttribute && 'name' === $name) {
+                        continue;
+                    }
 
-            $definition->addTag($tagName, $parameters);
+                    if (str_contains($name, '-') && !str_contains($name, '_') && !\array_key_exists($normalizedName = str_replace('-', '_', $name), $parameters)) {
+                        $parameters[$normalizedName] = XmlUtils::phpize($node->nodeValue);
+                    }
+                    // keep not normalized key
+                    $parameters[$name] = XmlUtils::phpize($node->nodeValue);
+                }
+
+                match ($type) {
+                    'tag' => $definition->addTag($tagName, $parameters),
+                    'resource-tag' => $definition->addResourceTag($tagName, $parameters),
+                };
+            }
         }
 
         $definition->setTags(array_merge_recursive($definition->getTags(), $defaults->getTags()));

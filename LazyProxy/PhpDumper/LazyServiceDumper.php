@@ -72,7 +72,7 @@ final class LazyServiceDumper implements DumperInterface
         $instantiation = 'return';
 
         if ($definition->isShared()) {
-            $instantiation .= \sprintf(' $container->%s[%s] =', $definition->isPublic() && !$definition->isPrivate() ? 'services' : 'privates', var_export($id, true));
+            $instantiation .= \sprintf(' $container->%s[%s] =', $definition->isPublic() ? 'services' : 'privates', var_export($id, true));
         }
 
         $asGhostObject = str_contains($factoryCode, '$proxy');

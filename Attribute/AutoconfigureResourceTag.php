@@ -12,21 +12,19 @@
 namespace Symfony\Component\DependencyInjection\Attribute;
 
 /**
- * An attribute to tell how a base type should be tagged.
- *
  * @author Nicolas Grekas <p@tchwork.com>
  */
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
-class AutoconfigureTag extends Autoconfigure
+class AutoconfigureResourceTag extends Autoconfigure
 {
     /**
-     * @param string|null  $name       The tag name to add
-     * @param array<mixed> $attributes The attributes to attach to the tag
+     * @param string|null  $name       The resource tag name to add
+     * @param array<mixed> $attributes The attributes to attach to the resource tag
      */
     public function __construct(?string $name = null, array $attributes = [])
     {
         parent::__construct(
-            tags: [
+            resourceTags: [
                 [$name ?? 0 => $attributes],
             ]
         );

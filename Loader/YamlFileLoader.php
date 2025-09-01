@@ -57,6 +57,7 @@ class YamlFileLoader extends FileLoader
         'configurator' => 'configurator',
         'calls' => 'calls',
         'tags' => 'tags',
+        'resource_tags' => 'resource_tags',
         'decorates' => 'decorates',
         'decoration_inner_name' => 'decoration_inner_name',
         'decoration_priority' => 'decoration_priority',
@@ -83,6 +84,7 @@ class YamlFileLoader extends FileLoader
         'configurator' => 'configurator',
         'calls' => 'calls',
         'tags' => 'tags',
+        'resource_tags' => 'resource_tags',
         'autowire' => 'autowire',
         'autoconfigure' => 'autoconfigure',
         'bind' => 'bind',
@@ -97,6 +99,7 @@ class YamlFileLoader extends FileLoader
         'configurator' => 'configurator',
         'calls' => 'calls',
         'tags' => 'tags',
+        'resource_tags' => 'resource_tags',
         'autowire' => 'autowire',
         'bind' => 'bind',
         'constructor' => 'constructor',
@@ -105,6 +108,7 @@ class YamlFileLoader extends FileLoader
     private const DEFAULTS_KEYWORDS = [
         'public' => 'public',
         'tags' => 'tags',
+        'resource_tags' => 'resource_tags',
         'autowire' => 'autowire',
         'autoconfigure' => 'autoconfigure',
         'bind' => 'bind',
@@ -281,9 +285,13 @@ class YamlFileLoader extends FileLoader
             }
         }
 
-        if (isset($defaults['tags'])) {
-            if (!\is_array($tags = $defaults['tags'])) {
-                throw new InvalidArgumentException(\sprintf('Parameter "tags" in "_defaults" must be an array in "%s". Check your YAML syntax.', $file));
+        foreach (['tags', 'resource_tags'] as $type) {
+            if (!isset($defaults[$type])) {
+                continue;
+            }
+
+            if (!\is_array($tags = $defaults[$type])) {
+                throw new InvalidArgumentException(\sprintf('Parameter "%s" in "_defaults" must be an array in "%s". Check your YAML syntax.', $type, $file));
             }
 
             foreach ($tags as $tag) {
@@ -296,7 +304,7 @@ class YamlFileLoader extends FileLoader
                     $tag = current($tag);
                 } else {
                     if (!isset($tag['name'])) {
-                        throw new InvalidArgumentException(\sprintf('A "tags" entry in "_defaults" is missing a "name" key in "%s".', $file));
+                        throw new InvalidArgumentException(\sprintf('A "%s" entry in "_defaults" is missing a "name" key in "%s".', $type, $file));
                     }
                     $name = $tag['name'];
                     unset($tag['name']);
@@ -602,38 +610,43 @@ class YamlFileLoader extends FileLoader
             }
         }
 
-        $tags = $service['tags'] ?? [];
-        if (!\is_array($tags)) {
-            throw new InvalidArgumentException(\sprintf('Parameter "tags" must be an array for service "%s" in "%s". Check your YAML syntax.', $id, $file));
-        }
-
-        if (isset($defaults['tags'])) {
-            $tags = array_merge($tags, $defaults['tags']);
-        }
-
-        foreach ($tags as $tag) {
-            if (!\is_array($tag)) {
-                $tag = ['name' => $tag];
+        foreach (['tags', 'resource_tags'] as $type) {
+            $tags = $service[$type] ?? [];
+            if (!\is_array($tags)) {
+                throw new InvalidArgumentException(\sprintf('Parameter "%s" must be an array for service "%s" in "%s". Check your YAML syntax.', $type, $id, $file));
             }
 
-            if (1 === \count($tag) && \is_array(current($tag))) {
-                $name = key($tag);
-                $tag = current($tag);
-            } else {
-                if (!isset($tag['name'])) {
-                    throw new InvalidArgumentException(\sprintf('A "tags" entry is missing a "name" key for service "%s" in "%s".', $id, $file));
+            if (isset($defaults[$type])) {
+                $tags = array_merge($tags, $defaults[$type]);
+            }
+
+            foreach ($tags as $tag) {
+                if (!\is_array($tag)) {
+                    $tag = ['name' => $tag];
                 }
-                $name = $tag['name'];
-                unset($tag['name']);
+
+                if (1 === \count($tag) && \is_array(current($tag))) {
+                    $name = key($tag);
+                    $tag = current($tag);
+                } else {
+                    if (!isset($tag['name'])) {
+                        throw new InvalidArgumentException(\sprintf('A "%s" entry is missing a "name" key for service "%s" in "%s".', $type, $id, $file));
+                    }
+                    $name = $tag['name'];
+                    unset($tag['name']);
+                }
+
+                if (!\is_string($name) || '' === $name) {
+                    throw new InvalidArgumentException(\sprintf('The tag name for service "%s" in "%s" must be a non-empty string.', $id, $file));
+                }
+
+                $this->validateAttributes(\sprintf('A "%s" attribute must be of a scalar-type for service "%s", tag "%s", attribute "%s" in "%s". Check your YAML syntax.', $id, $name, '%s', $type, $file), $tag);
+
+                match ($type) {
+                    'tags' => $definition->addTag($name, $tag),
+                    'resource_tags' => $definition->addResourceTag($name, $tag),
+                };
             }
-
-            if (!\is_string($name) || '' === $name) {
-                throw new InvalidArgumentException(\sprintf('The tag name for service "%s" in "%s" must be a non-empty string.', $id, $file));
-            }
-
-            $this->validateAttributes(\sprintf('A "tags" attribute must be of a scalar-type for service "%s", tag "%s", attribute "%s" in "%s". Check your YAML syntax.', $id, $name, '%s', $file), $tag);
-
-            $definition->addTag($name, $tag);
         }
 
         if (null !== $decorates = $service['decorates'] ?? null) {
