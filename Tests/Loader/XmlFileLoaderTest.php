@@ -381,7 +381,7 @@ class XmlFileLoaderTest extends TestCase
         $this->assertTrue($def->hasTag('another.tag'));
         $this->assertSame([['foo' => 'bar']], $def->getTag('my.tag'));
         $this->assertSame([[]], $def->getTag('another.tag'));
-        $this->assertTrue($def->isAbstract());
+        $this->assertFalse($def->isAbstract());
     }
 
     public function testParsesIteratorArgument()

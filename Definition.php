@@ -465,8 +465,7 @@ class Definition
     public function addResourceTag(string $name, array $attributes = []): static
     {
         return $this->addTag($name, $attributes)
-            ->addTag('container.excluded', ['source' => \sprintf('by tag "%s"', $name)])
-            ->setAbstract(true);
+            ->addTag('container.excluded', ['source' => \sprintf('by tag "%s"', $name)]);
     }
 
     /**

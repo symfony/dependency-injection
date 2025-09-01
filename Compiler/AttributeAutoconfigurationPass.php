@@ -79,14 +79,18 @@ final class AttributeAutoconfigurationPass extends AbstractRecursivePass
             }
         }
 
-        parent::process($container);
+        $this->container = $container;
+        foreach ($container->getDefinitions() as $id => $definition) {
+            $this->currentId = $id;
+            $this->processValue($definition, true);
+        }
     }
 
     protected function processValue(mixed $value, bool $isRoot = false): mixed
     {
         if (!$value instanceof Definition
             || !$value->isAutoconfigured()
-            || $value->isAbstract()
+            || ($value->isAbstract() && !$value->hasTag('container.excluded'))
             || $value->hasTag('container.ignore_attributes')
             || !($classReflector = $this->container->getReflectionClass($value->getClass(), false))
         ) {
