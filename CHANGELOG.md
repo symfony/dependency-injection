@@ -15,8 +15,10 @@ CHANGELOG
 
  * Allow adding resource tags using any config format
  * Allow `#[AsAlias]` to be extended
+ * Parse attributes found on abstract classes for resource definitions
  * Add argument `$target` to `ContainerBuilder::registerAliasForArgument()`
  * Deprecate registering a service without a class when its id is a non-existing FQCN
+ * Allow multiple `#[AsDecorator]` attributes
 
 7.3
 ---

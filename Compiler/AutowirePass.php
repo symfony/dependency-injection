@@ -334,9 +334,13 @@ class AutowirePass extends AbstractRecursivePass
                         $value = $attribute->buildDefinition($value, $type, $parameter);
                         $value = $this->doProcessValue($value);
                     } elseif ($lazy = $attribute->lazy) {
+                        $value ??= $getValue();
+                        if ($this->container->has($value->getType())) {
+                            $type = $this->container->findDefinition($value->getType())->getClass();
+                        }
                         $definition = (new Definition($type))
                             ->setFactory('current')
-                            ->setArguments([[$value ??= $getValue()]])
+                            ->setArguments([[$value]])
                             ->setLazy(true);
 
                         if (!\is_array($lazy)) {

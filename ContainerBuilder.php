@@ -1366,19 +1366,30 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
      *          }
      *      }
      *
+     * @param bool $throwOnAbstract
+     *
      * @return array<string, array> An array of tags with the tagged service as key, holding a list of attribute arrays
      */
-    public function findTaggedResourceIds(string $tagName): array
+    public function findTaggedResourceIds(string $tagName/* , bool $throwOnAbstract = true */): array
     {
+        $throwOnAbstract = \func_num_args() > 1 ? func_get_arg(1) : true;
         $this->usedTags[] = $tagName;
         $tags = [];
         foreach ($this->getDefinitions() as $id => $definition) {
-            if ($definition->hasTag($tagName)) {
-                if (!$definition->hasTag('container.excluded')) {
-                    throw new InvalidArgumentException(\sprintf('The resource "%s" tagged "%s" is missing the "container.excluded" tag.', $id, $tagName));
-                }
-                $tags[$id] = $definition->getTag($tagName);
+            if (!$definition->hasTag($tagName)) {
+                continue;
             }
+            if (!$definition->hasTag('container.excluded')) {
+                throw new InvalidArgumentException(\sprintf('The resource "%s" tagged "%s" is missing the "container.excluded" tag.', $id, $tagName));
+            }
+            $class = $this->parameterBag->resolveValue($definition->getClass());
+            if (!$class || $throwOnAbstract && $definition->isAbstract()) {
+                throw new InvalidArgumentException(\sprintf('The resource "%s" tagged "%s" must have a class and not be abstract.', $id, $tagName));
+            }
+            if ($definition->getClass() !== $class) {
+                $definition->setClass($class);
+            }
+            $tags[$id] = $definition->getTag($tagName);
         }
 
         return $tags;

@@ -28,6 +28,7 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\AbstractClass;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\BadClasses\MissingParent;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\Foo;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\FooInterface;
@@ -114,7 +115,7 @@ class FileLoaderTest extends TestCase
         $loader->registerAliasesForSinglyImplementedInterfaces();
 
         $this->assertEquals(
-            ['service_container', Bar::class],
+            ['service_container', Bar::class, '.abstract.'.BarInterface::class],
             array_keys($container->getDefinitions())
         );
         $this->assertEquals([BarInterface::class], array_keys($container->getAliases()));
@@ -212,6 +213,24 @@ class FileLoaderTest extends TestCase
         $this->assertTrue($alias->isPrivate());
 
         $this->assertEquals([FooInterface::class => (new ChildDefinition(''))->addTag('foo')], $container->getAutoconfiguredInstanceof());
+    }
+
+    public function testRegisterClassesWithAbstractClassesAndAutoconfigure()
+    {
+        $container = new ContainerBuilder();
+        $loader = new TestFileLoader($container, new FileLocator(self::$fixturesPath.'/Fixtures'));
+
+        $loader->registerClasses(
+            (new Definition())->setAutoconfigured(true),
+            'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\\',
+            'Prototype/*',
+            'Prototype/{StaticConstructor}'
+        );
+
+        $definition = $container->getDefinition('.abstract.'.AbstractClass::class);
+        $this->assertTrue($definition->isAbstract());
+        $this->assertTrue($definition->hasTag('container.excluded'));
+        $this->assertTrue($definition->isAutoconfigured());
     }
 
     public function testMissingParentClass()

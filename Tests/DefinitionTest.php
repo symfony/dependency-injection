@@ -262,7 +262,7 @@ class DefinitionTest extends TestCase
         $def->addResourceTag('foo', ['bar' => true]);
 
         $this->assertSame([['bar' => true]], $def->getTag('foo'));
-        $this->assertTrue($def->isAbstract());
+        $this->assertFalse($def->isAbstract());
         $this->assertSame([['source' => 'by tag "foo"']], $def->getTag('container.excluded'));
     }
 
