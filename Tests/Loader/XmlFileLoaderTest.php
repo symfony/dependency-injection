@@ -1286,4 +1286,20 @@ class XmlFileLoaderTest extends TestCase
 
         self::assertInstanceOf(RemoteCallerSocket::class, $container->get(RemoteCaller::class));
     }
+
+    public function testXmlParseExceptionIncludesFilenameAndPosition()
+    {
+        $container = new ContainerBuilder();
+        $loader = new XmlFileLoader(
+            $container,
+            new FileLocator(__DIR__.'/../Fixtures/xml')
+        );
+
+        $invalidXMLFileName = 'services31.xml';
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Unable to parse file .*services31\.xml.*bogusTag.*This element is not expected.*line 5, column 0/');
+
+        $loader->load($invalidXMLFileName);
+    }
 }
