@@ -348,16 +348,10 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             if (\is_object($object)) {
                 $object = $object::class;
             }
-            if (!isset($this->classReflectors[$object])) {
-                $this->classReflectors[$object] = new \ReflectionClass($object);
-            }
-            $class = $this->classReflectors[$object];
+            $class = $this->classReflectors[$object] ??= new \ReflectionClass($object);
 
             foreach ($class->getInterfaceNames() as $name) {
-                if (null === $interface = &$this->classReflectors[$name]) {
-                    $interface = new \ReflectionClass($name);
-                }
-                $file = $interface->getFileName();
+                $file = ($this->classReflectors[$name] ??= new \ReflectionClass($name))->getFileName();
                 if (false !== $file && file_exists($file)) {
                     $this->fileExists($file);
                 }
@@ -1172,14 +1166,14 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             $service = $factory(...$arguments);
 
             if (!$definition->isDeprecated() && \is_array($factory) && \is_string($factory[0])) {
-                $r = new \ReflectionClass($factory[0]);
+                $r = $this->classReflectors[$factory[0]] ??= new \ReflectionClass($factory[0]);
 
-                if (0 < strpos($r->getDocComment() ?: '', "\n * @deprecated ")) {
+                if (str_contains($r->getDocComment() ?: '', "\n * @deprecated ")) {
                     trigger_deprecation('', '', 'The "%s" service relies on the deprecated "%s" factory class. It should either be deprecated or its factory upgraded.', $id, $r->name);
                 }
             }
         } else {
-            $r = new \ReflectionClass($class);
+            $r = $this->classReflectors[$class] ??= new \ReflectionClass($class);
 
             if (\is_object($tryProxy)) {
                 if ($r->getConstructor()) {
@@ -1191,7 +1185,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
                 $service = $r->getConstructor() ? $r->newInstanceArgs($arguments) : $r->newInstance();
             }
 
-            if (!$definition->isDeprecated() && 0 < strpos($r->getDocComment() ?: '', "\n * @deprecated ")) {
+            if (!$definition->isDeprecated() && str_contains($r->getDocComment() ?: '', "\n * @deprecated ")) {
                 trigger_deprecation('', '', 'The "%s" service relies on the deprecated "%s" class. It should either be deprecated or its implementation upgraded.', $id, $r->name);
             }
         }
