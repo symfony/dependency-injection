@@ -19,6 +19,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\DirectoryResource;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Resource\ResourceInterface;
@@ -46,6 +47,8 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\LazyProxy\Instantiator\RealServiceInstantiator;
 use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\ParameterBag\EnvPlaceholderParameterBag;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -58,6 +61,7 @@ use Symfony\Component\DependencyInjection\Tests\Compiler\Wither;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\CaseSensitiveClass;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\CustomDefinition;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\FooWithAbstractArgument;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\ProxyAndInheritance;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\ScalarFactory;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\SimilarArgumentsDummy;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\StringBackedEnum;
@@ -2119,6 +2123,35 @@ class ContainerBuilderTest extends TestCase
         $this->assertInstanceOf(Foo::class, $container->get('closure')());
         $this->assertSame(1 + $cloned, Foo::$counter);
         $this->assertSame(1, (new \ReflectionFunction($container->get('closure')))->getNumberOfParameters());
+    }
+
+    public function testProxyAndInheritance()
+    {
+        $container = new ContainerBuilder();
+
+        $phpLoader = new PhpFileLoader($container, new FileLocator());
+        $instanceof = [];
+        $configurator = new ContainerConfigurator($container, $phpLoader, $instanceof, __DIR__, __FILE__);
+
+        $services = $configurator->services();
+        $services
+            ->defaults()
+                ->autowire()
+                ->autoconfigure()
+                ->public()
+
+            ->load('Symfony\Component\DependencyInjection\Tests\Fixtures\ProxyAndInheritance\\', __DIR__.'/Fixtures/ProxyAndInheritance/*')
+        ;
+
+        $services->set(
+            ProxyAndInheritance\Application::class,
+            ProxyAndInheritance\RepackedApplication::class,
+        );
+
+        $container->compile(true);
+
+        $foo = $container->get(ProxyAndInheritance\Foo::class);
+        $this->assertSame('my-app', $foo->getApplicationName());
     }
 }
 
