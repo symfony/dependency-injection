@@ -56,25 +56,10 @@ final class AttributeAutoconfigurationPass extends AbstractRecursivePass
                     throw new LogicException(\sprintf('Argument "$%s" of attribute autoconfigurator should have a type, use one or more of "\ReflectionClass|\ReflectionMethod|\ReflectionProperty|\ReflectionParameter|\Reflector" in "%s" on line "%d".', $reflectorParameter->getName(), $callableReflector->getFileName(), $callableReflector->getStartLine()));
                 }
 
-                try {
-                    $attributeReflector = new \ReflectionClass($attributeName);
-                } catch (\ReflectionException) {
-                    continue;
-                }
-
-                $targets = $attributeReflector->getAttributes(\Attribute::class)[0] ?? 0;
-                $targets = $targets ? $targets->getArguments()[0] ?? -1 : 0;
-
-                foreach (['class', 'method', 'property', 'parameter'] as $symbol) {
-                    if (['Reflector'] !== $types) {
-                        if (!\in_array('Reflection'.ucfirst($symbol), $types, true)) {
-                            continue;
-                        }
-                        if (!($targets & \constant('Attribute::TARGET_'.strtoupper($symbol)))) {
-                            throw new LogicException(\sprintf('Invalid type "Reflection%s" on argument "$%s": attribute "%s" cannot target a '.$symbol.' in "%s" on line "%d".', ucfirst($symbol), $reflectorParameter->getName(), $attributeName, $callableReflector->getFileName(), $callableReflector->getStartLine()));
-                        }
+                foreach (['Class', 'Method', 'Property', 'Parameter'] as $symbol) {
+                    if (['Reflector'] === $types || \in_array('Reflection'.$symbol, $types, true)) {
+                        $this->{lcfirst($symbol).'AttributeConfigurators'}[$attributeName][] = $callable;
                     }
-                    $this->{$symbol.'AttributeConfigurators'}[$attributeName][] = $callable;
                 }
             }
         }
