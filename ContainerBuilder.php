@@ -273,46 +273,58 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
         if ($resource instanceof DirectoryResource && $this->inVendors($resource->getResource())) {
             return $this;
         }
-        if ($resource instanceof ClassExistenceResource) {
-            $class = $resource->getResource();
+        if (!$resource instanceof ClassExistenceResource) {
+            $this->resources[(string) $resource] = $resource;
 
-            $inVendor = false;
-            foreach (spl_autoload_functions() as $autoloader) {
-                if (!\is_array($autoloader)) {
+            return $this;
+        }
+
+        $class = $resource->getResource();
+
+        if (!(new ClassExistenceResource($class, false))->isFresh(1)) {
+            if (!$this->inVendors((new \ReflectionClass($class))->getFileName())) {
+                $this->resources[$class] = $resource;
+            }
+
+            return $this;
+        }
+
+        $inVendor = true;
+        foreach (spl_autoload_functions() as $autoloader) {
+            if (!\is_array($autoloader)) {
+                $inVendor = false;
+                break;
+            }
+
+            if ($autoloader[0] instanceof DebugClassLoader) {
+                $autoloader = $autoloader[0]->getClassLoader();
+            }
+
+            if (!\is_array($autoloader) || !$autoloader[0] instanceof ClassLoader) {
+                $inVendor = false;
+                break;
+            }
+
+            foreach ($autoloader[0]->getPrefixesPsr4() as $prefix => $dirs) {
+                if (!str_starts_with($class, $prefix)) {
                     continue;
                 }
 
-                if ($autoloader[0] instanceof DebugClassLoader) {
-                    $autoloader = $autoloader[0]->getClassLoader();
-                }
-
-                if (!\is_array($autoloader) || !$autoloader[0] instanceof ClassLoader || !$autoloader[0]->findFile(__CLASS__)) {
-                    continue;
-                }
-
-                foreach ($autoloader[0]->getPrefixesPsr4() as $prefix => $dirs) {
-                    if ('' === $prefix || !str_starts_with($class, $prefix)) {
+                foreach ($dirs as $dir) {
+                    if (!$dir = realpath($dir)) {
                         continue;
                     }
 
-                    foreach ($dirs as $dir) {
-                        if (!$dir = realpath($dir)) {
-                            continue;
-                        }
-
-                        if (!$inVendor = $this->inVendors($dir)) {
-                            break 3;
-                        }
+                    if (!$inVendor = $this->inVendors($dir)) {
+                        break 3;
                     }
                 }
             }
-
-            if ($inVendor) {
-                return $this;
-            }
         }
 
-        $this->resources[(string) $resource] = $resource;
+        if (!$inVendor) {
+            $this->resources[$class] = $resource;
+        }
 
         return $this;
     }

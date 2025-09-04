@@ -1206,7 +1206,10 @@ class ContainerBuilderTest extends TestCase
         $r2 = $container->getReflectionClass('BarClass');
         $r3 = $container->getReflectionClass('BarClass');
 
-        $this->assertNull($container->getReflectionClass('BarMissingClass'));
+        $this->assertNull($container->getReflectionClass(BarMissingClass::class));
+
+        // No resource should be added for this class because no autoloader would be able to load it
+        $this->assertNull($container->getReflectionClass(\BarMissingClass::class));
 
         $this->assertEquals($r1, $r2);
         $this->assertSame($r2, $r3);
@@ -1216,7 +1219,7 @@ class ContainerBuilderTest extends TestCase
         $this->assertCount(2, $resources);
 
         $this->assertSame('reflection.BarClass', (string) $resources[0]);
-        $this->assertSame('BarMissingClass', (string) end($resources));
+        $this->assertSame(BarMissingClass::class, (string) end($resources));
     }
 
     public function testGetReflectionClassOnInternalTypes()
