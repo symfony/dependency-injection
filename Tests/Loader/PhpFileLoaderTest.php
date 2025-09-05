@@ -309,4 +309,14 @@ class PhpFileLoaderTest extends TestCase
 
         $this->assertIsString($container->getExtensionConfig('acme')[0]['color']);
     }
+
+    public function testNamedClosure()
+    {
+        $container = new ContainerBuilder();
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'some-env');
+        $loader->load('named_closure.php');
+        $container->compile();
+        $dumper = new PhpDumper($container);
+        $this->assertStringEqualsFile(\dirname(__DIR__).'/Fixtures/php/named_closure_compiled.php', $dumper->dump());
+    }
 }
