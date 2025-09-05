@@ -207,7 +207,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
         $this->extensions[$extension->getAlias()] = $extension;
 
         if (false !== $extension->getNamespace()) {
-            $this->extensionsByNs[$extension->getNamespace()] = $extension;
+            $this->extensionsByNs[$extension->getNamespace() ?? ''] = $extension;
         }
     }
 
