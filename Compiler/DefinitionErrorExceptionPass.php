@@ -66,9 +66,9 @@ class DefinitionErrorExceptionPass extends AbstractRecursivePass
                 ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE === $value->getInvalidBehavior()
                 || ContainerInterface::IGNORE_ON_UNINITIALIZED_REFERENCE === $value->getInvalidBehavior()
             ) {
-                $this->sourceReferences[$targetId][$this->currentId] ??= true;
+                $this->sourceReferences[$targetId][$this->currentId ?? ''] ??= true;
             } else {
-                $this->sourceReferences[$targetId][$this->currentId] = false;
+                $this->sourceReferences[$targetId][$this->currentId ?? ''] = false;
             }
 
             return $value;
@@ -78,7 +78,7 @@ class DefinitionErrorExceptionPass extends AbstractRecursivePass
             return parent::processValue($value, $isRoot);
         }
 
-        $this->erroredDefinitions[$this->currentId] = $value;
+        $this->erroredDefinitions[$this->currentId ?? ''] = $value;
 
         return parent::processValue($value);
     }
