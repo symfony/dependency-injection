@@ -66,7 +66,7 @@ class LazyServiceDumperTest extends TestCase
         $dumper->getProxyCode($definition);
     }
 
-    #[RequiresPhp('8.3')]
+    #[RequiresPhp('>=8.3')]
     public function testReadonlyClass()
     {
         $dumper = new LazyServiceDumper();
