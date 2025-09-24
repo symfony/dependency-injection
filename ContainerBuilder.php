@@ -1372,13 +1372,10 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
      *          }
      *      }
      *
-     * @param bool $throwOnAbstract
-     *
      * @return array<string, array> An array of tags with the tagged service as key, holding a list of attribute arrays
      */
-    public function findTaggedResourceIds(string $tagName/* , bool $throwOnAbstract = true */): array
+    public function findTaggedResourceIds(string $tagName, bool $throwOnAbstract = true): array
     {
-        $throwOnAbstract = \func_num_args() > 1 ? func_get_arg(1) : true;
         $this->usedTags[] = $tagName;
         $tags = [];
         foreach ($this->getDefinitions() as $id => $definition) {
