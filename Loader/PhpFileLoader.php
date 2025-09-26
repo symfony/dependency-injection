@@ -61,13 +61,25 @@ class PhpFileLoader extends FileLoader
         class_exists(ContainerConfigurator::class);
 
         // the closure forbids access to the private scope in the included file
-        $load = \Closure::bind(function ($path, $env) use ($container, $loader, $resource, $type) {
+        $load = \Closure::bind(static function ($path, $env) use ($container, $loader, $resource, $type) {
             return include $path;
-        }, $this, ProtectedPhpFileLoader::class);
+        }, null, null);
 
         try {
-            if (1 === $result = $load($path, $this->env)) {
-                $result = null;
+            try {
+                if (1 === $result = $load($path, $this->env)) {
+                    $result = null;
+                }
+            } catch (\Error $e) {
+                $load = \Closure::bind(function ($path, $env) use ($container, $loader, $resource, $type) {
+                    return include $path;
+                }, $this, ProtectedPhpFileLoader::class);
+
+                if (1 === $result = $load($path, $this->env)) {
+                    $result = null;
+                }
+
+                trigger_deprecation('symfony/dependency-injection', '8.1', 'Using `$this` or its internal scope in config files is deprecated, use the `$loader` variable instead in "%s" on line %d.', $e->getFile(), $e->getLine());
             }
 
             if (\is_object($result) && \is_callable($result)) {
