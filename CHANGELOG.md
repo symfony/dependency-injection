@@ -10,6 +10,7 @@ CHANGELOG
  * Add argument `$target` to `ContainerBuilder::registerAliasForArgument()`
  * Deprecate registering a service without a class when its id is a non-existing FQCN
  * Allow multiple `#[AsDecorator]` attributes
+ * Handle returning arrays and config-builders from config files
 
 7.3
 ---

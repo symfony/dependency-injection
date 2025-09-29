@@ -319,4 +319,50 @@ class PhpFileLoaderTest extends TestCase
         $dumper = new PhpDumper($container);
         $this->assertStringEqualsFile(\dirname(__DIR__).'/Fixtures/php/named_closure_compiled.php', $dumper->dump());
     }
+
+    public function testReturnsConfigBuilderObject()
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new \AcmeExtension());
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+
+        $loader->load('return_config_builder.php');
+
+        $this->assertSame([['color' => 'red']], $container->getExtensionConfig('acme'));
+    }
+
+    public function testReturnsIterableOfArraysAndBuilders()
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new \AcmeExtension());
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+
+        $loader->load('return_iterable_configs.php');
+
+        $configs = $container->getExtensionConfig('acme');
+        $this->assertCount(2, $configs);
+        $this->assertSame('red', $configs[0]['color']);
+        $this->assertArrayHasKey('color', $configs[1]);
+    }
+
+    public function testThrowsOnInvalidReturnType()
+    {
+        $container = new ContainerBuilder();
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/The return value in config file/');
+
+        $loader->load('return_invalid_types.php');
+    }
+
+    public function testReturnsGenerator()
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new \AcmeExtension());
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+
+        $loader->load('return_generator.php');
+        $this->assertSame([['color' => 'red']], $container->getExtensionConfig('acme'));
+    }
 }
