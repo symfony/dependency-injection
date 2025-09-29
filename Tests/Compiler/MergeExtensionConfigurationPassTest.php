@@ -64,7 +64,7 @@ class MergeExtensionConfigurationPassTest extends TestCase
         $extension = $this->getMockBuilder(FooExtension::class)->onlyMethods(['load'])->getMock();
         $extension->expects($this->once())
             ->method('load')
-            ->with($this->isType('array'), $this->isInstanceOf(MergeExtensionConfigurationContainerBuilder::class))
+            ->with($this->isArray(), $this->isInstanceOf(MergeExtensionConfigurationContainerBuilder::class))
         ;
 
         $container = new ContainerBuilder(new ParameterBag());
