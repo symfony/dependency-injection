@@ -33,7 +33,6 @@ use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Loader\IniFileLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Bar;
@@ -117,7 +116,6 @@ class YamlFileLoaderTest extends TestCase
         $container = new ContainerBuilder();
         $resolver = new LoaderResolver([
             new IniFileLoader($container, new FileLocator(self::$fixturesPath.'/ini')),
-            new XmlFileLoader($container, new FileLocator(self::$fixturesPath.'/xml')),
             new PhpFileLoader($container, new FileLocator(self::$fixturesPath.'/php')),
             $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml')),
         ]);
@@ -125,18 +123,9 @@ class YamlFileLoaderTest extends TestCase
         $loader->load('services4.yml');
 
         $actual = $container->getParameterBag()->all();
-        $expected = [
-            'foo' => 'bar',
-            'values' => [true, false, \PHP_INT_MAX],
-            'bar' => '%foo%',
-            'escape' => '@escapeme',
-            'foo_bar' => new Reference('foo_bar'),
-            'mixedcase' => ['MixedCaseKey' => 'value'],
-            'imported_from_ini' => true,
-            'imported_from_xml' => true,
-            'with_wrong_ext' => 'from yaml',
-        ];
-        $this->assertEquals(array_keys($expected), array_keys($actual), '->load() imports and merges imported files');
+        $expectedKeys = ['foo', 'values', 'bar', 'escape', 'foo_bar', 'mixedcase', 'imported_from_ini', 'with_wrong_ext'];
+
+        $this->assertEquals($expectedKeys, array_keys($actual), '->load() imports and merges imported files');
         $this->assertTrue($actual['imported_from_ini']);
 
         // Bad import throws no exception due to ignore_errors value.

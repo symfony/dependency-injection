@@ -51,6 +51,8 @@ use Symfony\Component\DependencyInjection\Tests\Fixtures\RemoteCallerHttp;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\RemoteCallerSocket;
 use Symfony\Component\ExpressionLanguage\Expression;
 
+#[IgnoreDeprecations]
+#[Group('legacy')]
 class XmlFileLoaderTest extends TestCase
 {
     protected static string $fixturesPath;

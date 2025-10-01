@@ -259,8 +259,25 @@ abstract class FileLoader extends BaseFileLoader
         $this->interfaces = $this->singlyImplemented = $this->aliases = [];
     }
 
-    final protected function loadExtensionConfig(string $namespace, array $config): void
+    final protected function loadExtensionConfig(string $namespace, array $config, string $file = '?'): void
     {
+        if (\in_array($namespace, ['imports', 'services', 'parameters'], true)) {
+            $yamlLoader = new YamlFileLoader($this->container, $this->locator, $this->env, $this->prepend);
+            $loadContent = new \ReflectionMethod(YamlFileLoader::class, 'loadContent');
+            $loadContent->invoke($yamlLoader, [$namespace => $config], $file);
+
+            if ($this->env && isset($config['when@'.$this->env])) {
+                if (!\is_array($config['when@'.$this->env])) {
+                    throw new InvalidArgumentException(\sprintf('The "when@%s" key should contain an array in "%s".', $this->env, $file));
+                }
+
+                $yamlLoader->env = null;
+                $loadContent->invoke($yamlLoader, [$namespace => $config['when@'.$this->env]], $file);
+            }
+
+            return;
+        }
+
         if (!$this->prepend) {
             $this->container->loadFromExtension($namespace, $config);
 

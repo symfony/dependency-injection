@@ -57,17 +57,54 @@ class PhpFileLoader extends FileLoader
         $this->setCurrentDir(\dirname($path));
         $this->container->fileExists($path);
 
+        // Force load ContainerConfigurator to make env(), param() etc available.
+        class_exists(ContainerConfigurator::class);
+
         // the closure forbids access to the private scope in the included file
-        $load = \Closure::bind(function ($path, $env) use ($container, $loader, $resource, $type) {
+        $load = \Closure::bind(static function ($path, $env) use ($container, $loader, $resource, $type) {
             return include $path;
-        }, $this, ProtectedPhpFileLoader::class);
+        }, null, null);
 
         try {
-            $callback = $load($path, $this->env);
+            try {
+                if (1 === $result = $load($path, $this->env)) {
+                    $result = null;
+                }
+            } catch (\Error $e) {
+                $load = \Closure::bind(function ($path, $env) use ($container, $loader, $resource, $type) {
+                    return include $path;
+                }, $this, ProtectedPhpFileLoader::class);
 
-            if (\is_object($callback) && \is_callable($callback)) {
-                $this->executeCallback($callback, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
+                if (1 === $result = $load($path, $this->env)) {
+                    $result = null;
+                }
+
+                trigger_deprecation('symfony/dependency-injection', '8.1', 'Using `$this` or its internal scope in config files is deprecated, use the `$loader` variable instead in "%s" on line %d.', $e->getFile(), $e->getLine());
             }
+
+            if (\is_object($result) && \is_callable($result)) {
+                $result = $this->callConfigurator($result, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
+            }
+            if ($result instanceof ConfigBuilderInterface) {
+                $this->loadExtensionConfig($result->getExtensionAlias(), ContainerConfigurator::processValue($result->toArray()), $path);
+            } elseif (is_iterable($result)) {
+                foreach ($result as $key => $config) {
+                    if ($config instanceof ConfigBuilderInterface) {
+                        if (\is_string($key) && $config->getExtensionAlias() !== $key) {
+                            throw new InvalidArgumentException(\sprintf('The extension alias "%s" of the "%s" config builder does not match the key "%s" in file "%s".', $config->getExtensionAlias(), get_debug_type($config), $key, $path));
+                        }
+                        $this->loadExtensionConfig($config->getExtensionAlias(), ContainerConfigurator::processValue($config->toArray()), $path);
+                    } elseif (!\is_string($key) || !\is_array($config)) {
+                        throw new InvalidArgumentException(\sprintf('The configuration returned in file "%s" must yield only string-keyed arrays or ConfigBuilderInterface values.', $path));
+                    } else {
+                        $this->loadExtensionConfig($key, ContainerConfigurator::processValue($config), $path);
+                    }
+                }
+            } elseif (null !== $result) {
+                throw new InvalidArgumentException(\sprintf('The return value in config file "%s" is invalid: "%s" given.', $path, get_debug_type($result)));
+            }
+
+            $this->loadExtensionConfigs();
         } finally {
             $this->instanceof = [];
             $this->registerAliasesForSinglyImplementedInterfaces();
@@ -92,7 +129,7 @@ class PhpFileLoader extends FileLoader
     /**
      * Resolve the parameters to the $callback and execute it.
      */
-    private function executeCallback(callable $callback, ContainerConfigurator $containerConfigurator, string $path): void
+    private function callConfigurator(callable $callback, ContainerConfigurator $containerConfigurator, string $path): mixed
     {
         $callback = $callback(...);
         $arguments = [];
@@ -125,7 +162,7 @@ class PhpFileLoader extends FileLoader
         }
 
         if ($excluded) {
-            return;
+            return null;
         }
 
         foreach ($r->getParameters() as $parameter) {
@@ -163,21 +200,21 @@ class PhpFileLoader extends FileLoader
             }
         }
 
-        // Force load ContainerConfigurator to make env(), param() etc available.
-        class_exists(ContainerConfigurator::class);
-
         ++$this->importing;
         try {
-            $callback(...$arguments);
+            $result = $callback(...$arguments);
+
+            return \in_array($result, $configBuilders, true) ? null : $result;
+        } catch (\Throwable $e) {
+            $configBuilders = [];
+            throw $e;
         } finally {
             --$this->importing;
-        }
 
-        foreach ($configBuilders as $configBuilder) {
-            $this->loadExtensionConfig($configBuilder->getExtensionAlias(), ContainerConfigurator::processValue($configBuilder->toArray()));
+            foreach ($configBuilders as $configBuilder) {
+                $this->loadExtensionConfig($configBuilder->getExtensionAlias(), ContainerConfigurator::processValue($configBuilder->toArray()));
+            }
         }
-
-        $this->loadExtensionConfigs();
     }
 
     /**

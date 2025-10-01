@@ -15,6 +15,8 @@ require_once __DIR__.'/../Fixtures/includes/AcmeExtension.php';
 require_once __DIR__.'/../Fixtures/includes/fixture_app_services.php';
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Builder\ConfigBuilderGenerator;
 use Symfony\Component\Config\FileLocator;
@@ -142,6 +144,7 @@ class PhpFileLoaderTest extends TestCase
         yield ['closure'];
         yield ['from_callable'];
         yield ['env_param'];
+        yield ['array_config'];
     }
 
     public function testResourceTags()
@@ -318,5 +321,63 @@ class PhpFileLoaderTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $this->assertStringEqualsFile(\dirname(__DIR__).'/Fixtures/php/named_closure_compiled.php', $dumper->dump());
+    }
+
+    public function testReturnsConfigBuilderObject()
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new \AcmeExtension());
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+
+        $loader->load('return_config_builder.php');
+
+        $this->assertSame([['color' => 'red']], $container->getExtensionConfig('acme'));
+    }
+
+    public function testReturnsIterableOfArraysAndBuilders()
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new \AcmeExtension());
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+
+        $loader->load('return_iterable_configs.php');
+
+        $configs = $container->getExtensionConfig('acme');
+        $this->assertCount(2, $configs);
+        $this->assertSame('red', $configs[0]['color']);
+        $this->assertArrayHasKey('color', $configs[1]);
+    }
+
+    public function testThrowsOnInvalidReturnType()
+    {
+        $container = new ContainerBuilder();
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/The return value in config file/');
+
+        $loader->load('return_invalid_types.php');
+    }
+
+    public function testReturnsGenerator()
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new \AcmeExtension());
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+
+        $loader->load('return_generator.php');
+        $this->assertSame([['color' => 'red']], $container->getExtensionConfig('acme'));
+    }
+
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
+    public function testTriggersDeprecationWhenAccessingLoaderInternalScope()
+    {
+        $fixtures = realpath(__DIR__.'/../Fixtures');
+        $loader = new PhpFileLoader(new ContainerBuilder(), new FileLocator($fixtures.'/config'));
+
+        $this->expectUserDeprecationMessageMatches('{^Since symfony/dependency-injection 8.1: Using \`\$this\` or its internal scope in config files is deprecated, use the \`\$loader\` variable instead in ".+" on line \d+\.$}');
+
+        $loader->load('legacy_internal_scope.php');
     }
 }

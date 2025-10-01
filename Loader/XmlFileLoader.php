@@ -34,6 +34,8 @@ use Symfony\Component\ExpressionLanguage\Expression;
  * XmlFileLoader loads XML files service definitions.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @deprecated since Symfony 7.4, use another loader instead
  */
 class XmlFileLoader extends FileLoader
 {
@@ -43,6 +45,8 @@ class XmlFileLoader extends FileLoader
 
     public function load(mixed $resource, ?string $type = null): mixed
     {
+        trigger_deprecation('symfony/dependency-injection', '7.4', 'XML configuration format is deprecated, use YAML or PHP instead.');
+
         $path = $this->locator->locate($resource);
 
         $xml = $this->parseFileToDOM($path);
