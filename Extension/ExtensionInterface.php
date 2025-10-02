@@ -31,11 +31,15 @@ interface ExtensionInterface
 
     /**
      * Returns the namespace to be used for this extension (XML namespace).
+     *
+     * @deprecated since Symfony 7.4, to be removed in Symfony 8.0 together with XML support.
      */
     public function getNamespace(): string;
 
     /**
      * Returns the base path for the XSD files.
+     *
+     * @deprecated since Symfony 7.4, to be removed in Symfony 8.0 together with XML support.
      */
     public function getXsdValidationBasePath(): string|false;
 

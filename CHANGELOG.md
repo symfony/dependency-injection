@@ -24,6 +24,7 @@ CHANGELOG
  * Handle declaring services using PHP arrays that follow the same shape as corresponding yaml files
  * Deprecate using `$this` or its internal scope from PHP config files; use the `$loader` variable instead
  * Deprecate XML configuration format, use YAML or PHP instead
+ * Deprecate `ExtensionInterface::getXsdValidationBasePath()` and `getNamespace()`
 
 7.3
 ---
