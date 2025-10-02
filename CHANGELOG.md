@@ -10,6 +10,7 @@ CHANGELOG
  * Remove `ContainerBuilder::getAutoconfiguredAttributes()`, replaced by `ContainerBuilder::getAttributeAutoconfigurators()`
  * Remove `!tagged` tag, use `!tagged_iterator` instead
  * Add argument `$target` to `ContainerBuilder::registerAliasForArgument()`
+ * Remove support for the XML configuration format
 
 7.4
 ---

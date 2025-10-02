@@ -22,7 +22,6 @@ use Symfony\Component\DependencyInjection\Loader\DirectoryLoader;
 use Symfony\Component\DependencyInjection\Loader\GlobFileLoader;
 use Symfony\Component\DependencyInjection\Loader\IniFileLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
@@ -55,7 +54,6 @@ trait ExtensionTrait
         $buildDir = $container->getParameter('kernel.build_dir');
         $locator = new FileLocator();
         $resolver = new LoaderResolver([
-            new XmlFileLoader($container, $locator, $env, $prepend),
             new YamlFileLoader($container, $locator, $env, $prepend),
             new IniFileLoader($container, $locator, $env),
             new PhpFileLoader($container, $locator, $env, new ConfigBuilderGenerator($buildDir), $prepend),
