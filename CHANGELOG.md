@@ -4,6 +4,7 @@ CHANGELOG
 8.0
 ---
 
+ * Remove `ExtensionInterface::getXsdValidationBasePath()` and `getNamespace()` without alternatives, the XML configuration format is no longer supported
  * Add argument `$throwOnAbstract` to `ContainerBuilder::findTaggedResourceIds()`
  * Registering a service without a class when its id is a non-existing FQCN throws an error
  * Remove `#[TaggedIterator]` and `#[TaggedLocator]` attributes, replaced by `#[AutowireLocator]` and `#[AutowireIterator]`
