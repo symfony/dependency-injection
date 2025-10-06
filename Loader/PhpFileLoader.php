@@ -88,7 +88,7 @@ class PhpFileLoader extends FileLoader
                     $result = null;
                 }
 
-                trigger_deprecation('symfony/dependency-injection', '8.1', 'Using `$this` or its internal scope in config files is deprecated, use the `$loader` variable instead in "%s" on line %d.', $e->getFile(), $e->getLine());
+                trigger_deprecation('symfony/dependency-injection', '7.4', 'Using `$this` or its internal scope in config files is deprecated, use the `$loader` variable instead in "%s" on line %d.', $e->getFile(), $e->getLine());
             }
 
             if (\is_object($result) && \is_callable($result)) {

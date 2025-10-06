@@ -376,7 +376,7 @@ class PhpFileLoaderTest extends TestCase
         $fixtures = realpath(__DIR__.'/../Fixtures');
         $loader = new PhpFileLoader(new ContainerBuilder(), new FileLocator($fixtures.'/config'));
 
-        $this->expectUserDeprecationMessageMatches('{^Since symfony/dependency-injection 8.1: Using \`\$this\` or its internal scope in config files is deprecated, use the \`\$loader\` variable instead in ".+" on line \d+\.$}');
+        $this->expectUserDeprecationMessageMatches('{^Since symfony/dependency-injection 7.4: Using \`\$this\` or its internal scope in config files is deprecated, use the \`\$loader\` variable instead in ".+" on line \d+\.$}');
 
         $loader->load('legacy_internal_scope.php');
     }
