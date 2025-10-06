@@ -36,6 +36,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 class PhpFileLoader extends FileLoader
 {
     protected bool $autoRegisterAliasesForSinglyImplementedInterfaces = false;
+    private ?\Closure $configBuilderAutoloader = null;
 
     public function __construct(
         ContainerBuilder $container,
@@ -59,6 +60,14 @@ class PhpFileLoader extends FileLoader
 
         // Force load ContainerConfigurator to make env(), param() etc available.
         class_exists(ContainerConfigurator::class);
+
+        if ($autoloaderRegistered = !$this->configBuilderAutoloader && $this->generator) {
+            spl_autoload_register($this->configBuilderAutoloader = function (string $class) {
+                if (str_starts_with($class, 'Symfony\\Config\\') && str_ends_with($class, 'Config')) {
+                    $this->configBuilder($class);
+                }
+            });
+        }
 
         // the closure forbids access to the private scope in the included file
         $load = \Closure::bind(static function ($path, $env) use ($container, $loader, $resource, $type) {
@@ -108,6 +117,11 @@ class PhpFileLoader extends FileLoader
         } finally {
             $this->instanceof = [];
             $this->registerAliasesForSinglyImplementedInterfaces();
+
+            if ($autoloaderRegistered) {
+                spl_autoload_unregister($this->configBuilderAutoloader);
+                $this->configBuilderAutoloader = null;
+            }
         }
 
         return null;
