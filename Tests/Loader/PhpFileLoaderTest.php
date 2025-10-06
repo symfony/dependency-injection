@@ -15,8 +15,6 @@ require_once __DIR__.'/../Fixtures/includes/AcmeExtension.php';
 require_once __DIR__.'/../Fixtures/includes/fixture_app_services.php';
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Builder\ConfigBuilderGenerator;
 use Symfony\Component\Config\FileLocator;
@@ -367,17 +365,5 @@ class PhpFileLoaderTest extends TestCase
 
         $loader->load('return_generator.php');
         $this->assertSame([['color' => 'red']], $container->getExtensionConfig('acme'));
-    }
-
-    #[IgnoreDeprecations]
-    #[Group('legacy')]
-    public function testTriggersDeprecationWhenAccessingLoaderInternalScope()
-    {
-        $fixtures = realpath(__DIR__.'/../Fixtures');
-        $loader = new PhpFileLoader(new ContainerBuilder(), new FileLocator($fixtures.'/config'));
-
-        $this->expectUserDeprecationMessageMatches('{^Since symfony/dependency-injection 8.1: Using \`\$this\` or its internal scope in config files is deprecated, use the \`\$loader\` variable instead in ".+" on line \d+\.$}');
-
-        $loader->load('legacy_internal_scope.php');
     }
 }
