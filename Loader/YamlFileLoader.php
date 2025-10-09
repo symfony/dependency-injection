@@ -655,17 +655,13 @@ class YamlFileLoader extends FileLoader
             }
 
             $decorationOnInvalid = \array_key_exists('decoration_on_invalid', $service) ? $service['decoration_on_invalid'] : 'exception';
-            if ('exception' === $decorationOnInvalid) {
-                $invalidBehavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE;
-            } elseif ('ignore' === $decorationOnInvalid) {
-                $invalidBehavior = ContainerInterface::IGNORE_ON_INVALID_REFERENCE;
-            } elseif (null === $decorationOnInvalid) {
-                $invalidBehavior = ContainerInterface::NULL_ON_INVALID_REFERENCE;
-            } elseif ('null' === $decorationOnInvalid) {
-                throw new InvalidArgumentException(\sprintf('Invalid value "%s" for attribute "decoration_on_invalid" on service "%s". Did you mean null (without quotes) in "%s"?', $decorationOnInvalid, $id, $file));
-            } else {
-                throw new InvalidArgumentException(\sprintf('Invalid value "%s" for attribute "decoration_on_invalid" on service "%s". Did you mean "exception", "ignore" or null in "%s"?', $decorationOnInvalid, $id, $file));
-            }
+            $invalidBehavior = match ($decorationOnInvalid) {
+                'exception', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE => ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                'ignore', ContainerInterface::IGNORE_ON_INVALID_REFERENCE => ContainerInterface::IGNORE_ON_INVALID_REFERENCE,
+                null, ContainerInterface::NULL_ON_INVALID_REFERENCE => ContainerInterface::NULL_ON_INVALID_REFERENCE,
+                'null' => throw new InvalidArgumentException(\sprintf('Invalid value "%s" for attribute "decoration_on_invalid" on service "%s". Did you mean null (without quotes) in "%s"?', $decorationOnInvalid, $id, $file)),
+                default => throw new InvalidArgumentException(\sprintf('Invalid value "%s" for attribute "decoration_on_invalid" on service "%s". Did you mean "exception", "ignore" or "null" in "%s"?', $decorationOnInvalid, $id, $file)),
+            };
 
             $renameId = $service['decoration_inner_name'] ?? null;
             $priority = $service['decoration_priority'] ?? 0;

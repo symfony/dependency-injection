@@ -24,6 +24,7 @@ use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Config\ServicesConfig;
 
 /**
  * PhpFileLoader loads service definitions from a PHP file.
@@ -58,8 +59,9 @@ class PhpFileLoader extends FileLoader
         $this->setCurrentDir(\dirname($path));
         $this->container->fileExists($path);
 
-        // Force load ContainerConfigurator to make env(), param() etc available.
-        class_exists(ContainerConfigurator::class);
+        // Ensure symbols in the \Symfony\Config and Configurator namespaces are available
+        require_once __DIR__.\DIRECTORY_SEPARATOR.'Config'.\DIRECTORY_SEPARATOR.'functions.php';
+        require_once __DIR__.\DIRECTORY_SEPARATOR.'Configurator'.\DIRECTORY_SEPARATOR.'functions.php';
 
         if ($autoloaderRegistered = !$this->configBuilderAutoloader && $this->generator) {
             spl_autoload_register($this->configBuilderAutoloader = function (string $class) {
@@ -82,23 +84,48 @@ class PhpFileLoader extends FileLoader
             if (\is_object($result) && \is_callable($result)) {
                 $result = $this->callConfigurator($result, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
             }
-            if ($result instanceof ConfigBuilderInterface) {
-                $this->loadExtensionConfig($result->getExtensionAlias(), ContainerConfigurator::processValue($result->toArray()), $path);
-            } elseif (is_iterable($result)) {
-                foreach ($result as $key => $config) {
-                    if ($config instanceof ConfigBuilderInterface) {
+            if ($result instanceof ConfigBuilderInterface || $result instanceof ServicesConfig) {
+                $result = [$result];
+            } elseif (!is_iterable($result ?? [])) {
+                throw new InvalidArgumentException(\sprintf('The return value in config file "%s" is invalid: "%s" given.', $path, get_debug_type($result)));
+            }
+
+            foreach ($result ?? [] as $key => $config) {
+                if (!str_starts_with($key, 'when@')) {
+                    $config = [$key => $config];
+                } elseif (!$this->env || 'when@'.$this->env !== $key) {
+                    continue;
+                } elseif ($config instanceof ServicesConfig || $config instanceof ConfigBuilderInterface) {
+                    $config = [$config];
+                } elseif (!is_iterable($config)) {
+                    throw new InvalidArgumentException(\sprintf('The "%s" key should contain an array in "%s".', $key, $path));
+                }
+
+                foreach ($config as $key => $config) {
+                    if ($config instanceof ServicesConfig || \in_array($key, ['imports', 'parameters', 'services'], true)) {
+                        if (!$config instanceof ServicesConfig) {
+                            $config = [$key => $config];
+                        } elseif (\is_string($key) && 'services' !== $key) {
+                            throw new InvalidArgumentException(\sprintf('Invalid key "%s" returned for the "%s" config builder; none or "services" expected in file "%s".', $key, get_debug_type($config), $path));
+                        }
+                        $yamlLoader = new YamlFileLoader($this->container, $this->locator, $this->env, $this->prepend);
+                        $loadContent = new \ReflectionMethod(YamlFileLoader::class, 'loadContent');
+                        $loadContent->invoke($yamlLoader, ContainerConfigurator::processValue((array) $config), $path);
+                    } elseif ($config instanceof ConfigBuilderInterface) {
                         if (\is_string($key) && $config->getExtensionAlias() !== $key) {
                             throw new InvalidArgumentException(\sprintf('The extension alias "%s" of the "%s" config builder does not match the key "%s" in file "%s".', $config->getExtensionAlias(), get_debug_type($config), $key, $path));
                         }
                         $this->loadExtensionConfig($config->getExtensionAlias(), ContainerConfigurator::processValue($config->toArray()), $path);
                     } elseif (!\is_string($key) || !\is_array($config)) {
-                        throw new InvalidArgumentException(\sprintf('The configuration returned in file "%s" must yield only string-keyed arrays or ConfigBuilderInterface values.', $path));
+                        throw new InvalidArgumentException(\sprintf('The configuration returned in file "%s" must yield only string-keyed arrays or ConfigBuilderInterface objects.', $path));
                     } else {
+                        if (str_starts_with($key, 'when@')) {
+                            throw new InvalidArgumentException(\sprintf('A service name cannot start with "when@" in "%s".', $path));
+                        }
+
                         $this->loadExtensionConfig($key, ContainerConfigurator::processValue($config), $path);
                     }
                 }
-            } elseif (null !== $result) {
-                throw new InvalidArgumentException(\sprintf('The return value in config file "%s" is invalid: "%s" given.', $path, get_debug_type($result)));
             }
 
             $this->loadExtensionConfigs();
@@ -240,6 +267,10 @@ class PhpFileLoader extends FileLoader
         // If it does not start with Symfony\Config\ we don't know how to handle this
         if (!str_starts_with($namespace, 'Symfony\\Config\\')) {
             throw new InvalidArgumentException(\sprintf('Could not find or generate class "%s".', $namespace));
+        }
+
+        if (is_a($namespace, ServicesConfig::class, true)) {
+            throw new \LogicException(\sprintf('You cannot use "%s" as a config builder; create an instance and return it instead.', $namespace));
         }
 
         // Try to get the extension alias
