@@ -6,6 +6,4 @@ if ('prod' !== $env) {
     return;
 }
 
-return function (AcmeConfig $config) {
-    $config->color('red');
-};
+return new AcmeConfig(['color' => 'red']);

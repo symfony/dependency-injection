@@ -253,6 +253,7 @@ class PhpFileLoader extends FileLoader
                     } catch (InvalidArgumentException|\LogicException $e) {
                         throw new \InvalidArgumentException(\sprintf('Could not resolve argument "%s" for "%s".', $type.' $'.$parameter->getName(), $path), 0, $e);
                     }
+                    trigger_deprecation('symfony/dependency-injection', '7.4', 'Using fluent builders for semantic configuration is deprecated, instantiate the "%s" class with the config array as argument and return it instead in "%s".', $type, $path);
                     $configBuilders[] = $configBuilder;
                     $arguments[] = $configBuilder;
             }

@@ -251,6 +251,8 @@ class PhpFileLoaderTest extends TestCase
         $this->assertSame([FooUnitEnum::BAR], $definition->getArguments());
     }
 
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testNestedBundleConfigNotAllowed()
     {
         $fixtures = realpath(__DIR__.'/../Fixtures');

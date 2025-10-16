@@ -16,6 +16,7 @@ CHANGELOG
  * Deprecate using `$this` or its internal scope from PHP config files; use the `$loader` variable instead
  * Deprecate XML configuration format, use YAML or PHP instead
  * Deprecate `ExtensionInterface::getXsdValidationBasePath()` and `getNamespace()`
+ * Deprecate the fluent PHP format for semantic configuration, instantiate builders inline with the config array as argument and return them instead
 
 7.3
 ---

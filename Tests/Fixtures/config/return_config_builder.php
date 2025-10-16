@@ -2,7 +2,4 @@
 
 use Symfony\Component\DependencyInjection\Tests\Fixtures\AcmeConfig;
 
-$config = new AcmeConfig();
-$config->color('red');
-
-return $config;
+return new AcmeConfig(['color' => 'red']);
