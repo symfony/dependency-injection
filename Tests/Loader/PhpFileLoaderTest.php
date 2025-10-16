@@ -66,8 +66,8 @@ class PhpFileLoaderTest extends TestCase
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
         $container->prependExtensionConfig('acme', ['foo' => 'bar']);
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
-        $loader->load('config/config_builder.php');
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
+        $loader->load('config_builder.php');
 
         $expected = [
             ['color' => 'red'],
@@ -82,8 +82,8 @@ class PhpFileLoaderTest extends TestCase
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
         $container->prependExtensionConfig('acme', ['foo' => 'bar']);
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
-        $loader->import('config/config_builder.php');
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
+        $loader->import('config_builder.php');
 
         $expected = [
             ['color' => 'red'],

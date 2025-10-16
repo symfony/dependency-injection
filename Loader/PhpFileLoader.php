@@ -15,6 +15,7 @@ use Symfony\Component\Config\Builder\ConfigBuilderGenerator;
 use Symfony\Component\Config\Builder\ConfigBuilderGeneratorInterface;
 use Symfony\Component\Config\Builder\ConfigBuilderInterface;
 use Symfony\Component\Config\FileLocatorInterface;
+use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\DependencyInjection\Attribute\WhenNot;
 use Symfony\Component\DependencyInjection\Container;
@@ -109,8 +110,14 @@ class PhpFileLoader extends FileLoader
                             throw new InvalidArgumentException(\sprintf('Invalid key "%s" returned for the "%s" config builder; none or "services" expected in file "%s".', $key, get_debug_type($config), $path));
                         }
                         $yamlLoader = new YamlFileLoader($this->container, $this->locator, $this->env, $this->prepend);
+                        $yamlLoader->setResolver(new LoaderResolver([$this]));
                         $loadContent = new \ReflectionMethod(YamlFileLoader::class, 'loadContent');
-                        $loadContent->invoke($yamlLoader, ContainerConfigurator::processValue((array) $config), $path);
+                        ++$this->importing;
+                        try {
+                            $loadContent->invoke($yamlLoader, ContainerConfigurator::processValue((array) $config), $path);
+                        } finally {
+                            --$this->importing;
+                        }
                     } elseif ($config instanceof ConfigBuilderInterface) {
                         if (\is_string($key) && $config->getExtensionAlias() !== $key) {
                             throw new InvalidArgumentException(\sprintf('The extension alias "%s" of the "%s" config builder does not match the key "%s" in file "%s".', $config->getExtensionAlias(), get_debug_type($config), $key, $path));
