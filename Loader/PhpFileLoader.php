@@ -25,6 +25,8 @@ use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Config\ImportsConfig;
+use Symfony\Config\ParametersConfig;
 use Symfony\Config\ServicesConfig;
 
 /**
@@ -97,7 +99,7 @@ class PhpFileLoader extends FileLoader
             if (\is_object($result) && \is_callable($result)) {
                 $result = $this->callConfigurator($result, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
             }
-            if ($result instanceof ConfigBuilderInterface || $result instanceof ServicesConfig) {
+            if ($result instanceof ServicesConfig || $result instanceof ParametersConfig || $result instanceof ImportsConfig || $result instanceof ConfigBuilderInterface) {
                 $result = [$result];
             } elseif (!is_iterable($result ?? [])) {
                 throw new InvalidArgumentException(\sprintf('The return value in config file "%s" is invalid: "%s" given.', $path, get_debug_type($result)));
@@ -108,25 +110,33 @@ class PhpFileLoader extends FileLoader
                     $config = [$key => $config];
                 } elseif (!$this->env || 'when@'.$this->env !== $key) {
                     continue;
-                } elseif ($config instanceof ServicesConfig || $config instanceof ConfigBuilderInterface) {
+                } elseif ($config instanceof ServicesConfig || $config instanceof ParametersConfig || $config instanceof ImportsConfig || $config instanceof ConfigBuilderInterface) {
                     $config = [$config];
                 } elseif (!is_iterable($config)) {
                     throw new InvalidArgumentException(\sprintf('The "%s" key should contain an array in "%s".', $key, $path));
                 }
 
                 foreach ($config as $key => $config) {
-                    if ($config instanceof ServicesConfig || \in_array($key, ['imports', 'parameters', 'services'], true)) {
-                        if (!$config instanceof ServicesConfig) {
+                    $expectedKey = match (true) {
+                        $config instanceof ServicesConfig => 'services',
+                        $config instanceof ParametersConfig => 'parameters',
+                        $config instanceof ImportsConfig => 'imports',
+                        default => null,
+                    };
+                    if (null !== $expectedKey || \in_array($key, ['services', 'parameters', 'imports'], true)) {
+                        if (null === $expectedKey) {
                             $config = [$key => $config];
-                        } elseif (\is_string($key) && 'services' !== $key) {
-                            throw new InvalidArgumentException(\sprintf('Invalid key "%s" returned for the "%s" config builder; none or "services" expected in file "%s".', $key, get_debug_type($config), $path));
+                        } elseif (\is_string($key) && $key !== $expectedKey) {
+                            throw new InvalidArgumentException(\sprintf('Invalid key "%s" returned for the "%s" config builder; none or "%s" expected in file "%s".', $key, get_debug_type($config), $expectedKey, $path));
+                        } else {
+                            $config = [$expectedKey => $config->config];
                         }
                         $yamlLoader = new YamlFileLoader($this->container, $this->locator, $this->env, $this->prepend);
                         $yamlLoader->setResolver(new LoaderResolver([$this]));
                         $loadContent = new \ReflectionMethod(YamlFileLoader::class, 'loadContent');
                         ++$this->importing;
                         try {
-                            $loadContent->invoke($yamlLoader, ContainerConfigurator::processValue((array) $config), $path);
+                            $loadContent->invoke($yamlLoader, ContainerConfigurator::processValue($config), $path);
                         } finally {
                             --$this->importing;
                         }
@@ -288,7 +298,7 @@ class PhpFileLoader extends FileLoader
             throw new InvalidArgumentException(\sprintf('Could not find or generate class "%s".', $namespace));
         }
 
-        if (is_a($namespace, ServicesConfig::class, true)) {
+        if (is_a($namespace, ServicesConfig::class, true) || is_a($namespace, ParametersConfig::class, true) || is_a($namespace, ImportsConfig::class, true)) {
             throw new \LogicException(\sprintf('You cannot use "%s" as a config builder; create an instance and return it instead.', $namespace));
         }
 
