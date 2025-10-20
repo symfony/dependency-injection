@@ -12,7 +12,6 @@
 namespace Symfony\Config;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -21,16 +20,10 @@ require_once __DIR__.\DIRECTORY_SEPARATOR.'functions.php';
 
 /**
  * @psalm-type Arguments = list<mixed>|array<string, mixed>
- * @psalm-type Callback = string|array{0:string|Reference|ReferenceConfigurator,1:string}|\Closure|Reference|ReferenceConfigurator|Expression
- * @psalm-type Tags = list<string|array<string, array<string, mixed>>>
- * @psalm-type Deprecation = array{package: string, version: string, message?: string}
  * @psalm-type Call = array<string, Arguments>|array{0:string, 1?:Arguments, 2?:bool}|array{method:string, arguments?:Arguments, returns_clone?:bool}
- * @psalm-type Imports = list<string|array{
- *   resource: string,
- *   type?: string|null,
- *   ignore_errors?: bool,
- * }>
- * @psalm-type Parameters = array<string, scalar|\UnitEnum|array<scalar|\UnitEnum|array|null>|null>
+ * @psalm-type Tags = list<string|array<string, array<string, mixed>>>
+ * @psalm-type Callback = string|array{0:string|Reference|ReferenceConfigurator,1:string}|\Closure|Reference|ReferenceConfigurator|Expression
+ * @psalm-type Deprecation = array{package: string, version: string, message?: string}
  * @psalm-type Defaults = array{
  *   public?: bool,
  *   tags?: Tags,
@@ -111,32 +104,19 @@ require_once __DIR__.\DIRECTORY_SEPARATOR.'functions.php';
  *   public?: bool,
  *   deprecated?: Deprecation,
  * }
- * @psalm-type Services = array<string, Definition|Alias|Prototype|Stack>|array<class-string, Arguments|null>
+ * @psalm-type Services = array{
+ *   _defaults?: Defaults,
+ *   _instanceof?: Instanceof,
+ *   ...<string, Definition|Alias|Prototype|Stack|Arguments|null>
+ * }
  */
 class ServicesConfig
 {
-    public readonly array $services;
-
     /**
-     * @param Services   $services
-     * @param Imports    $imports
-     * @param Parameters $parameters
-     * @param Defaults   $defaults
-     * @param Instanceof $instanceof
+     * @param Services $config
      */
     public function __construct(
-        array $services = [],
-        public readonly array $imports = [],
-        public readonly array $parameters = [],
-        array $defaults = [],
-        array $instanceof = [],
+        public readonly array $config,
     ) {
-        if (isset($services['_defaults']) || isset($services['_instanceof'])) {
-            throw new InvalidArgumentException('The $services argument should not contain "_defaults" or "_instanceof" keys, use the $defaults and $instanceof parameters instead.');
-        }
-
-        $services['_defaults'] = $defaults;
-        $services['_instanceof'] = $instanceof;
-        $this->services = $services;
     }
 }

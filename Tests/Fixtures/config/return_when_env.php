@@ -1,24 +1,23 @@
 <?php
 
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Bar;
+use Symfony\Config\ParametersConfig;
 use Symfony\Config\ServicesConfig;
 
 return [
     'when@prod' => [
-        'parameters' => [
+        new ParametersConfig([
             'foo_param' => 'bar_value',
-        ],
-        new ServicesConfig(
-            defaults: [
+        ]),
+        new ServicesConfig([
+            '_defaults' => [
                 'public' => true,
             ],
-            services: [
-                Bar::class => null,
-                'my_service' => [
-                    'class' => Bar::class,
-                    'arguments' => ['%foo_param%'],
-                ],
-            ]
-        ),
+            Bar::class => null,
+            'my_service' => [
+                'class' => Bar::class,
+                'arguments' => ['%foo_param%'],
+            ],
+        ]),
     ],
 ];
