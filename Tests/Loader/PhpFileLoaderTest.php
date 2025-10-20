@@ -16,7 +16,6 @@ require_once __DIR__.'/../Fixtures/includes/fixture_app_services.php';
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Config\Builder\ConfigBuilderGenerator;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -59,7 +58,7 @@ class PhpFileLoaderTest extends TestCase
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
         $container->prependExtensionConfig('acme', ['foo' => 'bar']);
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', prepend: true);
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', true);
         $loader->load('config_builder.php');
 
         $expected = [
@@ -75,7 +74,7 @@ class PhpFileLoaderTest extends TestCase
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
         $container->prependExtensionConfig('acme', ['foo' => 'bar']);
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', prepend: true);
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', true);
         $loader->import('config_builder.php');
 
         $expected = [
@@ -240,20 +239,6 @@ class PhpFileLoaderTest extends TestCase
 
         $definition = $container->getDefinition(FooClassWithEnumAttribute::class);
         $this->assertSame([FooUnitEnum::BAR], $definition->getArguments());
-    }
-
-    #[IgnoreDeprecations]
-    #[Group('legacy')]
-    public function testNestedBundleConfigNotAllowed()
-    {
-        $fixtures = realpath(__DIR__.'/../Fixtures');
-        $container = new ContainerBuilder();
-        $loader = new PhpFileLoader($container, new FileLocator(), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches('/^'.preg_quote('Could not resolve argument "Symfony\\Config\\AcmeConfig\\NestedConfig $config"', '/').'/');
-
-        $loader->load($fixtures.'/config/nested_bundle_config.php');
     }
 
     public function testWhenEnv()

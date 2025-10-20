@@ -13,6 +13,7 @@ CHANGELOG
  * Remove `!tagged` tag, use `!tagged_iterator` instead
  * Add argument `$target` to `ContainerBuilder::registerAliasForArgument()`
  * Remove support for the XML configuration format
+ * Remove the fluent PHP format for semantic configuration, instantiate builders inline with the config array as argument and return them instead
 
 7.4
 ---
