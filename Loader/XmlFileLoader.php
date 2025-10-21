@@ -55,19 +55,19 @@ class XmlFileLoader extends FileLoader
 
         $this->loadXml($xml, $path);
 
+        $xpath = new \DOMXPath($xml);
+        $xpath->registerNamespace('container', self::NS);
+
         if ($this->env) {
-            $xpath = new \DOMXPath($xml);
-            $xpath->registerNamespace('container', self::NS);
             foreach ($xpath->query(\sprintf('//container:when[@env="%s"]', $this->env)) ?: [] as $root) {
-                $env = $this->env;
-                $this->env = null;
-                try {
-                    $this->loadXml($xml, $path, $root);
-                } finally {
-                    $this->env = $env;
-                }
+                $this->loadXml($xml, $path, $root);
             }
         }
+        $knownEnvs = $this->container->hasParameter('.container.known_envs') ? array_flip($this->container->getParameter('.container.known_envs')) : [];
+        foreach ($xpath->query('//container:when') ?: [] as $root) {
+            $knownEnvs[$root->getAttribute('env')] = true;
+        }
+        $this->container->setParameter('.container.known_envs', array_keys($knownEnvs));
 
         return null;
     }

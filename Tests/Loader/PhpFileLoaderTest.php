@@ -27,11 +27,11 @@ use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Dumper\YamlDumper;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
+use Symfony\Component\DependencyInjection\Loader\Configurator\App;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\FooClassWithEnumAttribute;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\FooUnitEnum;
-use Symfony\Config\ServicesConfig;
 
 class PhpFileLoaderTest extends TestCase
 {
@@ -52,15 +52,8 @@ class PhpFileLoaderTest extends TestCase
 
         $this->assertEquals('foo', $container->getParameter('foo'), '->load() loads a PHP file resource');
 
-        $this->assertTrue(class_exists(ServicesConfig::class));
-        $this->assertTrue(\function_exists('Symfony\Config\service'));
+        $this->assertTrue(class_exists(App::class));
         $this->assertTrue(\function_exists('Symfony\Component\DependencyInjection\Loader\Configurator\service'));
-
-        $configCode = explode("\n/**", file_get_contents(\dirname(__DIR__, 2).'/Loader/Config/functions.php'), 2);
-        $configuratorCode = explode("\n/**", file_get_contents(\dirname(__DIR__, 2).'/Loader/Configurator/functions.php'), 2);
-
-        $this->assertStringEqualsFile(\dirname(__DIR__, 2).'/Loader/Config/functions.php', $configCode[0]."\n/**".$configuratorCode[1]);
-        $this->assertStringEqualsFile(\dirname(__DIR__, 2).'/Loader/Configurator/functions.php', $configuratorCode[0]."\n/**".$configCode[1]);
     }
 
     public function testPrependExtensionConfigWithLoadMethod()
@@ -322,8 +315,8 @@ class PhpFileLoaderTest extends TestCase
     {
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
-        $loader->load('config/config_builder_env_configurator.php');
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
+        $loader->load('config_builder_env_configurator.php');
 
         $this->assertIsString($container->getExtensionConfig('acme')[0]['color']);
     }
@@ -336,52 +329,6 @@ class PhpFileLoaderTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $this->assertStringEqualsFile(\dirname(__DIR__).'/Fixtures/php/named_closure_compiled.php', $dumper->dump());
-    }
-
-    public function testReturnsConfigBuilderObject()
-    {
-        $container = new ContainerBuilder();
-        $container->registerExtension(new \AcmeExtension());
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
-
-        $loader->load('return_config_builder.php');
-
-        $this->assertSame([['color' => 'red']], $container->getExtensionConfig('acme'));
-    }
-
-    public function testReturnsIterableOfArraysAndBuilders()
-    {
-        $container = new ContainerBuilder();
-        $container->registerExtension(new \AcmeExtension());
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
-
-        $loader->load('return_iterable_configs.php');
-
-        $configs = $container->getExtensionConfig('acme');
-        $this->assertCount(2, $configs);
-        $this->assertSame('red', $configs[0]['color']);
-        $this->assertArrayHasKey('color', $configs[1]);
-    }
-
-    public function testThrowsOnInvalidReturnType()
-    {
-        $container = new ContainerBuilder();
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches('/The return value in config file/');
-
-        $loader->load('return_invalid_types.php');
-    }
-
-    public function testReturnsGenerator()
-    {
-        $container = new ContainerBuilder();
-        $container->registerExtension(new \AcmeExtension());
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
-
-        $loader->load('return_generator.php');
-        $this->assertSame([['color' => 'red']], $container->getExtensionConfig('acme'));
     }
 
     #[IgnoreDeprecations]

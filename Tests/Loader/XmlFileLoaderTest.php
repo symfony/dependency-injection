@@ -154,6 +154,7 @@ class XmlFileLoaderTest extends TestCase
             ],
             'mixedcase' => ['MixedCaseKey' => 'value'],
             'constant' => \PHP_EOL,
+            '.container.known_envs' => [],
         ];
 
         $this->assertEquals($expected, $actual, '->load() converts XML values to PHP ones');
@@ -190,6 +191,7 @@ class XmlFileLoaderTest extends TestCase
             ],
             'mixedcase' => ['MixedCaseKey' => 'value'],
             'constant' => \PHP_EOL,
+            '.container.known_envs' => [],
             'bar' => '%foo%',
             'imported_from_ini' => true,
             'imported_from_yaml' => true,
@@ -243,6 +245,7 @@ class XmlFileLoaderTest extends TestCase
 
         self::assertSame([
             'imported_parameter' => 'value when on dev',
+            '.container.known_envs' => ['dev', 'test', 'prod'],
             'root_parameter' => 'value when on dev',
         ], $container->getParameterBag()->all());
 
@@ -251,6 +254,7 @@ class XmlFileLoaderTest extends TestCase
 
         self::assertSame([
             'imported_parameter' => 'value when on test',
+            '.container.known_envs' => ['dev', 'test', 'prod'],
             'root_parameter' => 'value when on test',
         ], $container->getParameterBag()->all());
 
@@ -259,6 +263,7 @@ class XmlFileLoaderTest extends TestCase
 
         self::assertSame([
             'imported_parameter' => 'value when on prod',
+            '.container.known_envs' => ['dev', 'test', 'prod'],
             'root_parameter' => 'value when on prod',
         ], $container->getParameterBag()->all());
 
@@ -267,6 +272,7 @@ class XmlFileLoaderTest extends TestCase
 
         self::assertSame([
             'imported_parameter' => 'default value',
+            '.container.known_envs' => ['dev', 'test', 'prod'],
             'root_parameter' => 'default value',
         ], $container->getParameterBag()->all());
     }
@@ -1220,7 +1226,11 @@ class XmlFileLoaderTest extends TestCase
         $loader = new XmlFileLoader($container, new FileLocator(self::$fixturesPath.'/xml'), 'some-env');
         $loader->load('when-env.xml');
 
-        $this->assertSame(['foo' => 234, 'bar' => 345], $container->getParameterBag()->all());
+        $this->assertSame([
+            'foo' => 234,
+            'bar' => 345,
+            '.container.known_envs' => ['some-env', 'some-other-env'],
+        ], $container->getParameterBag()->all());
     }
 
     public function testClosure()

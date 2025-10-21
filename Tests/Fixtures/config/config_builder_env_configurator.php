@@ -1,8 +1,9 @@
 <?php
 
-use Symfony\Component\DependencyInjection\Tests\Fixtures\AcmeConfig;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-return function () {
-    return new AcmeConfig(['color' => env('COLOR')]);
-};
+return [
+    'acme' => [
+        'color' => env('COLOR'),
+    ],
+];

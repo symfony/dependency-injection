@@ -1,14 +1,12 @@
 <?php
 
 use Symfony\Component\DependencyInjection\Tests\Fixtures\Bar;
-use Symfony\Config\ParametersConfig;
-use Symfony\Config\ServicesConfig;
 
 return [
-    new ParametersConfig([
+    'parameters' => [
         'foo' => 'bar',
-    ]),
-    new ServicesConfig([
+    ],
+    'services' => [
         '_defaults' => [
             'public' => true,
         ],
@@ -17,5 +15,5 @@ return [
             'class' => Bar::class,
             'arguments' => ['%foo%'],
         ],
-    ]),
+    ],
 ];
