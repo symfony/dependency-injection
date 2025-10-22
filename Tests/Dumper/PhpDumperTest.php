@@ -86,7 +86,7 @@ class PhpDumperTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::$fixturesPath = realpath(__DIR__.'/../Fixtures/');
+        self::$fixturesPath = realpath(__DIR__.'/../Fixtures');
     }
 
     public function testDump()
@@ -95,8 +95,8 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services1.php', $dumper->dump(), '->dump() dumps an empty container as an empty PHP class');
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services1-1.php', $dumper->dump(['class' => 'Container', 'base_class' => 'AbstractContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Dump']), '->dump() takes a class and a base_class options');
+        $this->assertStringEqualsGeneratedFile('services1.php', $dumper->dump(), '->dump() dumps an empty container as an empty PHP class');
+        $this->assertStringEqualsGeneratedFile('services1-1.php', $dumper->dump(['class' => 'Container', 'base_class' => 'AbstractContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Dump']), '->dump() takes a class and a base_class options');
     }
 
     public function testDumpOptimizationString()
@@ -126,7 +126,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
 
         $dumper = new PhpDumper($container);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services10.php', $dumper->dump(), '->dump() dumps an empty container as an empty PHP class');
+        $this->assertStringEqualsGeneratedFile('services10.php', $dumper->dump(), '->dump() dumps an empty container as an empty PHP class');
     }
 
     public function testDumpRelativeDir()
@@ -146,7 +146,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
 
         $dumper = new PhpDumper($container);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services12.php', $dumper->dump(['file' => __FILE__]), '->dump() dumps __DIR__ relative strings');
+        $this->assertStringEqualsGeneratedFile('services12.php', $dumper->dump(['file' => __FILE__]), '->dump() dumps __DIR__ relative strings');
     }
 
     public function testDumpCustomContainerClassWithoutConstructor()
@@ -156,7 +156,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/custom_container_class_without_constructor.php', $dumper->dump(['base_class' => 'NoConstructorContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
+        $this->assertStringEqualsGeneratedFile('custom_container_class_without_constructor.php', $dumper->dump(['base_class' => 'NoConstructorContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
     }
 
     public function testDumpCustomContainerClassConstructorWithoutArguments()
@@ -166,7 +166,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/custom_container_class_constructor_without_arguments.php', $dumper->dump(['base_class' => 'ConstructorWithoutArgumentsContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
+        $this->assertStringEqualsGeneratedFile('custom_container_class_constructor_without_arguments.php', $dumper->dump(['base_class' => 'ConstructorWithoutArgumentsContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
     }
 
     public function testDumpCustomContainerClassWithOptionalArgumentLessConstructor()
@@ -176,7 +176,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/custom_container_class_with_optional_constructor_arguments.php', $dumper->dump(['base_class' => 'ConstructorWithOptionalArgumentsContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
+        $this->assertStringEqualsGeneratedFile('custom_container_class_with_optional_constructor_arguments.php', $dumper->dump(['base_class' => 'ConstructorWithOptionalArgumentsContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
     }
 
     public function testDumpCustomContainerClassWithMandatoryArgumentLessConstructor()
@@ -186,7 +186,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/custom_container_class_with_mandatory_constructor_arguments.php', $dumper->dump(['base_class' => 'ConstructorWithMandatoryArgumentsContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
+        $this->assertStringEqualsGeneratedFile('custom_container_class_with_mandatory_constructor_arguments.php', $dumper->dump(['base_class' => 'ConstructorWithMandatoryArgumentsContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
     }
 
     public function testAddParameters()
@@ -194,7 +194,7 @@ class PhpDumperTest extends TestCase
         $container = include self::$fixturesPath.'/containers/container8.php';
         $container->compile();
         $dumper = new PhpDumper($container);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services8.php', $dumper->dump(), '->dump() dumps parameters');
+        $this->assertStringEqualsGeneratedFile('services8.php', $dumper->dump(), '->dump() dumps parameters');
     }
 
     public function testAddServiceWithoutCompilation()
@@ -210,7 +210,7 @@ class PhpDumperTest extends TestCase
         $container = include self::$fixturesPath.'/containers/container9.php';
         $container->compile();
         $dumper = new PhpDumper($container);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services9_compiled.php', str_replace(str_replace('\\', '\\\\', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR), '%path%', $dumper->dump()), '->dump() dumps services');
+        $this->assertStringEqualsGeneratedFile('services9_compiled.php', str_replace(str_replace('\\', '\\\\', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR), '%path%', $dumper->dump()), '->dump() dumps services');
 
         $container = new ContainerBuilder();
         $container->register('foo', 'FooClass')->addArgument(new \stdClass())->setPublic(true);
@@ -351,7 +351,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services19.php', $dumper->dump(), '->dump() dumps services with anonymous factories');
+        $this->assertStringEqualsGeneratedFile('services19.php', $dumper->dump(), '->dump() dumps services with anonymous factories');
     }
 
     public function testAddServiceIdWithUnsupportedCharacters()
@@ -365,7 +365,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_unsupported_characters.php', $dumper->dump(['class' => $class]));
+        $this->assertStringEqualsGeneratedFile('services_unsupported_characters.php', $dumper->dump(['class' => $class]));
 
         require_once self::$fixturesPath.'/php/services_unsupported_characters.php';
 
@@ -475,7 +475,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services24.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services24.php', $dumper->dump());
     }
 
     /**
@@ -492,7 +492,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_deprecated_parameters.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_deprecated_parameters.php', $dumper->dump());
     }
 
     /**
@@ -520,7 +520,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_nonempty_parameters.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_nonempty_parameters.php', $dumper->dump());
     }
 
     public function testNonEmptyParametersAsFiles()
@@ -540,7 +540,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_env_in_id.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_env_in_id.php', $dumper->dump());
     }
 
     public function testEnvParameter()
@@ -554,7 +554,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services26.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_EnvParameters', 'file' => self::$fixturesPath.'/php/services26.php', 'inline_factories' => false, 'inline_class_loader' => false]));
+        $this->assertStringEqualsGeneratedFile('services26.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_EnvParameters', 'file' => self::$fixturesPath.'/php/services26.php', 'inline_factories' => false, 'inline_class_loader' => false]));
 
         require self::$fixturesPath.'/php/services26.php';
         $container = new \Symfony_DI_PhpDumper_Test_EnvParameters();
@@ -588,7 +588,7 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
         $dumper->dump();
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_base64_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Base64Parameters']));
+        $this->assertStringEqualsGeneratedFile('services_base64_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Base64Parameters']));
 
         require self::$fixturesPath.'/php/services_base64_env.php';
         $container = new \Symfony_DI_PhpDumper_Test_Base64Parameters();
@@ -605,7 +605,7 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
         $dumper->dump();
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_csv_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_CsvParameters']));
+        $this->assertStringEqualsGeneratedFile('services_csv_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_CsvParameters']));
 
         require self::$fixturesPath.'/php/services_csv_env.php';
         $container = new \Symfony_DI_PhpDumper_Test_CsvParameters();
@@ -626,7 +626,7 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
         $dumper->dump();
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_default_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_DefaultParameters']));
+        $this->assertStringEqualsGeneratedFile('services_default_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_DefaultParameters']));
 
         require self::$fixturesPath.'/php/services_default_env.php';
         $container = new \Symfony_DI_PhpDumper_Test_DefaultParameters();
@@ -644,7 +644,7 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
         $dumper->dump();
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_url_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_UrlParameters']));
+        $this->assertStringEqualsGeneratedFile('services_url_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_UrlParameters']));
 
         require self::$fixturesPath.'/php/services_url_env.php';
         $container = new \Symfony_DI_PhpDumper_Test_UrlParameters();
@@ -670,7 +670,7 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
         $dumper->dump();
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_query_string_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_QueryStringParameters']));
+        $this->assertStringEqualsGeneratedFile('services_query_string_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_QueryStringParameters']));
 
         require self::$fixturesPath.'/php/services_query_string_env.php';
         $container = new \Symfony_DI_PhpDumper_Test_QueryStringParameters();
@@ -692,7 +692,7 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
         $dumper->dump();
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_json_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_JsonParameters']));
+        $this->assertStringEqualsGeneratedFile('services_json_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_JsonParameters']));
 
         putenv('foobar="hello"');
         require self::$fixturesPath.'/php/services_json_env.php';
@@ -712,7 +712,7 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
         $dumper->dump();
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_rot13_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Rot13Parameters']));
+        $this->assertStringEqualsGeneratedFile('services_rot13_env.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Rot13Parameters']));
 
         require self::$fixturesPath.'/php/services_rot13_env.php';
         $container = new \Symfony_DI_PhpDumper_Test_Rot13Parameters();
@@ -771,7 +771,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
 
         $dumper = new PhpDumper($container);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services13.php', $dumper->dump(), '->dump() dumps inline definitions which reference service_container');
+        $this->assertStringEqualsGeneratedFile('services13.php', $dumper->dump(), '->dump() dumps inline definitions which reference service_container');
     }
 
     public function testNonSharedLazy()
@@ -867,7 +867,7 @@ class PhpDumperTest extends TestCase
             $dumper->setProxyDumper(new \DummyProxyDumper());
         }
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_non_shared_lazy'.($asGhostObject ? '_ghost' : '').'.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_non_shared_lazy'.($asGhostObject ? '_ghost' : '').'.php', $dumper->dump());
     }
 
     public function testNonSharedDuplicates()
@@ -884,7 +884,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_non_shared_duplicates.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_non_shared_duplicates.php', $dumper->dump());
     }
 
     public function testInitializePropertiesBeforeMethodCalls()
@@ -940,7 +940,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_dedup_lazy.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_dedup_lazy.php', $dumper->dump());
     }
 
     public function testLazyArgumentProvideGenerator()
@@ -993,7 +993,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services33.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services33.php', $dumper->dump());
     }
 
     public function testDumpContainerBuilderWithFrozenConstructorIncludingPrivateServices()
@@ -1006,7 +1006,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_private_frozen.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_private_frozen.php', $dumper->dump());
     }
 
     public function testServiceLocator()
@@ -1061,7 +1061,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_locator.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_locator.php', $dumper->dump());
     }
 
     public function testServiceSubscriber()
@@ -1094,7 +1094,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_subscriber.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_subscriber.php', $dumper->dump());
     }
 
     public function testPrivateWithIgnoreOnInvalidReference()
@@ -1145,7 +1145,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_array_params.php', str_replace("'.\\DIRECTORY_SEPARATOR.'", '/', $dumper->dump(['file' => self::$fixturesPath.'/php/services_array_params.php', 'inline_factories' => false, 'inline_class_loader' => false])));
+        $this->assertStringEqualsGeneratedFile('services_array_params.php', str_replace("'.\\DIRECTORY_SEPARATOR.'", '/', $dumper->dump(['file' => self::$fixturesPath.'/php/services_array_params.php', 'inline_factories' => false, 'inline_class_loader' => false])));
     }
 
     public function testExpressionReferencingPrivateService()
@@ -1160,7 +1160,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_private_in_expression.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_private_in_expression.php', $dumper->dump());
     }
 
     public function testUninitializedReference()
@@ -1169,7 +1169,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_uninitialized_ref.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Uninitialized_Reference']));
+        $this->assertStringEqualsGeneratedFile('services_uninitialized_ref.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Uninitialized_Reference']));
 
         require self::$fixturesPath.'/php/services_uninitialized_ref.php';
 
@@ -1210,7 +1210,7 @@ class PhpDumperTest extends TestCase
         $dumper->setProxyDumper(new NullDumper());
 
         $container = 'Symfony_DI_PhpDumper_Test_Almost_Circular_'.ucfirst($visibility);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_almost_circular_'.$visibility.'.php', $dumper->dump(['class' => $container]));
+        $this->assertStringEqualsGeneratedFile('services_almost_circular_'.$visibility.'.php', $dumper->dump(['class' => $container]));
 
         require self::$fixturesPath.'/php/services_almost_circular_'.$visibility.'.php';
 
@@ -1276,7 +1276,7 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
         $dumper->dump();
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_deep_graph.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Deep_Graph']));
+        $this->assertStringEqualsGeneratedFile('services_deep_graph.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Deep_Graph']));
 
         require self::$fixturesPath.'/php/services_deep_graph.php';
 
@@ -1305,7 +1305,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
 
         $dumper = new PhpDumper($container);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_inline_self_ref.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Inline_Self_Ref']));
+        $this->assertStringEqualsGeneratedFile('services_inline_self_ref.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Inline_Self_Ref']));
     }
 
     public function testHotPathOptimizations()
@@ -1319,7 +1319,7 @@ class PhpDumperTest extends TestCase
             $dump = str_replace("'.\\DIRECTORY_SEPARATOR.'", '/', $dump);
         }
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_inline_requires.php', $dump);
+        $this->assertStringEqualsGeneratedFile('services_inline_requires.php', $dump);
     }
 
     public function testDumpHandlesLiteralClassWithRootNamespace()
@@ -1372,7 +1372,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
 
         $dumper = new PhpDumper($container);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_new_in_initializer.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_new_in_initializer.php', $dumper->dump());
     }
 
     public function testDumpHandlesEnumeration()
@@ -1457,7 +1457,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
 
         $dumper = new PhpDumper($container);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_adawson.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('services_adawson.php', $dumper->dump());
     }
 
     public function testParameterWithMixedCase()
@@ -1483,7 +1483,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Errored_Definition']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_errored_definition.php', str_replace(str_replace('\\', '\\\\', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR), '%path%', $dump));
+        $this->assertStringEqualsGeneratedFile('services_errored_definition.php', str_replace(str_replace('\\', '\\\\', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR), '%path%', $dump));
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Errored_Definition();
@@ -1496,7 +1496,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Service_Locator_Argument']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_service_locator_argument.php', str_replace(str_replace('\\', '\\\\', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR), '%path%', $dump));
+        $this->assertStringEqualsGeneratedFile('services_service_locator_argument.php', str_replace(str_replace('\\', '\\\\', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR), '%path%', $dump));
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Service_Locator_Argument();
@@ -1580,7 +1580,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Service_Wither']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_wither.php', $dump);
+        $this->assertStringEqualsGeneratedFile('services_wither.php', $dump);
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Service_Wither();
@@ -1603,7 +1603,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Service_Wither_Lazy']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_wither_lazy.php', $dump);
+        $this->assertStringEqualsGeneratedFile('services_wither_lazy.php', $dump);
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Service_Wither_Lazy();
@@ -1628,7 +1628,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Service_Wither_Lazy_Non_Shared']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_wither_lazy_non_shared.php', $dump);
+        $this->assertStringEqualsGeneratedFile('services_wither_lazy_non_shared.php', $dump);
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Service_Wither_Lazy_Non_Shared();
@@ -1657,7 +1657,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Service_WitherStaticReturnType']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_wither_staticreturntype.php', $dump);
+        $this->assertStringEqualsGeneratedFile('services_wither_staticreturntype.php', $dump);
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Service_WitherStaticReturnType();
@@ -1739,7 +1739,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Service_CurrentFactoryInlining']);
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_current_factory_inlining.php', $dump);
+        $this->assertStringEqualsGeneratedFile('services_current_factory_inlining.php', $dump);
         eval('?>'.$dump);
 
         $container = new \Symfony_DI_PhpDumper_Service_CurrentFactoryInlining();
@@ -1853,7 +1853,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/closure_proxy.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Closure_Proxy']));
+        $this->assertStringEqualsGeneratedFile('closure_proxy.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Closure_Proxy']));
 
         require self::$fixturesPath.'/php/closure_proxy.php';
 
@@ -1879,7 +1879,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/closure.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('closure.php', $dumper->dump());
     }
 
     public function testAutowireClosure()
@@ -1899,7 +1899,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/autowire_closure.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Autowire_Closure']));
+        $this->assertStringEqualsGeneratedFile('autowire_closure.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Autowire_Closure']));
 
         require self::$fixturesPath.'/php/autowire_closure.php';
 
@@ -1934,7 +1934,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/lazy_closure.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Lazy_Closure']));
+        $this->assertStringEqualsGeneratedFile('lazy_closure.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Lazy_Closure']));
 
         require self::$fixturesPath.'/php/lazy_closure.php';
 
@@ -1967,7 +1967,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/lazy_autowire_attribute.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Lazy_Autowire_Attribute']));
+        $this->assertStringEqualsGeneratedFile('lazy_autowire_attribute.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Lazy_Autowire_Attribute']));
 
         require self::$fixturesPath.'/php/lazy_autowire_attribute.php';
 
@@ -1999,7 +1999,7 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/lazy_autowire_attribute_with_intersection.php', $dumper->dump());
+        $this->assertStringEqualsGeneratedFile('lazy_autowire_attribute_with_intersection.php', $dumper->dump());
     }
 
     public function testCallableAdapterConsumer()
@@ -2012,7 +2012,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/callable_adapter_consumer.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Callable_Adapter_Consumer']));
+        $this->assertStringEqualsGeneratedFile('callable_adapter_consumer.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Callable_Adapter_Consumer']));
 
         require self::$fixturesPath.'/php/callable_adapter_consumer.php';
 
@@ -2042,7 +2042,7 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
 
-        $this->assertStringEqualsFile(self::$fixturesPath.'/php/inline_adapter_consumer.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Inline_Adapter_Consumer']));
+        $this->assertStringEqualsGeneratedFile('inline_adapter_consumer.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Inline_Adapter_Consumer']));
 
         require self::$fixturesPath.'/php/inline_adapter_consumer.php';
 
@@ -2173,6 +2173,18 @@ class PhpDumperTest extends TestCase
                     EOF,
             ],
         ];
+    }
+
+    private static function assertStringEqualsGeneratedFile(string $expectedFile, string $dumpedCode): void
+    {
+        $expectedFile = self::$fixturesPath.'/php/'.$expectedFile;
+
+        if ($_ENV['TEST_GENERATE_FIXTURES'] ?? false) {
+            file_put_contents($expectedFile, $dumpedCode);
+            self::markTestIncomplete('TEST_GENERATE_FIXTURES is set');
+        }
+
+        self::assertStringEqualsFile($expectedFile, $dumpedCode);
     }
 }
 
