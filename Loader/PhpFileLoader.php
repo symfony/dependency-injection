@@ -40,13 +40,21 @@ class PhpFileLoader extends FileLoader
 {
     protected bool $autoRegisterAliasesForSinglyImplementedInterfaces = false;
 
+    private ?ConfigBuilderGeneratorInterface $generator;
+
     public function __construct(
         ContainerBuilder $container,
         FileLocatorInterface $locator,
         ?string $env = null,
-        private ?ConfigBuilderGeneratorInterface $generator = null,
+        ConfigBuilderGeneratorInterface|bool|null $generator = null,
         bool $prepend = false,
     ) {
+        if (\is_bool($generator)) {
+            $prepend = $generator;
+            $generator = null;
+        }
+        $this->generator = $generator;
+
         parent::__construct($container, $locator, $env, $prepend);
     }
 

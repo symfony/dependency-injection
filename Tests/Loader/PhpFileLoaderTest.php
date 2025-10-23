@@ -61,7 +61,7 @@ class PhpFileLoaderTest extends TestCase
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
         $container->prependExtensionConfig('acme', ['foo' => 'bar']);
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', prepend: true);
         $loader->load('config_builder.php');
 
         $expected = [
@@ -77,7 +77,7 @@ class PhpFileLoaderTest extends TestCase
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
         $container->prependExtensionConfig('acme', ['foo' => 'bar']);
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', prepend: true);
         $loader->import('config_builder.php');
 
         $expected = [
@@ -117,7 +117,7 @@ class PhpFileLoaderTest extends TestCase
         $fixtures = realpath(__DIR__.'/../Fixtures');
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
-        $loader = new PhpFileLoader($container, new FileLocator(), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+        $loader = new PhpFileLoader($container, new FileLocator(), 'prod');
         $loader->load($fixtures.'/config/'.$file.'.php');
 
         $container->compile();
@@ -264,7 +264,7 @@ class PhpFileLoaderTest extends TestCase
 
         $fixtures = realpath(__DIR__.'/../Fixtures');
         $container = new ContainerBuilder();
-        $loader = new PhpFileLoader($container, new FileLocator(), 'dev', new ConfigBuilderGenerator(sys_get_temp_dir()));
+        $loader = new PhpFileLoader($container, new FileLocator(), 'dev');
 
         $loader->load($fixtures.'/config/when_env.php');
     }
@@ -275,7 +275,7 @@ class PhpFileLoaderTest extends TestCase
 
         $fixtures = realpath(__DIR__.'/../Fixtures');
         $container = new ContainerBuilder();
-        $loader = new PhpFileLoader($container, new FileLocator(), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+        $loader = new PhpFileLoader($container, new FileLocator(), 'prod');
 
         $loader->load($fixtures.'/config/not_when_env.php');
     }
@@ -284,7 +284,7 @@ class PhpFileLoaderTest extends TestCase
     {
         $fixtures = realpath(__DIR__.'/../Fixtures');
         $container = new ContainerBuilder();
-        $loader = new PhpFileLoader($container, new FileLocator(), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()));
+        $loader = new PhpFileLoader($container, new FileLocator(), 'prod');
 
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Using both #[When] and #[WhenNot] attributes on the same target is not allowed.');
@@ -311,12 +311,12 @@ class PhpFileLoaderTest extends TestCase
         $this->assertEquals([new ServiceLocatorArgument($values)], $container->getDefinition('locator_dependent_inline_service')->getArguments());
     }
 
-    public function testConfigBuilderEnvConfigurator()
+    public function testArrayEnvConfigurator()
     {
         $container = new ContainerBuilder();
         $container->registerExtension(new \AcmeExtension());
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod', new ConfigBuilderGenerator(sys_get_temp_dir()), true);
-        $loader->load('config_builder_env_configurator.php');
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'), 'prod');
+        $loader->load('array_env_configurator.php');
 
         $this->assertIsString($container->getExtensionConfig('acme')[0]['color']);
     }
