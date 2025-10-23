@@ -24,10 +24,9 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Loader\Configurator\App;
+use Symfony\Component\DependencyInjection\Loader\Configurator\AppReference;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Config\ImportsConfig;
-use Symfony\Config\ParametersConfig;
-use Symfony\Config\ServicesConfig;
 
 /**
  * PhpFileLoader loads service definitions from a PHP file.
@@ -40,7 +39,6 @@ use Symfony\Config\ServicesConfig;
 class PhpFileLoader extends FileLoader
 {
     protected bool $autoRegisterAliasesForSinglyImplementedInterfaces = false;
-    private ?\Closure $configBuilderAutoloader = null;
 
     public function __construct(
         ContainerBuilder $container,
@@ -62,16 +60,12 @@ class PhpFileLoader extends FileLoader
         $this->setCurrentDir(\dirname($path));
         $this->container->fileExists($path);
 
-        // Ensure symbols in the \Symfony\Config and Configurator namespaces are available
-        require_once __DIR__.\DIRECTORY_SEPARATOR.'Config'.\DIRECTORY_SEPARATOR.'functions.php';
-        require_once __DIR__.\DIRECTORY_SEPARATOR.'Configurator'.\DIRECTORY_SEPARATOR.'functions.php';
+        // Force load ContainerConfigurator to make env(), param() etc available.
+        class_exists(ContainerConfigurator::class);
 
-        if ($autoloaderRegistered = !$this->configBuilderAutoloader && $this->generator) {
-            spl_autoload_register($this->configBuilderAutoloader = function (string $class) {
-                if (str_starts_with($class, 'Symfony\\Config\\') && str_ends_with($class, 'Config')) {
-                    $this->configBuilder($class);
-                }
-            });
+        // Expose AppReference::config() as App::config()
+        if (!class_exists(App::class)) {
+            class_alias(AppReference::class, App::class);
         }
 
         // the closure forbids access to the private scope in the included file
@@ -85,63 +79,47 @@ class PhpFileLoader extends FileLoader
             }
 
             if (\is_object($result) && \is_callable($result)) {
-                $result = $this->callConfigurator($result, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
-            }
-            if ($result instanceof ServicesConfig || $result instanceof ParametersConfig || $result instanceof ImportsConfig || $result instanceof ConfigBuilderInterface) {
-                $result = [$result];
-            } elseif (!is_iterable($result ?? [])) {
-                throw new InvalidArgumentException(\sprintf('The return value in config file "%s" is invalid: "%s" given.', $path, get_debug_type($result)));
-            }
+                $this->callConfigurator($result, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
+            } elseif (\is_array($result)) {
+                $yamlLoader = new YamlFileLoader($this->container, $this->locator, $this->env, $this->prepend);
+                $yamlLoader->setResolver($this->resolver ?? new LoaderResolver([$this]));
+                $loadContent = new \ReflectionMethod(YamlFileLoader::class, 'loadContent');
+                $result = ContainerConfigurator::processValue($result);
 
-            foreach ($result ?? [] as $key => $config) {
-                if (!str_starts_with($key, 'when@')) {
-                    $config = [$key => $config];
-                } elseif (!$this->env || 'when@'.$this->env !== $key) {
-                    continue;
-                } elseif ($config instanceof ServicesConfig || $config instanceof ParametersConfig || $config instanceof ImportsConfig || $config instanceof ConfigBuilderInterface) {
-                    $config = [$config];
-                } elseif (!is_iterable($config)) {
-                    throw new InvalidArgumentException(\sprintf('The "%s" key should contain an array in "%s".', $key, $path));
-                }
+                ++$this->importing;
+                try {
+                    $content = array_intersect_key($result, ['imports' => true, 'parameters' => true, 'services' => true]);
+                    $loadContent->invoke($yamlLoader, $content, $path);
 
-                foreach ($config as $key => $config) {
-                    $expectedKey = match (true) {
-                        $config instanceof ServicesConfig => 'services',
-                        $config instanceof ParametersConfig => 'parameters',
-                        $config instanceof ImportsConfig => 'imports',
-                        default => null,
-                    };
-                    if (null !== $expectedKey || \in_array($key, ['services', 'parameters', 'imports'], true)) {
-                        if (null === $expectedKey) {
-                            $config = [$key => $config];
-                        } elseif (\is_string($key) && $key !== $expectedKey) {
-                            throw new InvalidArgumentException(\sprintf('Invalid key "%s" returned for the "%s" config builder; none or "%s" expected in file "%s".', $key, get_debug_type($config), $expectedKey, $path));
-                        } else {
-                            $config = [$expectedKey => $config->config];
+                    foreach ($result as $namespace => $config) {
+                        if (\in_array($namespace, ['imports', 'parameters', 'services'], true)) {
+                            continue;
                         }
-                        $yamlLoader = new YamlFileLoader($this->container, $this->locator, $this->env, $this->prepend);
-                        $yamlLoader->setResolver(new LoaderResolver([$this]));
-                        $loadContent = new \ReflectionMethod(YamlFileLoader::class, 'loadContent');
-                        ++$this->importing;
-                        try {
-                            $loadContent->invoke($yamlLoader, ContainerConfigurator::processValue($config), $path);
-                        } finally {
-                            --$this->importing;
+                        if (str_starts_with($namespace, 'when@')) {
+                            $knownEnvs = $this->container->hasParameter('.container.known_envs') ? array_flip($this->container->getParameter('.container.known_envs')) : [];
+                            $this->container->setParameter('.container.known_envs', array_keys($knownEnvs + [substr($namespace, 5) => true]));
+                            continue;
                         }
-                    } elseif ($config instanceof ConfigBuilderInterface) {
-                        if (\is_string($key) && $config->getExtensionAlias() !== $key) {
-                            throw new InvalidArgumentException(\sprintf('The extension alias "%s" of the "%s" config builder does not match the key "%s" in file "%s".', $config->getExtensionAlias(), get_debug_type($config), $key, $path));
-                        }
-                        $this->loadExtensionConfig($config->getExtensionAlias(), ContainerConfigurator::processValue($config->toArray()), $path);
-                    } elseif (!\is_string($key) || !\is_array($config)) {
-                        throw new InvalidArgumentException(\sprintf('The configuration returned in file "%s" must yield only string-keyed arrays or ConfigBuilderInterface objects.', $path));
-                    } else {
-                        if (str_starts_with($key, 'when@')) {
-                            throw new InvalidArgumentException(\sprintf('A service name cannot start with "when@" in "%s".', $path));
-                        }
-
-                        $this->loadExtensionConfig($key, ContainerConfigurator::processValue($config), $path);
+                        $this->loadExtensionConfig($namespace, $config);
                     }
+
+                    // per-env configuration
+                    if ($this->env && isset($result[$when = 'when@'.$this->env])) {
+                        if (!\is_array($result[$when])) {
+                            throw new InvalidArgumentException(\sprintf('The "%s" key should contain an array in "%s".', $when, $path));
+                        }
+
+                        $content = array_intersect_key($result[$when], ['imports' => true, 'parameters' => true, 'services' => true]);
+                        $loadContent->invoke($yamlLoader, $content, $path);
+
+                        foreach ($result[$when] as $namespace => $config) {
+                            if (!\in_array($namespace, ['imports', 'parameters', 'services'], true) && !str_starts_with($namespace, 'when@')) {
+                                $this->loadExtensionConfig($namespace, $config);
+                            }
+                        }
+                    }
+                } finally {
+                    --$this->importing;
                 }
             }
 
@@ -149,11 +127,6 @@ class PhpFileLoader extends FileLoader
         } finally {
             $this->instanceof = [];
             $this->registerAliasesForSinglyImplementedInterfaces();
-
-            if ($autoloaderRegistered) {
-                spl_autoload_unregister($this->configBuilderAutoloader);
-                $this->configBuilderAutoloader = null;
-            }
         }
 
         return null;
@@ -175,7 +148,7 @@ class PhpFileLoader extends FileLoader
     /**
      * Resolve the parameters to the $callback and execute it.
      */
-    private function callConfigurator(callable $callback, ContainerConfigurator $containerConfigurator, string $path): mixed
+    private function callConfigurator(callable $callback, ContainerConfigurator $containerConfigurator, string $path): void
     {
         $callback = $callback(...);
         $arguments = [];
@@ -208,7 +181,7 @@ class PhpFileLoader extends FileLoader
         }
 
         if ($excluded) {
-            return null;
+            return;
         }
 
         foreach ($r->getParameters() as $parameter) {
@@ -249,18 +222,13 @@ class PhpFileLoader extends FileLoader
 
         ++$this->importing;
         try {
-            $result = $callback(...$arguments);
-
-            return \in_array($result, $configBuilders, true) ? null : $result;
-        } catch (\Throwable $e) {
-            $configBuilders = [];
-            throw $e;
+            $callback(...$arguments);
         } finally {
             --$this->importing;
+        }
 
-            foreach ($configBuilders as $configBuilder) {
-                $this->loadExtensionConfig($configBuilder->getExtensionAlias(), ContainerConfigurator::processValue($configBuilder->toArray()));
-            }
+        foreach ($configBuilders as $configBuilder) {
+            $this->loadExtensionConfig($configBuilder->getExtensionAlias(), ContainerConfigurator::processValue($configBuilder->toArray()));
         }
     }
 
@@ -285,10 +253,6 @@ class PhpFileLoader extends FileLoader
         // If it does not start with Symfony\Config\ we don't know how to handle this
         if (!str_starts_with($namespace, 'Symfony\\Config\\')) {
             throw new InvalidArgumentException(\sprintf('Could not find or generate class "%s".', $namespace));
-        }
-
-        if (is_a($namespace, ServicesConfig::class, true) || is_a($namespace, ParametersConfig::class, true) || is_a($namespace, ImportsConfig::class, true)) {
-            throw new \LogicException(\sprintf('You cannot use "%s" as a config builder; create an instance and return it instead.', $namespace));
         }
 
         // Try to get the extension alias

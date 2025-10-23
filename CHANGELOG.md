@@ -23,13 +23,12 @@ CHANGELOG
  * Add argument `$target` to `ContainerBuilder::registerAliasForArgument()`
  * Deprecate registering a service without a class when its id is a non-existing FQCN
  * Allow multiple `#[AsDecorator]` attributes
- * Handle returning arrays and config-builders from config files
  * Handle declaring services using PHP arrays that follow the same shape as corresponding yaml files
- * Add `ServicesConfig` to help writing PHP configs using yaml-like array-shapes
+ * Add `AppReference` to help writing PHP configs using yaml-like array-shapes
  * Deprecate using `$this` or its internal scope from PHP config files; use the `$loader` variable instead
  * Deprecate XML configuration format, use YAML or PHP instead
  * Deprecate `ExtensionInterface::getXsdValidationBasePath()` and `getNamespace()`
- * Deprecate the fluent PHP format for semantic configuration, instantiate builders inline with the config array as argument and return them instead
+ * Deprecate the fluent PHP format for semantic configuration, use `$container->extension()` or return an array instead
 
 7.3
 ---
