@@ -56,7 +56,7 @@ trait ExtensionTrait
         $resolver = new LoaderResolver([
             new YamlFileLoader($container, $locator, $env, $prepend),
             new IniFileLoader($container, $locator, $env),
-            new PhpFileLoader($container, $locator, $env, new ConfigBuilderGenerator($buildDir), $prepend),
+            class_exists(ConfigBuilderGenerator::class) ? new PhpFileLoader($container, $locator, $env, new ConfigBuilderGenerator($buildDir), $prepend) : new PhpFileLoader($container, $locator, $env, $prepend),
             new GlobFileLoader($container, $locator, $env),
             new DirectoryLoader($container, $locator, $env),
             new ClosureLoader($container, $env),
