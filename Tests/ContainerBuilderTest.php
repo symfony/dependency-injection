@@ -115,7 +115,6 @@ class ContainerBuilderTest extends TestCase
      * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testDeprecateParameter()
     {
         $builder = new ContainerBuilder();
@@ -132,7 +131,6 @@ class ContainerBuilderTest extends TestCase
      * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testParameterDeprecationIsTrgiggeredWhenCompiled()
     {
         $builder = new ContainerBuilder();
@@ -2015,7 +2013,6 @@ class ContainerBuilderTest extends TestCase
      * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testDirectlyAccessingDeprecatedPublicService()
     {
         $this->expectUserDeprecationMessage('Since foo/bar 3.8: Accessing the "Symfony\Component\DependencyInjection\Tests\A" service directly from the container is deprecated, use dependency injection instead.');

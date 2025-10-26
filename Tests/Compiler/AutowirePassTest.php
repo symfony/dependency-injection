@@ -404,7 +404,6 @@ class AutowirePassTest extends TestCase
     }
 
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testOptionalParameter()
     {
         $container = new ContainerBuilder();

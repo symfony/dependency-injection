@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Alias;
@@ -88,7 +87,6 @@ class ResolveReferencesToAliasesPassTest extends TestCase
      * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testDeprecationNoticeWhenReferencedByAlias()
     {
         $this->expectUserDeprecationMessage('Since foobar 1.2.3.4: The "deprecated_foo_alias" service alias is deprecated. You should stop using it, as it will be removed in the future. It is being referenced by the "alias" alias.');
@@ -110,7 +108,6 @@ class ResolveReferencesToAliasesPassTest extends TestCase
      * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testDeprecationNoticeWhenReferencedByDefinition()
     {
         $this->expectUserDeprecationMessage('Since foobar 1.2.3.4: The "foo_aliased" service alias is deprecated. You should stop using it, as it will be removed in the future. It is being referenced by the "definition" service.');
