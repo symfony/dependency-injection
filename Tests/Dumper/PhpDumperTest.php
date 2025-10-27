@@ -13,7 +13,6 @@ namespace Symfony\Component\DependencyInjection\Tests\Dumper;
 
 use Bar\FooLazyClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -482,7 +481,6 @@ class PhpDumperTest extends TestCase
      * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testDeprecatedParameters()
     {
         $container = include self::$fixturesPath.'/containers/container_deprecated_parameters.php';
@@ -499,7 +497,6 @@ class PhpDumperTest extends TestCase
      * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testDeprecatedParametersAsFiles()
     {
         $container = include self::$fixturesPath.'/containers/container_deprecated_parameters.php';
@@ -1771,7 +1768,6 @@ class PhpDumperTest extends TestCase
      * The test must be marked as ignoring deprecations as it always expects a deprecation.
      */
     #[IgnoreDeprecations]
-    #[Group('legacy')]
     public function testDirectlyAccessingDeprecatedPublicService()
     {
         $this->expectUserDeprecationMessage('Since foo/bar 3.8: Accessing the "bar" service directly from the container is deprecated, use dependency injection instead.');
