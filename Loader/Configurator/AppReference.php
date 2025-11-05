@@ -134,21 +134,24 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     ...<string, DefinitionType|AliasType|PrototypeType|StackType|ArgumentsType|null>
  * }
  * @psalm-type ExtensionType = array<string, mixed>
+ * @psalm-type ConfigType = array{
+ *     imports?: ImportsConfig,
+ *     parameters?: ParametersConfig,
+ *     services?: ServicesConfig,
+ *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         ...<string, ExtensionType>,
+ *     }>
+ * }
  */
 class AppReference
 {
     /**
-     * @param array{
-     *     imports?: ImportsConfig,
-     *     parameters?: ParametersConfig,
-     *     services?: ServicesConfig,
-     *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         ...<string, ExtensionType>,
-     *     }>
-     * } $config
+     * @param ConfigType $config
+     *
+     * @psalm-return ConfigType
      */
     public static function config(array $config): array
     {
