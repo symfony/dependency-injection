@@ -232,27 +232,12 @@ class PriorityTaggedServiceTraitTest extends TestCase
             'hello' => new TypedReference('service2', HelloNamedService::class),
             'multi_hello_1' => new TypedReference('service6', MultiTagHelloNamedService::class),
             'service1' => new TypedReference('service1', FooTagClass::class),
+            'multi_hello_0' => new TypedReference('service6', MultiTagHelloNamedService::class),
         ];
 
         $services = $priorityTaggedServiceTraitImplementation->test($tag, $container);
         $this->assertSame(array_keys($expected), array_keys($services));
         $this->assertEquals($expected, $priorityTaggedServiceTraitImplementation->test($tag, $container));
-    }
-
-    public function testTaggedItemAttributesRepeatedWithoutNameThrows()
-    {
-        $container = new ContainerBuilder();
-        $container->register('service1', MultiNoNameTagHelloNamedService::class)
-            ->setAutoconfigured(true)
-            ->addTag('my_custom_tag');
-
-        (new ResolveInstanceofConditionalsPass())->process($container);
-        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo', 'getFooBar', exclude: ['service4', 'service5']);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Attribute "Symfony\Component\DependencyInjection\Attribute\AsTaggedItem" on class "Symfony\Component\DependencyInjection\Tests\Compiler\MultiNoNameTagHelloNamedService" cannot have an empty index when repeated.');
-
-        (new PriorityTaggedServiceTraitImplementation())->test($tag, $container);
     }
 
     public function testResolveIndexedTags()
@@ -282,6 +267,48 @@ class PriorityTaggedServiceTraitTest extends TestCase
         $this->assertSame(array_keys($expected), array_keys($services));
         $this->assertEquals($expected, $priorityTaggedServiceTraitImplementation->test($tag, $container));
     }
+
+    public function testAttributesAreMergedWithTags()
+    {
+        $container = new ContainerBuilder();
+        $definition = $container->register('service_attr_first', MultiTagHelloNamedService::class);
+        $definition->setAutoconfigured(true);
+        $definition->addTag('my_custom_tag', ['foo' => 'z']);
+        $definition->addTag('my_custom_tag', []);
+
+        (new ResolveInstanceofConditionalsPass())->process($container);
+
+        $priorityTaggedServiceTraitImplementation = new PriorityTaggedServiceTraitImplementation();
+
+        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo', 'getFooBar');
+        $services = $priorityTaggedServiceTraitImplementation->test($tag, $container);
+
+        $expected = [
+            'multi_hello_2' => new TypedReference('service_attr_first', MultiTagHelloNamedService::class),
+            'multi_hello_1' => new TypedReference('service_attr_first', MultiTagHelloNamedService::class),
+            'z' => new TypedReference('service_attr_first', MultiTagHelloNamedService::class),
+            'multi_hello_0' => new TypedReference('service_attr_first', MultiTagHelloNamedService::class),
+        ];
+        $this->assertSame(array_keys($expected), array_keys($services));
+        $this->assertEquals($expected, $services);
+    }
+
+    public function testAttributesAreFallbacks()
+    {
+        $container = new ContainerBuilder();
+        $definition = $container->register('service_attr_first', MultiTagHelloNamedService::class);
+        $definition->setAutoconfigured(true);
+        $definition->addTag('my_custom_tag', ['foo' => 'z']);
+
+        (new ResolveInstanceofConditionalsPass())->process($container);
+
+        $priorityTaggedServiceTraitImplementation = new PriorityTaggedServiceTraitImplementation();
+
+        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo', 'getFooBar');
+        $services = $priorityTaggedServiceTraitImplementation->test($tag, $container);
+
+        $this->assertEquals(['z' => new TypedReference('service_attr_first', MultiTagHelloNamedService::class)], $services);
+    }
 }
 
 class PriorityTaggedServiceTraitImplementation
@@ -304,15 +331,10 @@ class HelloNamedService2
 {
 }
 
+#[AsTaggedItem(index: 'multi_hello_0', priority: 0)]
 #[AsTaggedItem(index: 'multi_hello_1', priority: 1)]
 #[AsTaggedItem(index: 'multi_hello_2', priority: 2)]
 class MultiTagHelloNamedService
-{
-}
-
-#[AsTaggedItem(priority: 1)]
-#[AsTaggedItem(priority: 2)]
-class MultiNoNameTagHelloNamedService
 {
 }
 
