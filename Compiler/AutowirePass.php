@@ -335,9 +335,7 @@ class AutowirePass extends AbstractRecursivePass
                         $value = $this->doProcessValue($value);
                     } elseif ($lazy = $attribute->lazy) {
                         $value ??= $getValue();
-                        if ($this->container->has($value->getType())) {
-                            $type = $this->container->findDefinition($value->getType())->getClass();
-                        }
+                        $type = $this->resolveProxyType($type, $value->getType());
                         $definition = (new Definition($type))
                             ->setFactory('current')
                             ->setArguments([[$value]])
@@ -742,5 +740,31 @@ class AutowirePass extends AbstractRecursivePass
         }
 
         return $alias;
+    }
+
+    /**
+     * Resolves the class name that should be proxied for a lazy service.
+     *
+     * @param string $originalType The original parameter type-hint (e.g., the interface)
+     * @param string $serviceId    The service ID the type-hint resolved to (e.g., the alias)
+     */
+    private function resolveProxyType(string $originalType, string $serviceId): string
+    {
+        if (!$this->container->has($serviceId)) {
+            return $originalType;
+        }
+
+        $resolvedType = $this->container->findDefinition($serviceId)->getClass();
+        $resolvedType = $this->container->getParameterBag()->resolveValue($resolvedType);
+
+        if (!$resolvedType || !class_exists($resolvedType, false) && !interface_exists($resolvedType, false)) {
+            return $originalType;
+        }
+
+        if (\PHP_VERSION_ID < 80400 && $this->container->getReflectionClass($resolvedType, false)->isFinal()) {
+            return $originalType;
+        }
+
+        return $resolvedType;
     }
 }
