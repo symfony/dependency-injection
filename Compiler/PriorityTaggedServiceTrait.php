@@ -59,13 +59,12 @@ trait PriorityTaggedServiceTrait
                 continue;
             }
 
-            $defaultPriority = null;
-            $defaultIndex = null;
+            $defaultPriority = $defaultAttributePriority = null;
+            $defaultIndex = $defaultAttributeIndex = null;
             $definition = $container->getDefinition($serviceId);
             $class = $definition->getClass();
             $class = $container->getParameterBag()->resolveValue($class) ?: null;
             $reflector = null !== $class ? $container->getReflectionClass($class) : null;
-            $loadFromDefaultMethods = $reflector && null !== $defaultPriorityMethod;
             $phpAttributes = $definition->isAutoconfigured() && !$definition->hasTag('container.ignore_attributes') ? $reflector?->getAttributes(AsTaggedItem::class) : [];
 
             foreach ($phpAttributes ??= [] as $i => $attribute) {
@@ -74,9 +73,9 @@ trait PriorityTaggedServiceTrait
                     'priority' => $attribute->priority,
                     $indexAttribute ?? '' => $attribute->index,
                 ];
-                if (null === $defaultPriority) {
-                    $defaultPriority = $attribute->priority ?? 0;
-                    $defaultIndex = $attribute->index;
+                if (null === $defaultAttributePriority) {
+                    $defaultAttributePriority = $attribute->priority ?? 0;
+                    $defaultAttributeIndex = $attribute->index;
                 }
             }
             if (1 >= \count($phpAttributes)) {
@@ -93,10 +92,8 @@ trait PriorityTaggedServiceTrait
 
                 if (isset($attribute['priority'])) {
                     $priority = $attribute['priority'];
-                } elseif ($loadFromDefaultMethods) {
-                    $defaultPriority = PriorityTaggedServiceUtil::getDefault($serviceId, $reflector, $defaultPriorityMethod, $tagName, 'priority') ?? $defaultPriority;
-                    $defaultIndex = PriorityTaggedServiceUtil::getDefault($serviceId, $reflector, $defaultIndexMethod ?? 'getDefaultName', $tagName, $indexAttribute) ?? $defaultIndex;
-                    $loadFromDefaultMethods = false;
+                } elseif (null === $defaultPriority && $defaultPriorityMethod && $reflector) {
+                    $defaultPriority = PriorityTaggedServiceUtil::getDefault($serviceId, $reflector, $defaultPriorityMethod, $tagName, 'priority') ?? $defaultAttributePriority;
                 }
                 $priority ??= $defaultPriority ??= 0;
 
@@ -108,10 +105,8 @@ trait PriorityTaggedServiceTrait
                 if (null !== $indexAttribute && isset($attribute[$indexAttribute])) {
                     $index = $parameterBag->resolveValue($attribute[$indexAttribute]);
                 }
-                if (null === $index && $loadFromDefaultMethods) {
-                    $defaultPriority = PriorityTaggedServiceUtil::getDefault($serviceId, $reflector, $defaultPriorityMethod, $tagName, 'priority') ?? $defaultPriority;
-                    $defaultIndex = PriorityTaggedServiceUtil::getDefault($serviceId, $reflector, $defaultIndexMethod ?? 'getDefaultName', $tagName, $indexAttribute) ?? $defaultIndex;
-                    $loadFromDefaultMethods = false;
+                if (null === $index && null === $defaultIndex && $defaultPriorityMethod && $reflector) {
+                    $defaultIndex = PriorityTaggedServiceUtil::getDefault($serviceId, $reflector, $defaultIndexMethod ?? 'getDefaultName', $tagName, $indexAttribute) ?? $defaultAttributeIndex;
                 }
                 $index ??= $defaultIndex ??= $definition->getTag('container.decorator')[0]['id'] ?? $serviceId;
 
@@ -147,13 +142,10 @@ class PriorityTaggedServiceUtil
 {
     public static function getDefault(string $serviceId, \ReflectionClass $r, string $defaultMethod, string $tagName, ?string $indexAttribute): string|int|null
     {
-        if (!$r->hasMethod($defaultMethod)) {
+        if ($r->isInterface() || !$r->hasMethod($defaultMethod)) {
             return null;
         }
 
-        if ($r->isInterface()) {
-            return null;
-        }
         $class = $r->name;
 
         if (null !== $indexAttribute) {
