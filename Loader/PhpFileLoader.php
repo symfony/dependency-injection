@@ -31,6 +31,8 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
  */
 class PhpFileLoader extends FileLoader
 {
+    use ContentLoaderTrait;
+
     protected bool $autoRegisterAliasesForSinglyImplementedInterfaces = false;
 
     public function load(mixed $resource, ?string $type = null): mixed
@@ -69,13 +71,12 @@ class PhpFileLoader extends FileLoader
             } elseif (\is_array($result)) {
                 $yamlLoader = new YamlFileLoader($this->container, $this->locator, $this->env, $this->prepend);
                 $yamlLoader->setResolver($this->resolver ?? new LoaderResolver([$this]));
-                $loadContent = new \ReflectionMethod(YamlFileLoader::class, 'loadContent');
                 $result = ContainerConfigurator::processValue($result);
 
                 ++$this->importing;
                 try {
                     $content = array_intersect_key($result, ['imports' => true, 'parameters' => true, 'services' => true]);
-                    $loadContent->invoke($yamlLoader, $content, $path);
+                    $this->loadContent($content, $path);
 
                     foreach ($result as $namespace => $config) {
                         if (\in_array($namespace, ['imports', 'parameters', 'services'], true)) {
@@ -96,7 +97,7 @@ class PhpFileLoader extends FileLoader
                         }
 
                         $content = array_intersect_key($result[$when], ['imports' => true, 'parameters' => true, 'services' => true]);
-                        $loadContent->invoke($yamlLoader, $content, $path);
+                        $this->loadContent($content, $path);
 
                         foreach ($result[$when] as $namespace => $config) {
                             if (!\in_array($namespace, ['imports', 'parameters', 'services'], true) && !str_starts_with($namespace, 'when@')) {
