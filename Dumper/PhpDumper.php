@@ -1189,6 +1189,7 @@ class PhpDumper extends Dumper
                 || ($callable[0] instanceof Definition && !$this->definitionVariables->offsetExists($callable[0]))
             ))) {
                 $initializer = 'fn () => '.$this->dumpValue($callable[0]);
+                $this->preload[LazyClosure::class] = LazyClosure::class;
 
                 return $return.LazyClosure::getCode($initializer, $callable, $class, $this->container, $id).$tail;
             }
