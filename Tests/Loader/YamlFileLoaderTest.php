@@ -12,6 +12,7 @@
 namespace Symfony\Component\DependencyInjection\Tests\Loader;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
 use Symfony\Component\Config\Exception\LoaderLoadException;
@@ -1216,5 +1217,28 @@ class YamlFileLoaderTest extends TestCase
 
         $definition = $container->getDefinition('static_constructor');
         $this->assertEquals((new Definition('stdClass'))->setFactory([null, 'create']), $definition);
+    }
+
+    #[IgnoreDeprecations]
+    #[DataProvider('provideForbiddenKeys')]
+    public function testFromCallableTriggersDeprecationOnForbiddenKeys(string $key, mixed $value)
+    {
+        $this->expectUserDeprecationMessage(\sprintf('Since symfony/dependency-injection 8.1: Configuring the "%s" key for the service "my_service" when using "from_callable" is deprecated and will throw an "InvalidArgumentException" in 9.0.', $key));
+
+        $loader = new YamlFileLoader(new ContainerBuilder(), new FileLocator());
+
+        $reflectionMethod = new \ReflectionMethod($loader, 'parseDefinition');
+        $reflectionMethod->invoke($loader, 'my_service', ['from_callable' => 'strlen', $key => $value], 'config/services.yaml', []);
+    }
+
+    public static function provideForbiddenKeys(): iterable
+    {
+        yield 'parent' => ['parent', 'App\\SomeParent'];
+        yield 'synthetic' => ['synthetic', true];
+        yield 'file' => ['file', 'some_file.php'];
+        yield 'arguments' => ['arguments', []];
+        yield 'properties' => ['properties', ['foo' => 'bar']];
+        yield 'configurator' => ['configurator', 'some_configurator'];
+        yield 'calls' => ['calls', [['method' => 'setFoo', 'arguments' => ['bar']]]];
     }
 }

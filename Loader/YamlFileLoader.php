@@ -412,6 +412,10 @@ class YamlFileLoader extends FileLoader
                 if (isset($service['factory'])) {
                     throw new InvalidArgumentException(\sprintf('The configuration key "%s" is unsupported for the service "%s" when using "from_callable" in "%s".', $key, $id, $file));
                 }
+
+                if (isset($service[$key])) {
+                    trigger_deprecation('symfony/dependency-injection', '8.1', 'Configuring the "%s" key for the service "%s" when using "from_callable" is deprecated and will throw an "InvalidArgumentException" in 9.0.', $key, $id);
+                }
             }
 
             if ('Closure' !== $service['class'] ??= 'Closure') {
