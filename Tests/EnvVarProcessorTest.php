@@ -982,4 +982,24 @@ CSV;
         yield 'Null' => [false, fn () => null];
         yield 'Env var not defined' => [false, fn () => throw new EnvNotFoundException()];
     }
+
+    /**
+     * @dataProvider provideQueryStringScenarios
+     */
+    public function testQueryStringEnvVarProcessor($envValue, $expectedResult)
+    {
+        $processor = new EnvVarProcessor(new Container());
+
+        $result = $processor->getEnv('query_string', 'MY_VAR', fn () => $envValue);
+
+        $this->assertSame($expectedResult, $result);
+    }
+
+    public static function provideQueryStringScenarios(): iterable
+    {
+        yield 'url_without_query' => ['https://example.com', []];
+        yield 'url_with_empty_query' => ['https://example.com?', []];
+        yield 'url_with_query' => ['https://example.com?foo=bar&baz=123', ['foo' => 'bar', 'baz' => '123']];
+        yield 'raw_query_string' => ['foo=bar&test=1', ['foo' => 'bar', 'test' => '1']];
+    }
 }
