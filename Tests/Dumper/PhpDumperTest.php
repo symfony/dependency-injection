@@ -2293,6 +2293,38 @@ class PhpDumperTest extends TestCase
         $this->assertStringContainsString(': ?\stdClass', $code);
     }
 
+    public function testSourceDateEpoch()
+    {
+        $container = new ContainerBuilder();
+        $container->register('foo', 'stdClass')->setPublic(true);
+        $container->compile();
+
+        $sourceDateEpoch = 1609459200; // 2021-01-01 00:00:00 UTC
+
+        $_SERVER['SOURCE_DATE_EPOCH'] = $sourceDateEpoch;
+
+        $dumper = new PhpDumper($container);
+        $dump = print_r($dumper->dump(['as_files' => true, 'file' => __DIR__]), true);
+
+        $this->assertStringContainsString("'container.build_time' => {$sourceDateEpoch}", $dump);
+    }
+
+    public function testSourceDateEpochInvalid()
+    {
+        $container = new ContainerBuilder();
+        $container->register('foo', 'stdClass')->setPublic(true);
+        $container->compile();
+
+        $_SERVER['SOURCE_DATE_EPOCH'] = 'invalid';
+
+        $dumper = new PhpDumper($container);
+        $dump = print_r($dumper->dump(['as_files' => true, 'file' => __DIR__]), true);
+
+        // Should fall back to time() when SOURCE_DATE_EPOCH is invalid
+        $this->assertStringContainsString("'container.build_time' => ", $dump);
+        $this->assertStringNotContainsString("'container.build_time' => 0", $dump);
+    }
+
     private static function assertStringEqualsGeneratedFile(string $expectedFile, string $dumpedCode): void
     {
         $expectedFile = self::$fixturesPath.'/php/'.$expectedFile;

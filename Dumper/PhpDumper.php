@@ -147,7 +147,7 @@ class PhpDumper extends Dumper
             'inline_class_loader' => null,
             'preload_classes' => [],
             'service_locator_tag' => 'container.service_locator',
-            'build_time' => time(),
+            'build_time' => filter_var($_SERVER['SOURCE_DATE_EPOCH'] ?? null, \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE) ?? time(),
         ], $options);
 
         $this->addGetService = false;
