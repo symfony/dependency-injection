@@ -2209,6 +2209,25 @@ class PhpDumperTest extends TestCase
         ];
     }
 
+    public function testDumpServiceClosureWithNullableTypedReference()
+    {
+        $container = new ContainerBuilder();
+        $container->register('bar', 'stdClass');
+        $container->register('foo', 'stdClass')
+            ->setPublic(true)
+            ->setArguments([
+                new ServiceClosureArgument(new TypedReference('bar', '?stdClass')),
+            ]);
+
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        $code = $dumper->dump(['as_files' => false]);
+
+        $this->assertStringNotContainsString(': \?stdClass', $code);
+        $this->assertStringContainsString(': ?\stdClass', $code);
+    }
+
     private static function assertStringEqualsGeneratedFile(string $expectedFile, string $dumpedCode): void
     {
         $expectedFile = self::$fixturesPath.'/php/'.$expectedFile;
