@@ -112,6 +112,7 @@ class ParameterBag implements ParameterBagInterface
         }
 
         $this->parameters[$name] = $value;
+        $this->resolved = false;
     }
 
     /**
