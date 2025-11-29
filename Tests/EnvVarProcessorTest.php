@@ -1031,9 +1031,7 @@ class EnvVarProcessorTest extends TestCase
         yield 'Env var not defined' => [false, fn () => throw new EnvNotFoundException()];
     }
 
-    /**
-     * @dataProvider provideQueryStringScenarios
-     */
+    #[DataProvider('provideQueryStringScenarios')]
     public function testQueryStringEnvVarProcessor($envValue, $expectedResult)
     {
         $processor = new EnvVarProcessor(new Container());

@@ -82,9 +82,7 @@ class AutowireTest extends TestCase
         yield [['value' => 'some-value', 'expression' => 'expr']];
     }
 
-    /**
-     * @dataProvider provideMutuallyExclusiveOptions
-     */
+    #[DataProvider('provideMutuallyExclusiveOptions')]
     public function testConstructThrowsOnMutuallyExclusiveOptions(array $parameters)
     {
         $this->expectException(LogicException::class);
