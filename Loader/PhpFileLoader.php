@@ -62,6 +62,9 @@ class PhpFileLoader extends FileLoader
             return include $path;
         }, $this, ProtectedPhpFileLoader::class);
 
+        $instanceof = $this->instanceof;
+        $this->instanceof = [];
+
         try {
             $callback = $load($path, $this->env);
 
@@ -69,7 +72,7 @@ class PhpFileLoader extends FileLoader
                 $this->executeCallback($callback, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
             }
         } finally {
-            $this->instanceof = [];
+            $this->instanceof = $instanceof;
             $this->registerAliasesForSinglyImplementedInterfaces();
         }
 
