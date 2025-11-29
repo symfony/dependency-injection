@@ -81,6 +81,9 @@ class PhpFileLoader extends FileLoader
             return include $path;
         }, null, null);
 
+        $instanceof = $this->instanceof;
+        $this->instanceof = [];
+
         try {
             try {
                 if (1 === $result = $load($path, $this->env)) {
@@ -145,7 +148,7 @@ class PhpFileLoader extends FileLoader
 
             $this->loadExtensionConfigs();
         } finally {
-            $this->instanceof = [];
+            $this->instanceof = $instanceof;
             $this->registerAliasesForSinglyImplementedInterfaces();
         }
 

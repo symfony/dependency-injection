@@ -342,4 +342,18 @@ class PhpFileLoaderTest extends TestCase
 
         $loader->load('legacy_internal_scope.php');
     }
+
+    public function testInstanceofStateIsRestoredAfterImport()
+    {
+        $container = new ContainerBuilder();
+
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'));
+        $loader->load('instanceof_import_parent.php');
+
+        $conditionalsBefore = $container->getDefinition('service_before')->getInstanceofConditionals();
+        $this->assertArrayHasKey(\stdClass::class, $conditionalsBefore, 'Pre-import definition missing instanceof rule.');
+
+        $conditionalsAfter = $container->getDefinition('service_after')->getInstanceofConditionals();
+        $this->assertArrayHasKey(\stdClass::class, $conditionalsAfter, 'Post-import definition missing instanceof rule (State corruption detected).');
+    }
 }
