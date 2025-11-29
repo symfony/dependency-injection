@@ -12,6 +12,7 @@
 namespace Symfony\Component\DependencyInjection\Tests\Loader;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
@@ -1220,6 +1221,7 @@ class YamlFileLoaderTest extends TestCase
     }
 
     #[IgnoreDeprecations]
+    #[Group('legacy')]
     #[DataProvider('provideForbiddenKeys')]
     public function testFromCallableTriggersDeprecationOnForbiddenKeys(string $key, mixed $value)
     {
