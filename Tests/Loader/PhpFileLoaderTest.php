@@ -236,4 +236,18 @@ class PhpFileLoaderTest extends TestCase
         $values = ['foo' => new Definition(\stdClass::class), 'bar' => new Definition(\stdClass::class)];
         $this->assertEquals([new ServiceLocatorArgument($values)], $container->getDefinition('locator_dependent_inline_service')->getArguments());
     }
+
+    public function testInstanceofStateIsRestoredAfterImport()
+    {
+        $container = new ContainerBuilder();
+
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/Fixtures/config'));
+        $loader->load('instanceof_import_parent.php');
+
+        $conditionalsBefore = $container->getDefinition('service_before')->getInstanceofConditionals();
+        $this->assertArrayHasKey(\stdClass::class, $conditionalsBefore, 'Pre-import definition missing instanceof rule.');
+
+        $conditionalsAfter = $container->getDefinition('service_after')->getInstanceofConditionals();
+        $this->assertArrayHasKey(\stdClass::class, $conditionalsAfter, 'Post-import definition missing instanceof rule (State corruption detected).');
+    }
 }
