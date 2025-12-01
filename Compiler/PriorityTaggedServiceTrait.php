@@ -51,7 +51,6 @@ trait PriorityTaggedServiceTrait
         }
 
         $parameterBag = $container->getParameterBag();
-        $i = 0;
         $services = [];
 
         foreach ($container->findTaggedServiceIds($tagName, true) as $serviceId => $attributes) {

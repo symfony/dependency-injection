@@ -52,7 +52,7 @@ class Autowire
             if (null !== $value && null !== $service) {
                 throw new LogicException('#[Autowire] attribute cannot declare $value and $service at the same time.');
             }
-        } elseif (!(null !== $value xor null !== $service xor null !== $expression xor null !== $env xor null !== $param)) {
+        } elseif (1 !== (null !== $value) + (null !== $service) + (null !== $expression) + (null !== $env) + (null !== $param)) {
             throw new LogicException('#[Autowire] attribute must declare exactly one of $service, $expression, $env, $param or $value.');
         }
 
