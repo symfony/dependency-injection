@@ -154,7 +154,6 @@ class XmlFileLoaderTest extends TestCase
             ],
             'mixedcase' => ['MixedCaseKey' => 'value'],
             'constant' => \PHP_EOL,
-            '.container.known_envs' => [],
         ];
 
         $this->assertEquals($expected, $actual, '->load() converts XML values to PHP ones');
@@ -191,7 +190,6 @@ class XmlFileLoaderTest extends TestCase
             ],
             'mixedcase' => ['MixedCaseKey' => 'value'],
             'constant' => \PHP_EOL,
-            '.container.known_envs' => [],
             'bar' => '%foo%',
             'imported_from_ini' => true,
             'imported_from_yaml' => true,
