@@ -301,3 +301,10 @@ class PhpFileLoader extends FileLoader
         return $loader();
     }
 }
+
+/**
+ * @internal
+ */
+final class ProtectedPhpFileLoader extends PhpFileLoader
+{
+}
