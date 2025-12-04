@@ -99,4 +99,28 @@ class ResolveClassPassTest extends TestCase
 
         (new ResolveClassPass())->process($container);
     }
+
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
+    public function testInvalidClassWhoseImplementedInterfaceIsMissingDefinition()
+    {
+        $this->expectUserDeprecationMessage('Since symfony/dependency-injection 7.4: Service id "Acme\ClassImplementsUnavailableInterface" looks like a FQCN but no corresponding class or interface exists. To resolve this ambiguity, please rename this service to a non-FQCN (e.g. using dots), or create the missing class or interface.');
+
+        $autoloader = function (string $class) {
+            if ('Acme\ClassImplementsUnavailableInterface' === $class) {
+                new class implements UnavailableInterface {};
+            }
+        };
+
+        spl_autoload_register($autoloader);
+
+        try {
+            $container = new ContainerBuilder();
+            $container->register('Acme\ClassImplementsUnavailableInterface');
+
+            (new ResolveClassPass())->process($container);
+        } finally {
+            spl_autoload_unregister($autoloader);
+        }
+    }
 }
