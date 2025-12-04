@@ -29,7 +29,7 @@ class ResolveClassPass implements CompilerPassInterface
             ) {
                 continue;
             }
-            if (class_exists($id) || interface_exists($id, false)) {
+            if ($container->getReflectionClass($id, false)) {
                 $definition->setClass($id);
                 continue;
             }

@@ -392,4 +392,21 @@ class ParameterBagTest extends TestCase
             ['50% is less than 100%', '50% is less than 100%', 'Text between % signs is allowed, if there are spaces.'],
         ];
     }
+
+    public function testAddParametersAfterResolveBreaksConsistency()
+    {
+        $bag = new ParameterBag(['kernel.project_dir' => '/var/www/my_project']);
+        $bag->resolve();
+
+        $this->assertTrue($bag->isResolved());
+
+        $bag->set('app.uploads_dir', '%kernel.project_dir%/public/uploads');
+        $bag->resolve();
+
+        $this->assertSame(
+            '/var/www/my_project/public/uploads',
+            $bag->get('app.uploads_dir'),
+            'ParameterBag failed to resolve new parameters added after initial resolution.'
+        );
+    }
 }
