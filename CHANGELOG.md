@@ -4,6 +4,7 @@ CHANGELOG
 7.4
 ---
 
+ * [BC BREAK] Throw when using `$this` or its internal scope from PHP config files; use the `$loader` variable instead
  * Allow adding resource tags using any config format
  * Allow `#[AsAlias]` to be extended
  * Parse attributes found on abstract classes for resource definitions
@@ -12,7 +13,6 @@ CHANGELOG
  * Allow multiple `#[AsDecorator]` attributes
  * Handle declaring services using PHP arrays that follow the same shape as corresponding yaml files
  * Add `AppReference` to help writing PHP configs using yaml-like array-shapes
- * Deprecate using `$this` or its internal scope from PHP config files; use the `$loader` variable instead
  * Deprecate XML configuration format, use YAML or PHP instead
  * Deprecate `ExtensionInterface::getXsdValidationBasePath()` and `getNamespace()`
  * Deprecate the fluent PHP format for semantic configuration, use `$container->extension()` or return an array instead
