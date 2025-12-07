@@ -192,12 +192,12 @@ abstract class FileLoader extends BaseFileLoader
 
             $abstract = $r?->isAbstract() || $r?->isInterface() ? '.abstract.' : '';
             $this->setDefinition($abstract.$class, $definition = $getPrototype());
+            $definition->setClass($class);
             if (null !== $errorMessage) {
                 $definition->addError($errorMessage);
 
                 continue;
             }
-            $definition->setClass($class);
 
             if ($abstract) {
                 if ($r->isInterface()) {
