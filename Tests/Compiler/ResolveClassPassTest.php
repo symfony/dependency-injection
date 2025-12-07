@@ -93,4 +93,16 @@ class ResolveClassPassTest extends TestCase
 
         (new ResolveClassPass())->process($container);
     }
+
+    public function testSkipsDefinitionsWithErrors()
+    {
+        $container = new ContainerBuilder();
+        $def = $container->register('App\SomeClass');
+        $def->addError('Some error message');
+
+        (new ResolveClassPass())->process($container);
+
+        // The class should not be set because the definition has errors
+        $this->assertNull($def->getClass());
+    }
 }

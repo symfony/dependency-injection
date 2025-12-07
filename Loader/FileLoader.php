@@ -198,12 +198,12 @@ abstract class FileLoader extends BaseFileLoader
             }
 
             $this->setDefinition($class, $definition = $getPrototype());
+            $definition->setClass($class);
             if (null !== $errorMessage) {
                 $definition->addError($errorMessage);
 
                 continue;
             }
-            $definition->setClass($class);
 
             $interfaces = [];
             foreach (class_implements($class, false) as $interface) {
