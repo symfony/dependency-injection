@@ -227,6 +227,25 @@ class FileLoaderTest extends TestCase
         );
     }
 
+    public function testClassIsSetEvenWhenDefinitionHasErrors()
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('bad_classes_dir', 'BadClasses');
+        $loader = new TestFileLoader($container, new FileLocator(self::$fixturesPath.'/Fixtures'), 'test');
+
+        $loader->registerClasses(
+            (new Definition())->setAutoconfigured(true),
+            'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\BadClasses\\',
+            'Prototype/%bad_classes_dir%/*'
+        );
+
+        $definition = $container->getDefinition(MissingParent::class);
+
+        // The class should be set even when the definition has errors
+        $this->assertSame(MissingParent::class, $definition->getClass());
+        $this->assertNotEmpty($definition->getErrors());
+    }
+
     public function testRegisterClassesWithBadPrefix()
     {
         $this->expectException(InvalidArgumentException::class);
