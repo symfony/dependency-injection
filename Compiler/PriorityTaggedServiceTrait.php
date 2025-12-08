@@ -81,6 +81,7 @@ trait PriorityTaggedServiceTrait
                 $phpAttributes = [];
             }
 
+            $attributes = array_values($attributes);
             for ($i = 0; $i < \count($attributes); ++$i) {
                 if (!($attribute = $attributes[$i]) && $phpAttributes) {
                     array_splice($attributes, $i--, 1, $phpAttributes);

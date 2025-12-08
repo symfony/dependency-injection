@@ -448,6 +448,21 @@ class PriorityTaggedServiceTraitTest extends TestCase
         $this->assertArrayHasKey('foo', $services);
         $this->assertArrayHasKey('default', $services);
     }
+
+    public function testTagAttributesAreNotAList()
+    {
+        $container = new ContainerBuilder();
+        $container->register('service1')->setTags([
+            'my_custom_tag' => [1 => ['attributes' => 'not_a_list']],
+        ]);
+
+        $priorityTaggedServiceTraitImplementation = new PriorityTaggedServiceTraitImplementation();
+
+        $expected = [
+            new Reference('service1'),
+        ];
+        $this->assertEquals($expected, $priorityTaggedServiceTraitImplementation->test('my_custom_tag', $container));
+    }
 }
 
 class PriorityTaggedServiceTraitImplementation
