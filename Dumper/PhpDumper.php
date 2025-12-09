@@ -458,7 +458,7 @@ EOF;
         foreach ($edges as $edge) {
             $node = $edge->getDestNode();
             $id = $node->getId();
-            if ($sourceId === $id || !$node->getValue() instanceof Definition || $edge->isWeak()) {
+            if (($sourceId === $id && !$edge->isLazy()) || !$node->getValue() instanceof Definition || $edge->isWeak()) {
                 continue;
             }
 
@@ -699,7 +699,6 @@ EOF;
 
         $asGhostObject = false;
         $isProxyCandidate = $this->isProxyCandidate($definition, $asGhostObject, $id);
-        $instantiation = '';
 
         $lastWitherIndex = null;
         foreach ($definition->getMethodCalls() as $k => $call) {
@@ -708,20 +707,26 @@ EOF;
             }
         }
 
-        if (!$isProxyCandidate && $definition->isShared() && !isset($this->singleUsePrivateIds[$id]) && null === $lastWitherIndex) {
-            $instantiation = \sprintf('$container->%s[%s] = %s', $this->container->getDefinition($id)->isPublic() ? 'services' : 'privates', $this->doExport($id), $isSimpleInstance ? '' : '$instance');
-        } elseif (!$isSimpleInstance) {
-            $instantiation = '$instance';
+        $shouldShareInline = !$isProxyCandidate && $definition->isShared() && !isset($this->singleUsePrivateIds[$id]) && null === $lastWitherIndex;
+        $serviceAccessor = \sprintf('$container->%s[%s]', $this->container->getDefinition($id)->isPublic() ? 'services' : 'privates', $this->doExport($id));
+        $return = match (true) {
+            $shouldShareInline && !isset($this->circularReferences[$id]) && $isSimpleInstance=> 'return '.$serviceAccessor.' = ',
+            $shouldShareInline && !isset($this->circularReferences[$id]) => $serviceAccessor.' = $instance = ',
+            $shouldShareInline || !$isSimpleInstance => '$instance = ',
+            default => 'return ',
+        };
+
+        $code = $this->addNewInstance($definition, '        '.$return, $id, $asGhostObject);
+
+        if ($shouldShareInline && isset($this->circularReferences[$id])) {
+            $code .= \sprintf(
+                "\n        if (isset(%s)) {\n            return %1\$s;\n        }\n\n        %s%1\$s = \$instance;\n",
+                $serviceAccessor,
+                $isSimpleInstance ? 'return ' : ''
+            );
         }
 
-        $return = '';
-        if ($isSimpleInstance) {
-            $return = 'return ';
-        } else {
-            $instantiation .= ' = ';
-        }
-
-        return $this->addNewInstance($definition, '        '.$return.$instantiation, $id, $asGhostObject);
+        return $code;
     }
 
     private function isTrivialInstance(Definition $definition): bool
@@ -1055,7 +1060,7 @@ EOTXT
         $code = '';
 
         if ($isSimpleInstance = $isRootInstance = null === $inlineDef) {
-            foreach ($this->serviceCalls as $targetId => [$callCount, $behavior, $byConstructor]) {
+            foreach ($this->serviceCalls as $targetId => [, , $byConstructor]) {
                 if ($byConstructor && isset($this->circularReferences[$id][$targetId]) && !$this->circularReferences[$id][$targetId] && !($this->hasProxyDumper && $definition->isLazy())) {
                     $code .= $this->addInlineReference($id, $definition, $targetId, $forConstructor);
                 }

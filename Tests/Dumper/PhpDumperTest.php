@@ -921,7 +921,6 @@ class PhpDumperTest extends TestCase
 
         $dumper = new PhpDumper($container);
 
-        
         $legacy = \PHP_VERSION_ID < 80400 || !trait_exists(LazyDecoratorTrait::class) ? 'legacy_' : '';
         $this->assertStringEqualsFile(self::$fixturesPath.'/php/'.$legacy.'services_dedup_lazy.php', $dumper->dump());
     }
@@ -1833,6 +1832,37 @@ PHP
         $this->addToAssertionCount(1);
     }
 
+    public function testDecoratedFactoryServiceKeepsReentrantInstance()
+    {
+        ReentrantFactory::reset();
+
+        $container = new ContainerBuilder();
+        $container
+            ->register('decorated_service', \stdClass::class)
+            ->setPublic(true);
+        $container
+            ->register('decorated_service.reentrant', \stdClass::class)
+            ->setPublic(true)
+            ->setDecoratedService('decorated_service')
+            ->setFactory([ReentrantFactory::class, 'create'])
+            ->setArguments([
+                new ServiceLocatorArgument(['decorated_service' => new Reference('decorated_service')]),
+                new Reference('decorated_service.reentrant.inner'),
+            ]);
+
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        eval('?>'.$dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Reentrant_Service']));
+
+        $compiled = new \Symfony_DI_PhpDumper_Test_Reentrant_Service();
+
+        $service = $compiled->get('decorated_service');
+
+        $this->assertInstanceOf(\stdClass::class, ReentrantFactory::$reentrantInstance);
+        $this->assertSame(ReentrantFactory::$reentrantInstance, $service);
+    }
+
     public function testExpressionInFactory()
     {
         $container = new ContainerBuilder();
@@ -2217,5 +2247,28 @@ class CallableAdapterConsumer
         #[AutowireCallable(service: 'foo', method: 'cloneFoo')]
         public SingleMethodInterface $foo,
     ) {
+    }
+}
+
+class ReentrantFactory
+{
+    public static ?object $reentrantInstance = null;
+    private static bool $shouldReenter = true;
+
+    public static function reset(): void
+    {
+        self::$reentrantInstance = null;
+        self::$shouldReenter = true;
+    }
+
+    public static function create(ServiceLocator $locator, object $inner): \stdClass
+    {
+        if (self::$shouldReenter) {
+            self::$shouldReenter = false;
+            self::$reentrantInstance = $locator->get('decorated_service');
+            self::$shouldReenter = true;
+        }
+
+        return (object) ['inner' => $inner];
     }
 }

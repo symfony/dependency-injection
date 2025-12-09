@@ -117,7 +117,13 @@ class getBazService extends ProjectServiceContainer
      */
     public static function do($container, $lazyLoad = true)
     {
-        $container->services['baz'] = $instance = new \Baz();
+        $instance = new \Baz();
+
+        if (isset($container->services['baz'])) {
+            return $container->services['baz'];
+        }
+
+        $container->services['baz'] = $instance;
 
         $instance->setFoo(($container->services['foo_with_inline'] ?? $container->load('getFooWithInlineService')));
 
@@ -339,7 +345,13 @@ class getFooWithInlineService extends ProjectServiceContainer
      */
     public static function do($container, $lazyLoad = true)
     {
-        $container->services['foo_with_inline'] = $instance = new \Foo();
+        $instance = new \Foo();
+
+        if (isset($container->services['foo_with_inline'])) {
+            return $container->services['foo_with_inline'];
+        }
+
+        $container->services['foo_with_inline'] = $instance;
 
         $a = new \Bar();
         $a->pub = 'pub';
