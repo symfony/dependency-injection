@@ -162,7 +162,13 @@ class ProjectServiceContainer extends Container
      */
     protected static function getBazService($container)
     {
-        $container->services['baz'] = $instance = new \Baz();
+        $instance = new \Baz();
+
+        if (isset($container->services['baz'])) {
+            return $container->services['baz'];
+        }
+
+        $container->services['baz'] = $instance;
 
         $instance->setFoo(($container->services['foo_with_inline'] ?? self::getFooWithInlineService($container)));
 
@@ -310,7 +316,13 @@ class ProjectServiceContainer extends Container
      */
     protected static function getFooWithInlineService($container)
     {
-        $container->services['foo_with_inline'] = $instance = new \Foo();
+        $instance = new \Foo();
+
+        if (isset($container->services['foo_with_inline'])) {
+            return $container->services['foo_with_inline'];
+        }
+
+        $container->services['foo_with_inline'] = $instance;
 
         $a = new \Bar();
         $a->pub = 'pub';
