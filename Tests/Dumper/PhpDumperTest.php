@@ -320,6 +320,38 @@ class PhpDumperTest extends TestCase
         $this->assertStringMatchesFormatFile(self::$fixturesPath.'/php/services9_inlined_factories_with_tagged_iterrator.txt', $dump);
     }
 
+    public function testTaggedIteratorServicesRemainSharedWhenUsedByFactory()
+    {
+        PhpDumperTest_TaggedIteratorService::reset();
+
+        $container = new ContainerBuilder();
+        $container
+            ->register('tagged_service', PhpDumperTest_TaggedIteratorService::class)
+            ->addTag('tag1');
+        $container
+            ->register('wrapper', PhpDumperTest_TaggedIteratorWrapper::class)
+            ->setFactory([new Reference('wrapper_factory'), 'create'])
+            ->setPublic(true);
+        $container
+            ->register('wrapper_factory', PhpDumperTest_TaggedIteratorWrapperFactory::class)
+            ->setArguments([new TaggedIteratorArgument('tag1')]);
+
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        eval('?>'.$dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Tagged_Iterator_Factory']));
+
+        $compiled = new \Symfony_DI_PhpDumper_Test_Tagged_Iterator_Factory();
+        $wrapper = $compiled->get('wrapper');
+
+        $firstIteration = iterator_to_array($wrapper->getTaggedServices(), false);
+        $secondIteration = iterator_to_array($wrapper->getTaggedServices(), false);
+
+        $this->assertCount(1, $firstIteration);
+        $this->assertSame($firstIteration, $secondIteration);
+        $this->assertSame(1, PhpDumperTest_TaggedIteratorService::$constructed);
+    }
+
     public function testDumpAsFilesWithLazyFactoriesInlined()
     {
         $container = new ContainerBuilder();
@@ -1813,6 +1845,37 @@ class PhpDumperTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function testDecoratedFactoryServiceKeepsReentrantInstance()
+    {
+        ReentrantFactory::reset();
+
+        $container = new ContainerBuilder();
+        $container
+            ->register('decorated_service', \stdClass::class)
+            ->setPublic(true);
+        $container
+            ->register('decorated_service.reentrant', \stdClass::class)
+            ->setPublic(true)
+            ->setDecoratedService('decorated_service')
+            ->setFactory([ReentrantFactory::class, 'create'])
+            ->setArguments([
+                new ServiceLocatorArgument(['decorated_service' => new Reference('decorated_service')]),
+                new Reference('decorated_service.reentrant.inner'),
+            ]);
+
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        eval('?>'.$dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Reentrant_Service']));
+
+        $compiled = new \Symfony_DI_PhpDumper_Test_Reentrant_Service();
+
+        $service = $compiled->get('decorated_service');
+
+        $this->assertInstanceOf(\stdClass::class, ReentrantFactory::$reentrantInstance);
+        $this->assertSame(ReentrantFactory::$reentrantInstance, $service);
+    }
+
     public function testExpressionInFactory()
     {
         $container = new ContainerBuilder();
@@ -2257,6 +2320,70 @@ class CallableAdapterConsumer
         #[AutowireCallable(service: 'foo', method: 'cloneFoo')]
         public SingleMethodInterface $foo,
     ) {
+    }
+}
+
+class ReentrantFactory
+{
+    public static ?object $reentrantInstance = null;
+    private static bool $shouldReenter = true;
+
+    public static function reset(): void
+    {
+        self::$reentrantInstance = null;
+        self::$shouldReenter = true;
+    }
+
+    public static function create(ServiceLocator $locator, object $inner): \stdClass
+    {
+        if (self::$shouldReenter) {
+            self::$shouldReenter = false;
+            self::$reentrantInstance = $locator->get('decorated_service');
+            self::$shouldReenter = true;
+        }
+
+        return (object) ['inner' => $inner];
+    }
+}
+
+class PhpDumperTest_TaggedIteratorService
+{
+    public static int $constructed = 0;
+
+    public function __construct()
+    {
+        ++self::$constructed;
+    }
+
+    public static function reset(): void
+    {
+        self::$constructed = 0;
+    }
+}
+
+class PhpDumperTest_TaggedIteratorWrapper
+{
+    public function __construct(
+        private iterable $taggedServices,
+    ) {
+    }
+
+    public function getTaggedServices(): iterable
+    {
+        return $this->taggedServices;
+    }
+}
+
+class PhpDumperTest_TaggedIteratorWrapperFactory
+{
+    public function __construct(
+        private iterable $taggedServices,
+    ) {
+    }
+
+    public function create(): PhpDumperTest_TaggedIteratorWrapper
+    {
+        return new PhpDumperTest_TaggedIteratorWrapper($this->taggedServices);
     }
 }
 
