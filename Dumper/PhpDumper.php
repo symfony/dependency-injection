@@ -710,7 +710,7 @@ EOF;
         $shouldShareInline = !$isProxyCandidate && $definition->isShared() && !isset($this->singleUsePrivateIds[$id]) && null === $lastWitherIndex;
         $serviceAccessor = \sprintf('$container->%s[%s]', $this->container->getDefinition($id)->isPublic() ? 'services' : 'privates', $this->doExport($id));
         $return = match (true) {
-            $shouldShareInline && !isset($this->circularReferences[$id]) && $isSimpleInstance=> 'return '.$serviceAccessor.' = ',
+            $shouldShareInline && !isset($this->circularReferences[$id]) && $isSimpleInstance => 'return '.$serviceAccessor.' = ',
             $shouldShareInline && !isset($this->circularReferences[$id]) => $serviceAccessor.' = $instance = ',
             $shouldShareInline || !$isSimpleInstance => '$instance = ',
             default => 'return ',
@@ -2194,7 +2194,7 @@ EOF;
             if (!$value = $edge->getSourceNode()->getValue()) {
                 continue;
             }
-            if ($edge->isLazy() || !$value instanceof Definition || !$value->isShared()) {
+            if ($edge->isLazy() || !$value instanceof Definition || !$value->isShared() || $edge->isFromMultiUseArgument()) {
                 return false;
             }
 

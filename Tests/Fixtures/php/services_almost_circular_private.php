@@ -656,7 +656,7 @@ class Symfony_DI_PhpDumper_Test_Almost_Circular_Private extends Container
     {
         $instance = (new \FactoryCircular(new RewindableGenerator(function () use ($container) {
             yield 0 => ($container->privates['mailer.transport_factory.amazon'] ?? self::getMailer_TransportFactory_AmazonService($container));
-            yield 1 => self::getMailerInline_TransportFactory_AmazonService($container);
+            yield 1 => ($container->privates['mailer_inline.transport_factory.amazon'] ?? self::getMailerInline_TransportFactory_AmazonService($container));
         }, 2)))->create();
 
         if (isset($container->privates['mailer.transport'])) {
@@ -708,7 +708,7 @@ class Symfony_DI_PhpDumper_Test_Almost_Circular_Private extends Container
         $a = new \stdClass();
         $a->handler = ($container->privates['mailer_inline.mailer'] ?? self::getMailerInline_MailerService($container));
 
-        return new \stdClass($a);
+        return $container->privates['mailer_inline.transport_factory.amazon'] = new \stdClass($a);
     }
 
     /**

@@ -26,8 +26,9 @@ class ServiceReferenceGraphEdge
     private bool $lazy;
     private bool $weak;
     private bool $byConstructor;
+    private bool $byMultiUseArgument;
 
-    public function __construct(ServiceReferenceGraphNode $sourceNode, ServiceReferenceGraphNode $destNode, mixed $value = null, bool $lazy = false, bool $weak = false, bool $byConstructor = false)
+    public function __construct(ServiceReferenceGraphNode $sourceNode, ServiceReferenceGraphNode $destNode, mixed $value = null, bool $lazy = false, bool $weak = false, bool $byConstructor = false, bool $byMultiUseArgument = false)
     {
         $this->sourceNode = $sourceNode;
         $this->destNode = $destNode;
@@ -35,6 +36,7 @@ class ServiceReferenceGraphEdge
         $this->lazy = $lazy;
         $this->weak = $weak;
         $this->byConstructor = $byConstructor;
+        $this->byMultiUseArgument = $byMultiUseArgument;
     }
 
     /**
@@ -83,5 +85,10 @@ class ServiceReferenceGraphEdge
     public function isReferencedByConstructor(): bool
     {
         return $this->byConstructor;
+    }
+
+    public function isFromMultiUseArgument(): bool
+    {
+        return $this->byMultiUseArgument;
     }
 }
