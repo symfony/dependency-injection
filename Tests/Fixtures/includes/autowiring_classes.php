@@ -2,8 +2,10 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\AutowireCallable;
 use Symfony\Contracts\Service\Attribute\Required;
 
 require __DIR__.'/uniontype_classes.php';
@@ -575,5 +577,31 @@ class LazyProxyInheritanceConsumer
     public function getDependency(): BaseLazyProxyClass
     {
         return $this->dep;
+    }
+}
+
+class Listener1
+{
+    public function __construct(
+        #[AutowireCallable(service: MyInlineService::class, method: 'someMethod1')]
+        public \Closure $closure,
+    ) {
+    }
+}
+
+class Listener2
+{
+    public function __construct(
+        #[AutowireCallable(service: MyInlineService::class, method: 'someMethod2')]
+        public \Closure $closure,
+        public \stdClass $someOtherService,
+    ) {
+    }
+}
+
+class ListenerResolver
+{
+    public function __construct(public ContainerInterface $container)
+    {
     }
 }
