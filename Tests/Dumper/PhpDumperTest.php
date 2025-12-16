@@ -53,6 +53,9 @@ use Symfony\Component\DependencyInjection\Tests\Compiler\AInterface;
 use Symfony\Component\DependencyInjection\Tests\Compiler\Foo;
 use Symfony\Component\DependencyInjection\Tests\Compiler\FooVoid;
 use Symfony\Component\DependencyInjection\Tests\Compiler\IInterface;
+use Symfony\Component\DependencyInjection\Tests\Compiler\Listener1;
+use Symfony\Component\DependencyInjection\Tests\Compiler\Listener2;
+use Symfony\Component\DependencyInjection\Tests\Compiler\ListenerResolver;
 use Symfony\Component\DependencyInjection\Tests\Compiler\MyCallable;
 use Symfony\Component\DependencyInjection\Tests\Compiler\MyFactory;
 use Symfony\Component\DependencyInjection\Tests\Compiler\MyInlineService;
@@ -2167,6 +2170,43 @@ class PhpDumperTest extends TestCase
         $this->assertNotSame($fooService->factoredFromService, $barService->factoredFromService);
         $this->assertNotSame($fooService->factoredFromService, $barService->factoredFromService);
         $this->assertNotSame($fooService->factoredFromServiceWithParam, $barService->factoredFromServiceWithParam);
+    }
+
+    public function testAutowireCallableWithServiceLocator()
+    {
+        $containerBuilder = new ContainerBuilder();
+
+        $containerBuilder->register(MyInlineService::class, MyInlineService::class);
+        $containerBuilder->register(\stdClass::class, \stdClass::class);
+
+        $containerBuilder->register(Listener1::class, Listener1::class)
+            ->setAutowired(true);
+
+        $containerBuilder->register(Listener2::class, Listener2::class)
+            ->setAutowired(true);
+
+        $containerBuilder->register(ListenerResolver::class, ListenerResolver::class)
+            ->addArgument(new ServiceLocatorArgument([
+                Listener1::class => new TypedReference(Listener1::class, Listener1::class),
+                Listener2::class => new TypedReference(Listener2::class, Listener2::class),
+            ]))
+            ->setPublic(true);
+
+        $containerBuilder->compile();
+
+        $dumper = new PhpDumper($containerBuilder);
+
+        $this->assertStringEqualsFile(self::$fixturesPath.'/php/autowire_callable_with_service_locator.php', $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_AutowireCallable_With_ServiceLocator']));
+
+        require self::$fixturesPath.'/php/autowire_callable_with_service_locator.php';
+
+        $container = new \Symfony_DI_PhpDumper_Test_AutowireCallable_With_ServiceLocator();
+
+        $listenerResolver = $container->get(ListenerResolver::class);
+        $this->assertTrue($listenerResolver->container->has(Listener1::class));
+        $this->assertInstanceOf(\Closure::class, $listenerResolver->container->get(Listener1::class)->closure);
+        $this->assertTrue($listenerResolver->container->has(Listener2::class));
+        $this->assertInstanceOf(\Closure::class, $listenerResolver->container->get(Listener2::class)->closure);
     }
 
     #[DataProvider('getStripCommentsCodes')]
