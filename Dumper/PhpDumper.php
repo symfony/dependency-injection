@@ -1285,7 +1285,7 @@ class PhpDumper extends Dumper
             if (null !== $r
                 && (null !== $constructor = $r->getConstructor())
                 && 0 === $constructor->getNumberOfRequiredParameters()
-                && Container::class !== $constructor->getDeclaringClass()->name
+                && Container::class !== $constructor->class
             ) {
                 $code .= "        parent::__construct();\n";
                 $code .= "        \$this->parameterBag = null;\n\n";

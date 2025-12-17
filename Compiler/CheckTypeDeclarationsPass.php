@@ -203,7 +203,7 @@ final class CheckTypeDeclarationsPass extends AbstractRecursivePass
         }
 
         if ('self' === $type) {
-            $type = $parameter->getDeclaringClass()->getName();
+            $type = $parameter->getDeclaringClass()->name;
         }
 
         if ('static' === $type) {
