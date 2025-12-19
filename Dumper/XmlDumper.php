@@ -308,11 +308,13 @@ class XmlDumper extends Dumper
                 if (null !== $tag->getIndexAttribute()) {
                     $xmlAttr .= \sprintf(' index-by="%s"', $this->encode($tag->getIndexAttribute()));
 
-                    if (null !== $tag->getDefaultIndexMethod()) {
-                        $xmlAttr .= \sprintf(' default-index-method="%s"', $this->encode($tag->getDefaultIndexMethod()));
+                    $defaultPrefix = 'getDefault'.str_replace(' ', '', ucwords(preg_replace('/[^a-zA-Z0-9\x7f-\xff]++/', ' ', $tag->getIndexAttribute())));
+
+                    if ($tag->getDefaultIndexMethod(false) !== $defaultPrefix.'Name') {
+                        $xmlAttr .= \sprintf(' default-index-method="%s"', $this->encode($tag->getDefaultIndexMethod(false)));
                     }
-                    if (null !== $tag->getDefaultPriorityMethod()) {
-                        $xmlAttr .= \sprintf(' default-priority-method="%s"', $this->encode($tag->getDefaultPriorityMethod()));
+                    if ($tag->getDefaultPriorityMethod(false) !== $defaultPrefix.'Priority') {
+                        $xmlAttr .= \sprintf(' default-priority-method="%s"', $this->encode($tag->getDefaultPriorityMethod(false)));
                     }
                 }
                 if (1 === \count($excludes = $tag->getExclude())) {

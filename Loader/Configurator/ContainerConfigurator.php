@@ -143,18 +143,50 @@ function iterator(array $values): IteratorArgument
 
 /**
  * Creates a lazy iterator by tag name.
+ *
+ * @param string          $tag            The name of the tag identifying the target services
+ * @param string|null     $indexAttribute The name of the attribute that defines the key referencing each service in the tagged collection
+ * @param string|string[] $exclude        Services to exclude from the iterator
+ * @param bool            $excludeSelf    Whether to automatically exclude the referencing service from the iterator
  */
-function tagged_iterator(string $tag, ?string $indexAttribute = null, ?string $defaultIndexMethod = null, ?string $defaultPriorityMethod = null, string|array $exclude = [], bool $excludeSelf = true): TaggedIteratorArgument
+function tagged_iterator(string $tag, ?string $indexAttribute = null, string|array|null $exclude = [], bool|string|null $excludeSelf = true, ...$_): TaggedIteratorArgument
 {
-    return new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod, false, $defaultPriorityMethod, (array) $exclude, $excludeSelf);
+    if (\func_num_args() > 4 || !\is_bool($excludeSelf) || null === $exclude || (\is_string($exclude) && str_starts_with($exclude, 'get') && !\array_key_exists('defaultIndexMethod', $_))) {
+        [, , $defaultIndexMethod, $defaultPriorityMethod, $exclude, $excludeSelf] = \func_get_args() + [2 => null, null, [], true];
+    } else {
+        $defaultIndexMethod = \array_key_exists('defaultIndexMethod', $_) ? $_['defaultIndexMethod'] : false;
+        $defaultPriorityMethod = \array_key_exists('defaultPriorityMethod', $_) ? $_['defaultPriorityMethod'] : false;
+    }
+
+    if (false !== $defaultIndexMethod || false !== $defaultPriorityMethod) {
+        return new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod, false, $defaultPriorityMethod, (array) $exclude, $excludeSelf);
+    }
+
+    return new TaggedIteratorArgument($tag, $indexAttribute, false, (array) $exclude, $excludeSelf);
 }
 
 /**
  * Creates a service locator by tag name.
+ *
+ * @param string          $tag            The name of the tag identifying the target services
+ * @param string|null     $indexAttribute The name of the attribute that defines the key referencing each service in the tagged collection
+ * @param string|string[] $exclude        Services to exclude from the iterator
+ * @param bool            $excludeSelf    Whether to automatically exclude the referencing service from the iterator
  */
-function tagged_locator(string $tag, ?string $indexAttribute = null, ?string $defaultIndexMethod = null, ?string $defaultPriorityMethod = null, string|array $exclude = [], bool $excludeSelf = true): ServiceLocatorArgument
+function tagged_locator(string $tag, ?string $indexAttribute = null, string|array|null $exclude = [], bool|string|null $excludeSelf = true, ...$_): ServiceLocatorArgument
 {
-    return new ServiceLocatorArgument(new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod, true, $defaultPriorityMethod, (array) $exclude, $excludeSelf));
+    if (\func_num_args() > 4 || !\is_bool($excludeSelf) || null === $exclude || (\is_string($exclude) && str_starts_with($exclude, 'get') && !\array_key_exists('defaultIndexMethod', $_))) {
+        [, , $defaultIndexMethod, $defaultPriorityMethod, $exclude, $excludeSelf] = \func_get_args() + [2 => null, null, [], true];
+    } else {
+        $defaultIndexMethod = \array_key_exists('defaultIndexMethod', $_) ? $_['defaultIndexMethod'] : false;
+        $defaultPriorityMethod = \array_key_exists('defaultPriorityMethod', $_) ? $_['defaultPriorityMethod'] : false;
+    }
+
+    if (false !== $defaultIndexMethod || false !== $defaultPriorityMethod) {
+        return new ServiceLocatorArgument(new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod, true, $defaultPriorityMethod, (array) $exclude, $excludeSelf));
+    }
+
+    return new ServiceLocatorArgument(new TaggedIteratorArgument($tag, $indexAttribute, true, (array) $exclude, $excludeSelf));
 }
 
 /**

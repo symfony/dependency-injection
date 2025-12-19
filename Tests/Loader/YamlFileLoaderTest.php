@@ -415,6 +415,8 @@ class YamlFileLoaderTest extends TestCase
         }
     }
 
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testTaggedArgumentsWithIndex()
     {
         $container = new ContainerBuilder();
@@ -528,6 +530,8 @@ class YamlFileLoaderTest extends TestCase
         $loader->load('tag_name_no_string.yml');
     }
 
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testParsesIteratorArgument()
     {
         $container = new ContainerBuilder();
@@ -994,6 +998,8 @@ class YamlFileLoaderTest extends TestCase
         $this->assertSame([['interface' => 'SomeInterface']], $definition->getTag('proxy'));
     }
 
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testServiceWithSameNameAsInterfaceAndFactoryIsNotTagged()
     {
         $container = new ContainerBuilder();

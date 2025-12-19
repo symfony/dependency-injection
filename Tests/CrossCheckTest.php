@@ -12,6 +12,8 @@
 namespace Symfony\Component\DependencyInjection\Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -31,6 +33,8 @@ class CrossCheckTest extends TestCase
     }
 
     #[DataProvider('crossCheckYamlLoadersDumpers')]
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testYamlCrossCheck($fixture)
     {
         $tmp = tempnam(sys_get_temp_dir(), 'sf');

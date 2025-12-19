@@ -12,6 +12,8 @@
 namespace Symfony\Component\DependencyInjection\Tests\Dumper;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
@@ -189,6 +191,50 @@ class XmlDumperTest extends TestCase
 
     public function testTaggedArguments()
     {
+        $taggedIterator = new TaggedIteratorArgument('foo_tag', 'barfoo');
+        $taggedIterator2 = new TaggedIteratorArgument('foo_tag', null, false, ['baz']);
+        $taggedIterator3 = new TaggedIteratorArgument('foo_tag', null, false, ['baz', 'qux'], false);
+
+        $container = new ContainerBuilder();
+
+        $container->register('foo', 'Foo')->addTag('foo_tag');
+        $container->register('baz', 'Baz')->addTag('foo_tag');
+        $container->register('qux', 'Qux')->addTag('foo_tag');
+
+        $container->register('foo_tagged_iterator', 'Bar')
+            ->setPublic(true)
+            ->addArgument($taggedIterator)
+        ;
+        $container->register('foo2_tagged_iterator', 'Bar')
+            ->setPublic(true)
+            ->addArgument($taggedIterator2)
+        ;
+        $container->register('foo3_tagged_iterator', 'Bar')
+            ->setPublic(true)
+            ->addArgument($taggedIterator3)
+        ;
+
+        $container->register('foo_tagged_locator', 'Bar')
+            ->setPublic(true)
+            ->addArgument(new ServiceLocatorArgument($taggedIterator))
+        ;
+        $container->register('foo2_tagged_locator', 'Bar')
+            ->setPublic(true)
+            ->addArgument(new ServiceLocatorArgument($taggedIterator2))
+        ;
+        $container->register('foo3_tagged_locator', 'Bar')
+            ->setPublic(true)
+            ->addArgument(new ServiceLocatorArgument($taggedIterator3))
+        ;
+
+        $dumper = new XmlDumper($container);
+        $this->assertXmlStringEqualsGeneratedXmlFile('services_with_tagged_arguments.xml', $dumper->dump());
+    }
+
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
+    public function testLegacyTaggedArguments()
+    {
         $taggedIterator = new TaggedIteratorArgument('foo_tag', 'barfoo', 'foobar', false, 'getPriority');
         $taggedIterator2 = new TaggedIteratorArgument('foo_tag', null, null, false, null, ['baz']);
         $taggedIterator3 = new TaggedIteratorArgument('foo_tag', null, null, false, null, ['baz', 'qux'], false);
@@ -226,7 +272,7 @@ class XmlDumperTest extends TestCase
         ;
 
         $dumper = new XmlDumper($container);
-        $this->assertXmlStringEqualsGeneratedXmlFile('services_with_tagged_arguments.xml', $dumper->dump());
+        $this->assertXmlStringEqualsGeneratedXmlFile('legacy_services_with_tagged_arguments.xml', $dumper->dump());
     }
 
     public function testServiceClosure()
