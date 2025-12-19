@@ -54,7 +54,7 @@ class ContainerConfigurator extends AbstractConfigurator
         }
 
         if (!$this->container->hasExtension($namespace)) {
-            $extensions = array_filter(array_map(fn (ExtensionInterface $ext) => $ext->getAlias(), $this->container->getExtensions()));
+            $extensions = array_filter(array_map(static fn (ExtensionInterface $ext) => $ext->getAlias(), $this->container->getExtensions()));
             throw new InvalidArgumentException(UndefinedExtensionHandler::getErrorMessage($namespace, $this->file, $namespace, $extensions));
         }
 

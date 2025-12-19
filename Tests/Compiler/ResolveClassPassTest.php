@@ -117,7 +117,7 @@ class ResolveClassPassTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Service id "Acme\ClassImplementsUnavailableInterface" looks like a FQCN but no corresponding class or interface exists. To resolve this ambiguity, please rename this service to a non-FQCN (e.g. using dots), or create the missing class or interface.');
 
-        $autoloader = function (string $class) {
+        $autoloader = static function (string $class) {
             if ('Acme\ClassImplementsUnavailableInterface' === $class) {
                 new class implements UnavailableInterface {};
             }

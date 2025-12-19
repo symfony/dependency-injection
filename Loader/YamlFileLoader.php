@@ -817,7 +817,7 @@ class YamlFileLoader extends FileLoader
             }
 
             if (!$this->prepend && !$this->container->hasExtension($namespace)) {
-                $extensionNamespaces = array_filter(array_map(fn (ExtensionInterface $ext) => $ext->getAlias(), $this->container->getExtensions()));
+                $extensionNamespaces = array_filter(array_map(static fn (ExtensionInterface $ext) => $ext->getAlias(), $this->container->getExtensions()));
                 throw new InvalidArgumentException(UndefinedExtensionHandler::getErrorMessage($namespace, $file, $namespace, $extensionNamespaces));
             }
         }
