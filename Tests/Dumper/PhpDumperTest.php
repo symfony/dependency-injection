@@ -597,6 +597,22 @@ class PhpDumperTest extends TestCase
         putenv('Baz');
     }
 
+    public function testEnvParameterWithDot()
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('env(dynamic.var)', 'test_value');
+        $container->setParameter('test_with_dot', '%env(dynamic.var)%');
+        $container->compile();
+        $dumper = new PhpDumper($container);
+        $dumped = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_EnvWithDot']);
+
+        $this->assertStringContainsString("'test_with_dot' => \$container->getEnv('dynamic.var')", $dumped, 'Parameter with dot should be in getDynamicParameter');
+
+        if (preg_match('/protected function getDefaultParameters\(\): array\s*\{\s*return \[(.*?)\];/s', $dumped, $matches)) {
+            $this->assertStringNotContainsString("'test_with_dot'", $matches[1], 'Parameter with dot should be dynamic in getDynamicParameter');
+        }
+    }
+
     public function testResolvedBase64EnvParameters()
     {
         $container = new ContainerBuilder();

@@ -1604,7 +1604,7 @@ class PhpDumper extends Dumper
             $export = $this->exportParameters([$value], '', 12, $hasEnum);
             $export = explode('0 => ', substr(rtrim($export, " ]\n"), 2, -1), 2);
 
-            if ($hasEnum || preg_match("/\\\$container->(?:getEnv\('(?:[-.\w\\\\]*+:)*+\w*+'\)|targetDir\.'')/", $export[1])) {
+            if ($hasEnum || preg_match("/\\\$container->(?:getEnv\('(?:[-.\w\\\\]*+:)*+[\w.]*+'\)|targetDir\.'')/", $export[1])) {
                 $dynamicPhp[$key] = \sprintf('%s%s => %s,', $export[0], $this->export($key), $export[1]);
                 $this->dynamicParameters[$key] = true;
             } else {
