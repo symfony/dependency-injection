@@ -1,4 +1,5 @@
 parameters:
+    .container.known_envs: [prod]
     foo_param: bar_value
 
 services:
