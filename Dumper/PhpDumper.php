@@ -1622,18 +1622,16 @@ EOF;
             trigger_deprecation(...self::DEPRECATED_PARAMETERS[$name]);
         }
 
-        if (isset($this->buildParameters[$name])) {
+        if (\array_key_exists($name, $this->buildParameters)) {
             return $this->buildParameters[$name];
-        }
-
-        if (!(isset($this->parameters[$name]) || isset($this->loadedDynamicParameters[$name]) || \array_key_exists($name, $this->parameters))) {
-            throw new ParameterNotFoundException($name, extraMessage: self::NONEMPTY_PARAMETERS[$name] ?? null);
         }
 
         if (isset($this->loadedDynamicParameters[$name])) {
             $value = $this->loadedDynamicParameters[$name] ? $this->dynamicParameters[$name] : $this->getDynamicParameter($name);
-        } else {
+        } elseif (\array_key_exists($name, $this->parameters) && '.' !== ($name[0] ?? '')) {
             $value = $this->parameters[$name];
+        } else {
+            throw new ParameterNotFoundException($name, extraMessage: self::NONEMPTY_PARAMETERS[$name] ?? null);
         }
 
         if (isset(self::NONEMPTY_PARAMETERS[$name]) && (null === $value || '' === $value || [] === $value)) {
@@ -1645,11 +1643,11 @@ EOF;
 
     public function hasParameter(string $name): bool
     {
-        if (isset($this->buildParameters[$name])) {
+        if (\array_key_exists($name, $this->buildParameters)) {
             return true;
         }
 
-        return isset($this->parameters[$name]) || isset($this->loadedDynamicParameters[$name]) || \array_key_exists($name, $this->parameters);
+        return \array_key_exists($name, $this->parameters) || isset($this->loadedDynamicParameters[$name]);
     }
 
     public function setParameter(string $name, $value): void

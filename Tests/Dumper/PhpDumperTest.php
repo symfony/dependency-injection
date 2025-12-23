@@ -38,6 +38,7 @@ use Symfony\Component\DependencyInjection\Exception\EnvParameterException;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Exception\ParameterCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\LazyProxy\PhpDumper\NullDumper;
@@ -1832,6 +1833,25 @@ PHP
 
         $dumper = new PhpDumper($container);
         $dumper->dump();
+    }
+
+    public function testDotPrefixedParametersAreNotAccessibleInDumpedContainer()
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('.build_param', 'internal_value');
+        $container->setParameter('regular_param', 'public_value');
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        eval('?>'.$dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Dot_Prefixed']));
+
+        $dumped = new \Symfony_DI_PhpDumper_Test_Dot_Prefixed();
+
+        $this->assertTrue($dumped->hasParameter('regular_param'));
+        $this->assertSame('public_value', $dumped->getParameter('regular_param'));
+        $this->assertFalse($dumped->hasParameter('.build_param'));
+        $this->expectException(ParameterNotFoundException::class);
+        $dumped->getParameter('.build_param');
     }
 
     /**
