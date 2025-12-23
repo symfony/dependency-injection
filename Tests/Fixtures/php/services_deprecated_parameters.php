@@ -58,11 +58,12 @@ class ProjectServiceContainer extends Container
             trigger_deprecation(...self::DEPRECATED_PARAMETERS[$name]);
         }
 
-        if (!(isset($this->parameters[$name]) || isset($this->loadedDynamicParameters[$name]) || \array_key_exists($name, $this->parameters))) {
-            throw new ParameterNotFoundException($name);
-        }
         if (isset($this->loadedDynamicParameters[$name])) {
             return $this->loadedDynamicParameters[$name] ? $this->dynamicParameters[$name] : $this->getDynamicParameter($name);
+        }
+
+        if (!\array_key_exists($name, $this->parameters) || '.' === ($name[0] ?? '')) {
+            throw new ParameterNotFoundException($name);
         }
 
         return $this->parameters[$name];
@@ -70,7 +71,7 @@ class ProjectServiceContainer extends Container
 
     public function hasParameter(string $name): bool
     {
-        return isset($this->parameters[$name]) || isset($this->loadedDynamicParameters[$name]) || \array_key_exists($name, $this->parameters);
+        return \array_key_exists($name, $this->parameters) || isset($this->loadedDynamicParameters[$name]);
     }
 
     public function setParameter(string $name, $value): void
