@@ -58,7 +58,7 @@ class AutowireLocator extends Autowire
             return;
         }
         if (false !== $defaultIndexMethod || false !== $defaultPriorityMethod) {
-            trigger_deprecation('symfony/dependency-injection', '7.4', 'The $defaultIndexMethod and $defaultPriorityMethod arguments of tagged locators and iterators attributes are deprecated, use the #[AsTaggedItem] attribute instead of default methods.');
+            trigger_deprecation('symfony/dependency-injection', '8.1', 'The $defaultIndexMethod and $defaultPriorityMethod arguments of tagged locators and iterators attributes are deprecated, use the #[AsTaggedItem] attribute instead of default methods.');
         }
 
         $references = [];

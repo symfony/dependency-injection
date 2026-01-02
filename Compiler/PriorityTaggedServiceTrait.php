@@ -163,7 +163,7 @@ class PriorityTaggedServiceUtil
             throw new InvalidArgumentException(implode('be public', $message));
         }
 
-        trigger_deprecation('symfony/dependency-injection', '7.4', 'Calling "%s::%s()" to get the "%s" index is deprecated, use the #[AsTaggedItem] attribute instead.', $class, $defaultMethod, $indexAttribute);
+        trigger_deprecation('symfony/dependency-injection', '8.1', 'Calling "%s::%s()" to get the "%s" index is deprecated, use the #[AsTaggedItem] attribute instead.', $class, $defaultMethod, $indexAttribute);
 
         $default = $rm->invoke(null);
 
