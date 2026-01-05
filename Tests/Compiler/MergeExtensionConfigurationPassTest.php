@@ -41,7 +41,7 @@ class MergeExtensionConfigurationPassTest extends TestCase
                 $tmpProviders = $container->getExpressionLanguageProviders();
             });
 
-        $provider = $this->createMock(ExpressionFunctionProviderInterface::class);
+        $provider = $this->createStub(ExpressionFunctionProviderInterface::class);
         $container = new ContainerBuilder(new ParameterBag());
         $container->registerExtension($extension);
         $container->prependExtensionConfig('foo', ['bar' => true]);
