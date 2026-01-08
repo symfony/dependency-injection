@@ -90,6 +90,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     decoration_inner_name?: string,
  *     decoration_priority?: int,
  *     decoration_on_invalid?: 'exception'|'ignore'|null,
+ *     decorates_tag?: string,
  *     autowire?: bool,
  *     autoconfigure?: bool,
  *     bind?: array<string, mixed>,

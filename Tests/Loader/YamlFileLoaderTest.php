@@ -26,7 +26,9 @@ use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
+use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass;
 use Symfony\Component\DependencyInjection\Compiler\ResolveBindingsPass;
+use Symfony\Component\DependencyInjection\Compiler\TagDecoratorPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -1248,5 +1250,22 @@ class YamlFileLoaderTest extends TestCase
         yield 'properties' => ['properties', ['foo' => 'bar']];
         yield 'configurator' => ['configurator', 'some_configurator'];
         yield 'calls' => ['calls', [['method' => 'setFoo', 'arguments' => ['bar']]]];
+    }
+
+    public function testDecoratesTag()
+    {
+        $container = new ContainerBuilder();
+        $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
+        $loader->load('services_decorates_tag.yml');
+
+        (new TagDecoratorPass())->process($container);
+        (new DecoratorServicePass())->process($container);
+
+        $this->assertFalse($container->has('tag_decorator'));
+
+        $this->assertTrue($container->hasAlias('foo'));
+        $this->assertTrue($container->hasAlias('bar'));
+
+        $this->assertStringContainsString('.decorator.foo.', (string) $container->getAlias('foo'));
     }
 }

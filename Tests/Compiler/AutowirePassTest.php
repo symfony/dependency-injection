@@ -26,6 +26,7 @@ use Symfony\Component\DependencyInjection\Compiler\AutowirePass;
 use Symfony\Component\DependencyInjection\Compiler\AutowireRequiredMethodsPass;
 use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass;
 use Symfony\Component\DependencyInjection\Compiler\ResolveClassPass;
+use Symfony\Component\DependencyInjection\Compiler\TagDecoratorPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\AutowiringFailedException;
@@ -1350,6 +1351,32 @@ class AutowirePassTest extends TestCase
         $barDecoratorName = '.decorator.'.AsDecoratorMultipleBar::class.'.'.AsDecoratorMultiple::class;
         $this->assertSame($barDecoratorName, (string) $container->getAlias(AsDecoratorMultipleBar::class));
         $this->assertSame($barDecoratorName.'.inner', (string) $container->getDefinition($barDecoratorName)->getArgument(1));
+    }
+
+    public function testAsTagDecoratorAttribute()
+    {
+        $container = new ContainerBuilder();
+
+        $container->register(AsTagDecoratorFoo::class)->addTag('test.tag');
+        $container->register(AsTagDecoratorBar::class)->addTag('test.tag');
+        $container->register(AsTagDecoratorService::class, AsTagDecoratorService::class)->setAutowired(true);
+
+        (new AutowirePass())->process($container);
+        (new AutowireAsDecoratorPass())->process($container);
+        (new TagDecoratorPass())->process($container);
+        (new DecoratorServicePass())->process($container);
+
+        $tagDecoratorTemplate = '.tag_decorator.test.tag.'.AsTagDecoratorService::class;
+        $this->assertFalse($container->has($tagDecoratorTemplate));
+
+        $fooDecorator = '.decorator.'.AsTagDecoratorFoo::class.'.'.$tagDecoratorTemplate;
+        $barDecorator = '.decorator.'.AsTagDecoratorBar::class.'.'.$tagDecoratorTemplate;
+
+        $this->assertTrue($container->has($fooDecorator));
+        $this->assertTrue($container->has($barDecorator));
+
+        $this->assertSame($fooDecorator, (string) $container->getAlias(AsTagDecoratorFoo::class));
+        $this->assertSame($barDecorator, (string) $container->getAlias(AsTagDecoratorBar::class));
     }
 
     public function testTypeSymbolExcluded()

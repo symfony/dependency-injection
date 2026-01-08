@@ -55,6 +55,7 @@ trait ContentLoaderTrait
         'decoration_inner_name' => 'decoration_inner_name',
         'decoration_priority' => 'decoration_priority',
         'decoration_on_invalid' => 'decoration_on_invalid',
+        'decorates_tag' => 'decorates_tag',
         'autowire' => 'autowire',
         'autoconfigure' => 'autoconfigure',
         'bind' => 'bind',
@@ -609,6 +610,34 @@ trait ContentLoaderTrait
             $priority = $service['decoration_priority'] ?? 0;
 
             $definition->setDecoratedService($decorates, $renameId, $priority, $invalidBehavior);
+        }
+
+        if (null !== $decoratesTag = $service['decorates_tag'] ?? null) {
+            if (isset($service['decorates'])) {
+                throw new InvalidArgumentException(\sprintf('A service cannot have both "decorates" and "decorates_tag" attributes on service "%s" in "%s".', $id, $file));
+            }
+
+            $priority = $service['decoration_priority'] ?? 0;
+
+            $decorationOnInvalid = \array_key_exists('decoration_on_invalid', $service) ? $service['decoration_on_invalid'] : 'exception';
+            $invalidBehavior = match ($decorationOnInvalid) {
+                'exception', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE => ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                'ignore', ContainerInterface::IGNORE_ON_INVALID_REFERENCE => ContainerInterface::IGNORE_ON_INVALID_REFERENCE,
+                null, ContainerInterface::NULL_ON_INVALID_REFERENCE => ContainerInterface::NULL_ON_INVALID_REFERENCE,
+                'null' => throw new InvalidArgumentException(\sprintf('Invalid value "%s" for attribute "decoration_on_invalid" on service "%s". Did you mean null (without quotes) in "%s"?', $decorationOnInvalid, $id, $file)),
+                default => throw new InvalidArgumentException(\sprintf('Invalid value "%s" for attribute "decoration_on_invalid" on service "%s". Did you mean "exception", "ignore" or "null" in "%s"?', $decorationOnInvalid, $id, $file)),
+            };
+
+            $tagAttributes = [
+                'decorates_tag' => $decoratesTag,
+                'priority' => $priority,
+            ];
+
+            if (ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE !== $invalidBehavior) {
+                $tagAttributes['on_invalid'] = $invalidBehavior;
+            }
+
+            $definition->addResourceTag('container.tag_decorator', $tagAttributes);
         }
 
         if (isset($service['autowire'])) {
