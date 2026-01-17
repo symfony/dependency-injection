@@ -35,6 +35,18 @@ class AutowireProperty
     public Foo $foo;
 }
 
+class AutowireReadonlyProperty
+{
+    #[Required]
+    public readonly Foo $foo;
+}
+
+class AutowirePrivateProperty
+{
+    #[Required]
+    private Foo $foo;
+}
+
 #[\Attribute(\Attribute::TARGET_PARAMETER)]
 class CustomAutowire extends Autowire
 {
