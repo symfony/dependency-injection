@@ -61,10 +61,10 @@ class ContainerConfigurator extends AbstractConfigurator
         $this->container->loadFromExtension($namespace, static::processValue($config));
     }
 
-    final public function import(string $resource, ?string $type = null, bool|string $ignoreErrors = false): void
+    final public function import(string $resource, ?string $type = null, bool|string $ignoreErrors = false, string|array|null $exclude = null): void
     {
         $this->loader->setCurrentDir(\dirname($this->path));
-        $this->loader->import($resource, $type, $ignoreErrors, $this->file);
+        $this->loader->import($resource, $type, $ignoreErrors, $this->file, $exclude);
     }
 
     final public function parameters(): ParametersConfigurator
