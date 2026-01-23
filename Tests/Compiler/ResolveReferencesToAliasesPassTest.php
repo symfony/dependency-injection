@@ -169,6 +169,30 @@ class ResolveReferencesToAliasesPassTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function testDeprecationIsPreservedWhenResolvingAliasChain()
+    {
+        $container = new ContainerBuilder();
+
+        // Create a chain: deprecated_alias -> intermediate_alias -> service
+        $container->register('service', 'stdClass');
+
+        $container->setAlias('intermediate_alias', 'service');
+
+        $deprecatedAlias = new Alias('intermediate_alias');
+        $deprecatedAlias->setPublic(true);
+        $deprecatedAlias->setDeprecated('my/package', '1.0', 'The "%alias_id%" alias is deprecated.');
+        $container->setAlias('deprecated_alias', $deprecatedAlias);
+
+        $this->process($container);
+
+        // After resolving, deprecated_alias should point directly to service
+        // but should still be deprecated
+        $resolvedAlias = $container->getAlias('deprecated_alias');
+        $this->assertSame('service', (string) $resolvedAlias);
+        $this->assertTrue($resolvedAlias->isDeprecated(), 'Deprecation should be preserved when resolving alias chain');
+        $this->assertSame('my/package', $resolvedAlias->getDeprecation('deprecated_alias')['package']);
+    }
+
     protected function process(ContainerBuilder $container)
     {
         $pass = new ResolveReferencesToAliasesPass();
