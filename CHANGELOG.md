@@ -9,6 +9,7 @@ CHANGELOG
  * Deprecate default index/priority methods when defining tagged locators/iterators; use the `#[AsTaggedItem]` attribute instead
  * Allow environment variables with `.` in them
  * Add argument `exclude` to `ContainerConfigurator::import()`
+ * Add `target` parameter to `#[AsAlias]` to create target-specific autowiring aliases
 
 8.0
 ---
