@@ -970,9 +970,7 @@ class EnvVarProcessorTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        (new EnvVarProcessor(new Container()))->getEnv('url', 'foo', static function () use ($url): string {
-            return $url;
-        });
+        (new EnvVarProcessor(new Container()))->getEnv('url', 'foo', static fn (): string => $url);
     }
 
     #[TestWith(['', 'string'])]
@@ -985,11 +983,7 @@ class EnvVarProcessorTest extends TestCase
     {
         $processor = new EnvVarProcessor(new Container());
 
-        $this->assertSame($expected, $processor->getEnv($prefix, 'default::FOO', static function () use ($processor) {
-            return $processor->getEnv('default', ':FOO', static function () {
-                return null;
-            });
-        }));
+        $this->assertSame($expected, $processor->getEnv($prefix, 'default::FOO', static fn () => $processor->getEnv('default', ':FOO', static fn () => null)));
     }
 
     public function testGetEnvWithEmptyStringPrefixCastsToString()
@@ -1015,9 +1009,7 @@ class EnvVarProcessorTest extends TestCase
     {
         $processor = new EnvVarProcessor(new Container());
 
-        $result = $processor->getEnv('urlencode', 'URLENCODETEST', static function () {
-            return 'foo: Data123!@-_ + bar: Not the same content as Data123!@-_ +';
-        });
+        $result = $processor->getEnv('urlencode', 'URLENCODETEST', static fn () => 'foo: Data123!@-_ + bar: Not the same content as Data123!@-_ +');
 
         $this->assertSame('foo%3A%20Data123%21%40-_%20%2B%20bar%3A%20Not%20the%20same%20content%20as%20Data123%21%40-_%20%2B', $result);
     }
