@@ -605,3 +605,42 @@ class ListenerResolver
     {
     }
 }
+
+interface SomeServiceInterface
+{
+    public function getValue(): string;
+}
+
+class SomeServiceClass implements SomeServiceInterface
+{
+    public function getValue(): string
+    {
+        return 'original';
+    }
+}
+
+class DecoratedSomeServiceClass implements SomeServiceInterface
+{
+    public function __construct(private SomeServiceInterface $inner)
+    {
+    }
+
+    public function getValue(): string
+    {
+        return 'decorated:'.$this->inner->getValue();
+    }
+}
+
+class LazyDecoratedServiceConsumer
+{
+    public function __construct(
+        #[Autowire(service: 'some_service', lazy: true)]
+        private SomeServiceInterface $service,
+    ) {
+    }
+
+    public function getValue(): string
+    {
+        return $this->service->getValue();
+    }
+}
