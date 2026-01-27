@@ -1452,4 +1452,30 @@ class AutowirePassTest extends TestCase
         $dep = $service->getDependency()->getSelf();
         $this->assertInstanceOf(ExtendedLazyProxyClass::class, $dep);
     }
+
+    public function testLazyProxyForDecoratedService()
+    {
+        $container = new ContainerBuilder();
+
+        $container->register('some_service', SomeServiceClass::class)
+            ->setPublic(true);
+
+        $container->register('some_service.decorated', DecoratedSomeServiceClass::class)
+            ->setDecoratedService('some_service')
+            ->addArgument(new Reference('.inner'));
+
+        $container->register(LazyDecoratedServiceConsumer::class)
+            ->setAutowired(true)
+            ->setPublic(true);
+
+        $container->setAlias(SomeServiceInterface::class, 'some_service');
+
+        $container->compile();
+
+        $service = $container->get(LazyDecoratedServiceConsumer::class);
+        $this->assertInstanceOf(LazyDecoratedServiceConsumer::class, $service);
+
+        $result = $service->getValue();
+        $this->assertSame('decorated:original', $result);
+    }
 }
