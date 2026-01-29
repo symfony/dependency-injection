@@ -7,6 +7,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
 use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 use Symfony\Component\DependencyInjection\Attribute\TaggedLocator;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -30,6 +31,13 @@ class AutowireWither
 class AutowireProperty
 {
     #[Required]
+    public Foo $foo;
+}
+
+class AutowirePropertyWithTarget
+{
+    #[Required]
+    #[Target('foo.target')]
     public Foo $foo;
 }
 
