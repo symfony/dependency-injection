@@ -1499,6 +1499,39 @@ class PhpDumperTest extends TestCase
         $this->assertEquals((object) ['foo' => (object) [123]], $container->get('bar'));
     }
 
+    public function testSyntheticServiceWithNullOnInvalidReference()
+    {
+        $container = new ContainerBuilder();
+        $container->register('synthetic_service', 'stdClass')->setPublic(true)->setSynthetic(true);
+        // Reference the synthetic service twice so the dumper creates a variable for it
+        $container->register('bar', 'stdClass')->setPublic(true)->setShared(false)
+            ->setProperty('synth', new Reference('synthetic_service', ContainerBuilder::NULL_ON_INVALID_REFERENCE))
+            ->setProperty('synth2', new Reference('synthetic_service', ContainerBuilder::NULL_ON_INVALID_REFERENCE));
+
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        $dump = $dumper->dump([
+            'class' => 'Symfony_DI_PhpDumper_Test_SyntheticNullOnInvalid',
+        ]);
+
+        // The dumped code should pass the behavior (2 = NULL_ON_INVALID_REFERENCE) when getting the synthetic service
+        $this->assertStringContainsString("->get('synthetic_service', 2)", $dump);
+
+        eval('?>'.$dump);
+
+        $container = new \Symfony_DI_PhpDumper_Test_SyntheticNullOnInvalid();
+
+        // Without the synthetic service being set, bar should still be instantiable with synth=null
+        $bar = $container->get('bar');
+        $this->assertNull($bar->synth);
+
+        // After setting the synthetic service, it should be injected
+        $container->set('synthetic_service', (object) ['test' => 123]);
+        $bar2 = $container->get('bar');
+        $this->assertEquals((object) ['test' => 123], $bar2->synth);
+    }
+
     public function testAdawsonContainer()
     {
         $container = new ContainerBuilder();
