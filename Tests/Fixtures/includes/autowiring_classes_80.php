@@ -9,6 +9,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireInline;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
 use Symfony\Component\DependencyInjection\Attribute\Lazy;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -32,6 +33,13 @@ class AutowireWither
 class AutowireProperty
 {
     #[Required]
+    public Foo $foo;
+}
+
+class AutowirePropertyWithTarget
+{
+    #[Required]
+    #[Target('foo.target')]
     public Foo $foo;
 }
 
