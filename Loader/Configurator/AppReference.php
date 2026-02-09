@@ -148,11 +148,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  */
 class AppReference
 {
-    /**
-     * @param ConfigType $config
-     *
-     * @psalm-return ConfigType
-     */
     public static function config(array $config): array
     {
         $defaults = [
