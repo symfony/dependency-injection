@@ -62,6 +62,7 @@ use Symfony\Component\DependencyInjection\Tests\Compiler\MyFactory;
 use Symfony\Component\DependencyInjection\Tests\Compiler\MyInlineService;
 use Symfony\Component\DependencyInjection\Tests\Compiler\SingleMethodInterface;
 use Symfony\Component\DependencyInjection\Tests\Compiler\Wither;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\Bar;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\CustomDefinition;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\DependencyContainer;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\DependencyContainerInterface;
@@ -771,6 +772,21 @@ class PhpDumperTest extends TestCase
         $container->compile();
         $dumper = new PhpDumper($container);
         $dumper->dump();
+    }
+
+    public function testEnvInAbstractDefinitionIsIgnoredWhenDefinitionIsRemoved()
+    {
+        $container = new ContainerBuilder();
+        $container->register('abstract_service', Bar::class)
+            ->setAbstract(true)
+            ->setArgument('$quz', '%env(FOO)%')
+        ;
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        $dumper->dump();
+
+        $this->assertGreaterThan(0, $container->getEnvCounters()['FOO']);
     }
 
     public function testCircularDynamicEnv()
