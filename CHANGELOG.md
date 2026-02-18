@@ -11,6 +11,7 @@ CHANGELOG
  * Allow environment variables with `.` in them
  * Add argument `exclude` to `ContainerConfigurator::import()`
  * Add `target` parameter to `#[AsAlias]` to create target-specific autowiring aliases
+ * Deprecate named autowiring alias that don't use `#[Target]`
 
 8.0
 ---

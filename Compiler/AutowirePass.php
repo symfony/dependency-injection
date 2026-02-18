@@ -283,6 +283,9 @@ class AutowirePass extends AbstractRecursivePass
             $currentId = $this->currentId;
 
             $getValue = function () use ($type, $parameter, $class, $method, $name, $target, $defaultArgument, $currentId) {
+                if (!$target && null !== ($namedAlias = $this->getCombinedAlias($type, $name)) && $this->canDefinitionBeAutowired($namedAlias)) {
+                    trigger_deprecation('symfony/dependency-injection', '8.1', 'Relying solely on the name of parameter "$%s" of "%s()" to match a named autowiring alias is deprecated; use the "#[Target]" attribute.', $parameter->name, $class !== $currentId ? $class.'::'.$method : $method);
+                }
                 if (!$value = $this->getAutowiredReference($ref = new TypedReference($type, $type, ContainerBuilder::EXCEPTION_ON_INVALID_REFERENCE, $name, $target), false)) {
                     $failureMessage = $this->createTypeNotFoundMessageCallback($ref, \sprintf('argument "$%s" of method "%s()"', $parameter->name, $class !== $currentId ? $class.'::'.$method : $method));
 
