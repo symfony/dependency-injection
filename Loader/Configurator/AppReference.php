@@ -148,6 +148,11 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  */
 class AppReference
 {
+    /**
+     * @param ConfigType $config
+     *
+     * @psalm-return ConfigType
+     */
     public static function config(array $config): array
     {
         $defaults = [
@@ -162,7 +167,7 @@ class AppReference
 
         foreach ($config as $key => $value) {
             if (str_starts_with($key, 'when@') && \is_array($value['services'] ?? null)) {
-                $config[$key]['services'] = array_replace_recursive($defaults, $config[$key]['services']);
+                $config[$key]['services'] = array_replace_recursive($defaults, $value['services']);
             }
         }
 
