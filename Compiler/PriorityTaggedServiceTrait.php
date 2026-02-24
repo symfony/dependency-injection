@@ -65,10 +65,15 @@ trait PriorityTaggedServiceTrait
             $class = $container->getParameterBag()->resolveValue($class) ?: null;
             $checkTaggedItem = !$definition->hasTag($definition->isAutoconfigured() ? 'container.ignore_attributes' : $tagName);
 
-            // For decorated services, fall back to the inner service's class for #[AsTaggedItem] discovery
-            if ($innerClass = $definition->getTag('container.decorator')[0]['inner'] ?? null) {
-                $innerClass = $container->has($innerClass) ? $container->findDefinition($innerClass) : null;
-                $innerClass = $container->getParameterBag()->resolveValue($innerClass?->getClass());
+            // For decorated services, walk the decoration chain to find #[AsTaggedItem] on the original service
+            $innerClass = null;
+            $innerDef = $definition;
+            while ($innerId = $innerDef->getTag('container.decorator')[0]['inner'] ?? null) {
+                if (!$container->has($innerId)) {
+                    break;
+                }
+                $innerDef = $container->findDefinition($innerId);
+                $innerClass = $container->getParameterBag()->resolveValue($innerDef->getClass()) ?: null;
             }
 
             foreach ($attributes as $attribute) {

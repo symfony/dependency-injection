@@ -258,6 +258,36 @@ class PriorityTaggedServiceTraitTest extends TestCase
         $this->assertArrayHasKey('custom_key', $services);
         $this->assertSame('decorator.tagged_service', (string) $services['custom_key']);
     }
+
+    public function testMultiLevelDecoratedServiceAsTaggedItemIndex()
+    {
+        $container = new ContainerBuilder();
+
+        // Register the innermost service with AsTaggedItem
+        $container->register('inner.tagged_service', DecoratedAsTaggedItemService::class)
+            ->setAutoconfigured(true)
+            ->addTag('my_custom_tag');
+
+        // First decorator wraps the inner service
+        $decorator1 = $container->register('decorator1.tagged_service', \stdClass::class);
+        $decorator1->addTag('my_custom_tag');
+        $decorator1->addTag('container.decorator', ['id' => DecoratedAsTaggedItemService::class, 'inner' => 'inner.tagged_service']);
+
+        // Second decorator wraps the first decorator
+        $decorator2 = $container->register('decorator2.tagged_service', \stdClass::class);
+        $decorator2->addTag('my_custom_tag');
+        $decorator2->addTag('container.decorator', ['id' => DecoratedAsTaggedItemService::class, 'inner' => 'decorator1.tagged_service']);
+
+        (new ResolveInstanceofConditionalsPass())->process($container);
+
+        $priorityTaggedServiceTraitImplementation = new PriorityTaggedServiceTraitImplementation();
+
+        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo', 'getFooBar');
+        $services = $priorityTaggedServiceTraitImplementation->test($tag, $container);
+
+        $this->assertArrayHasKey('custom_key', $services);
+        $this->assertSame('decorator2.tagged_service', (string) $services['custom_key']);
+    }
 }
 
 class PriorityTaggedServiceTraitImplementation
