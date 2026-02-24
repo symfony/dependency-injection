@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
+use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -217,6 +218,37 @@ class ServiceLocatorTagPassTest extends TestCase
         static::assertSame(['service-2', 'service-1'], array_keys($factories));
     }
 
+    public function testIndexedByAsTaggedItemWithDecoration()
+    {
+        $container = new ContainerBuilder();
+
+        $locator = new Definition(Locator::class);
+        $locator->setPublic(true);
+        $locator->addArgument(new ServiceLocatorArgument(new TaggedIteratorArgument('test_tag', 'key', null, true)));
+
+        $container->setDefinition(Locator::class, $locator);
+
+        $service = new Definition(AsTaggedItemService::class);
+        $service->setPublic(true);
+        $service->setAutoconfigured(true);
+        $service->addTag('test_tag');
+
+        $container->setDefinition(AsTaggedItemService::class, $service);
+
+        $decorated = new Definition(AsTaggedItemServiceDecorator::class);
+        $decorated->setPublic(true);
+        $decorated->setDecoratedService(AsTaggedItemService::class);
+
+        $container->setDefinition(AsTaggedItemServiceDecorator::class, $decorated);
+
+        $container->compile();
+
+        /** @var ServiceLocator $locator */
+        $locator = $container->get(Locator::class)->locator;
+        static::assertTrue($locator->has('custom_key'));
+        static::assertInstanceOf(AsTaggedItemServiceDecorator::class, $locator->get('custom_key'));
+    }
+
     public function testBindingsAreProcessed()
     {
         $container = new ContainerBuilder();
@@ -245,5 +277,14 @@ class Service
 }
 
 class DecoratedService
+{
+}
+
+#[AsTaggedItem(index: 'custom_key')]
+class AsTaggedItemService
+{
+}
+
+class AsTaggedItemServiceDecorator
 {
 }

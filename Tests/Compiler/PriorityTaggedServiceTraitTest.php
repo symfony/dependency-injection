@@ -233,6 +233,31 @@ class PriorityTaggedServiceTraitTest extends TestCase
         $this->assertSame(array_keys($expected), array_keys($services));
         $this->assertEquals($expected, $priorityTaggedServiceTraitImplementation->test($tag, $container));
     }
+
+    public function testDecoratedServiceAsTaggedItemIndex()
+    {
+        $container = new ContainerBuilder();
+
+        // Register the inner service with AsTaggedItem
+        $container->register('inner.tagged_service', DecoratedAsTaggedItemService::class)
+            ->setAutoconfigured(true)
+            ->addTag('my_custom_tag');
+
+        // Register a decorator that wraps the inner service
+        $decorator = $container->register('decorator.tagged_service', \stdClass::class);
+        $decorator->addTag('my_custom_tag');
+        $decorator->addTag('container.decorator', ['id' => DecoratedAsTaggedItemService::class, 'inner' => 'inner.tagged_service']);
+
+        (new ResolveInstanceofConditionalsPass())->process($container);
+
+        $priorityTaggedServiceTraitImplementation = new PriorityTaggedServiceTraitImplementation();
+
+        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo', 'getFooBar');
+        $services = $priorityTaggedServiceTraitImplementation->test($tag, $container);
+
+        $this->assertArrayHasKey('custom_key', $services);
+        $this->assertSame('decorator.tagged_service', (string) $services['custom_key']);
+    }
 }
 
 class PriorityTaggedServiceTraitImplementation
@@ -258,4 +283,9 @@ class HelloNamedService2
 interface HelloInterface
 {
     public static function getFooBar(): string;
+}
+
+#[AsTaggedItem(index: 'custom_key', priority: 1)]
+class DecoratedAsTaggedItemService
+{
 }
