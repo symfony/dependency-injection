@@ -514,7 +514,7 @@ class PriorityTaggedServiceTraitTest extends TestCase
 
         $priorityTaggedServiceTraitImplementation = new PriorityTaggedServiceTraitImplementation();
 
-        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo', 'getFooBar');
+        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo');
         $services = $priorityTaggedServiceTraitImplementation->test($tag, $container);
 
         $this->assertArrayHasKey('custom_key', $services);
@@ -544,7 +544,7 @@ class PriorityTaggedServiceTraitTest extends TestCase
 
         $priorityTaggedServiceTraitImplementation = new PriorityTaggedServiceTraitImplementation();
 
-        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo', 'getFooBar');
+        $tag = new TaggedIteratorArgument('my_custom_tag', 'foo');
         $services = $priorityTaggedServiceTraitImplementation->test($tag, $container);
 
         $this->assertArrayHasKey('custom_key', $services);

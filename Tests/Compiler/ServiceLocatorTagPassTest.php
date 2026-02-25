@@ -283,7 +283,7 @@ class ServiceLocatorTagPassTest extends TestCase
 
         $locator = new Definition(Locator::class);
         $locator->setPublic(true);
-        $locator->addArgument(new ServiceLocatorArgument(new TaggedIteratorArgument('test_tag', 'key', null, true)));
+        $locator->addArgument(new ServiceLocatorArgument(new TaggedIteratorArgument('test_tag', 'key', true)));
 
         $container->setDefinition(Locator::class, $locator);
 
