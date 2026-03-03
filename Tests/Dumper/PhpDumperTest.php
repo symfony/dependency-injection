@@ -46,6 +46,7 @@ use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\LazyProxy\PhpDumper\NullDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ServiceLocator;
@@ -181,6 +182,26 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
 
         $this->assertStringEqualsGeneratedFile('custom_container_class_with_optional_constructor_arguments.php', $dumper->dump(['base_class' => 'ConstructorWithOptionalArgumentsContainer', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']));
+    }
+
+    public function testDumpCustomContainerClassWithTypedParameterBagCanBeInstantiated()
+    {
+        $container = new ContainerBuilder();
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        $code = $dumper->dump(['base_class' => 'ContainerWithTypedParameterBag', 'class' => 'CompiledContainerWithTypedParameterBag', 'namespace' => 'Symfony\Component\DependencyInjection\Tests\Fixtures\Container']);
+
+        // The compiled container must not assign null to a potentially typed $parameterBag property
+        $this->assertStringNotContainsString('$this->parameterBag = null', $code);
+        $this->assertStringContainsString('unset($this->parameterBag)', $code);
+
+        // Verify the compiled container can actually be instantiated without TypeError
+        eval('?>'.$code);
+        $compiledContainer = new \Symfony\Component\DependencyInjection\Tests\Fixtures\Container\CompiledContainerWithTypedParameterBag();
+        $this->assertTrue($compiledContainer->isCompiled());
+
+        $this->assertInstanceOf(FrozenParameterBag::class, $compiledContainer->getParameterBag());
     }
 
     public function testDumpCustomContainerClassWithMandatoryArgumentLessConstructor()
