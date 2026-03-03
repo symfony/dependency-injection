@@ -1280,16 +1280,9 @@ class PhpDumper extends Dumper
             }
         }
 
-        if (Container::class !== $this->baseClass) {
-            $r = $this->container->getReflectionClass($this->baseClass, false);
-            if (null !== $r
-                && (null !== $constructor = $r->getConstructor())
-                && 0 === $constructor->getNumberOfRequiredParameters()
-                && Container::class !== $constructor->getDeclaringClass()->name
-            ) {
-                $code .= "        parent::__construct();\n";
-                $code .= "        \$this->parameterBag = null;\n\n";
-            }
+        if ($this->needsUnsetParameterBag()) {
+            $code .= "        parent::__construct();\n";
+            $code .= "        unset(\$this->parameterBag);\n\n";
         }
 
         if ($this->container->getParameterBag()->all()) {
@@ -1585,11 +1578,24 @@ class PhpDumper extends Dumper
         return $code ? \sprintf("\n        \$this->privates['service_container'] = static function (\$container) {%s\n        };\n", $code) : '';
     }
 
+    private function needsUnsetParameterBag(): bool
+    {
+        if (Container::class === $this->baseClass) {
+            return false;
+        }
+        $r = $this->container->getReflectionClass($this->baseClass, false);
+
+        return null !== $r
+            && (null !== $constructor = $r->getConstructor())
+            && 0 === $constructor->getNumberOfRequiredParameters()
+            && Container::class !== $constructor->getDeclaringClass()->name;
+    }
+
     private function addDefaultParametersMethod(): string
     {
         $bag = $this->container->getParameterBag();
 
-        if (!$bag->all() && (!$bag instanceof ParameterBag || !$bag->allNonEmpty())) {
+        if (!$bag->all() && (!$bag instanceof ParameterBag || !$bag->allNonEmpty()) && !$this->needsUnsetParameterBag()) {
             return '';
         }
 
