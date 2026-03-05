@@ -147,7 +147,7 @@ class ServicesConfigurator extends AbstractConfigurator
      *
      * @param InlineServiceConfigurator[]|ReferenceConfigurator[] $services
      */
-    final public function stack(string $id, array $services): AliasConfigurator
+    final public function stack(string $id, array $services): StackConfigurator
     {
         foreach ($services as $i => $service) {
             if ($service instanceof InlineServiceConfigurator) {
@@ -165,7 +165,7 @@ class ServicesConfigurator extends AbstractConfigurator
             }
         }
 
-        $alias = $this->alias($id, '');
+        $alias = new StackConfigurator($this, $this->container->setAlias($id, ''));
         $alias->definition = $this->set($id)
             ->parent('')
             ->args($services)

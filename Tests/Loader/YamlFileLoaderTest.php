@@ -1185,6 +1185,58 @@ class YamlFileLoaderTest extends TestCase
         $this->assertEquals($expected, $container->get('stack_e'));
     }
 
+    public function testStackDecorates()
+    {
+        $container = new ContainerBuilder();
+
+        $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
+        $loader->load('stack_decorates.yaml');
+
+        $container->compile();
+
+        $expected = (object) [
+            'label' => 'A',
+            'inner' => (object) [
+                'label' => 'B',
+                'inner' => (object) [
+                    'label' => 'original',
+                ],
+            ],
+        ];
+        $this->assertEquals($expected, $container->get('original_service'));
+    }
+
+    public function testStackDecoratesTag()
+    {
+        $container = new ContainerBuilder();
+
+        $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
+        $loader->load('stack_decorates_tag.yaml');
+
+        $container->compile();
+
+        $expectedFoo = (object) [
+            'label' => 'A',
+            'inner' => (object) [
+                'label' => 'B',
+                'inner' => (object) [
+                    'label' => 'foo',
+                ],
+            ],
+        ];
+        $expectedBar = (object) [
+            'label' => 'A',
+            'inner' => (object) [
+                'label' => 'B',
+                'inner' => (object) [
+                    'label' => 'bar',
+                ],
+            ],
+        ];
+        $this->assertEquals($expectedFoo, $container->get('foo'));
+        $this->assertEquals($expectedBar, $container->get('bar'));
+    }
+
     public function testWhenEnv()
     {
         $container = new ContainerBuilder();

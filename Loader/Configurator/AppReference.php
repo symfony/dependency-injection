@@ -87,10 +87,10 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     tags?: TagsType,
  *     resource_tags?: TagsType,
  *     decorates?: string,
+ *     decorates_tag?: string,
  *     decoration_inner_name?: string,
  *     decoration_priority?: int,
  *     decoration_on_invalid?: 'exception'|'ignore'|null,
- *     decorates_tag?: string,
  *     autowire?: bool,
  *     autoconfigure?: bool,
  *     bind?: array<string, mixed>,
@@ -128,6 +128,11 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     stack: list<DefinitionType|AliasType|PrototypeType|array<class-string, ArgumentsType|null>>,
  *     public?: bool,
  *     deprecated?: DeprecationType,
+ *     decorates?: string,
+ *     decorates_tag?: string,
+ *     decoration_inner_name?: string,
+ *     decoration_priority?: int,
+ *     decoration_on_invalid?: 'exception'|'ignore'|null,
  * }
  * @psalm-type ServicesConfig = array{
  *     _defaults?: DefaultsType,

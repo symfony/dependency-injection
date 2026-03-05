@@ -337,8 +337,8 @@ trait ContentLoaderTrait
                 $stack[$k] = $definition;
             }
 
-            if ($diff = array_diff(array_keys($service), ['stack', 'public', 'deprecated'])) {
-                throw new InvalidArgumentException(\sprintf('Invalid attribute "%s"; supported ones are "public" and "deprecated" for service "%s" in "%s".', implode('", "', $diff), $id, $file));
+            if ($diff = array_diff(array_keys($service), ['stack', 'public', 'deprecated', 'decorates', 'decorates_tag', 'decoration_inner_name', 'decoration_priority', 'decoration_on_invalid'])) {
+                throw new InvalidArgumentException(\sprintf('Invalid attribute "%s"; supported ones are "public", "deprecated", "decorates", "decorates_tag" and "decoration_*" for service "%s" in "%s".', implode('", "', $diff), $id, $file));
             }
 
             $service = [
@@ -347,6 +347,11 @@ trait ContentLoaderTrait
                 'tags' => ['container.stack'],
                 'public' => $service['public'] ?? null,
                 'deprecated' => $service['deprecated'] ?? null,
+                'decorates' => $service['decorates'] ?? null,
+                'decorates_tag' => $service['decorates_tag'] ?? null,
+                'decoration_inner_name' => $service['decoration_inner_name'] ?? null,
+                'decoration_priority' => $service['decoration_priority'] ?? null,
+                'decoration_on_invalid' => $service['decoration_on_invalid'] ?? null,
             ];
         }
 
