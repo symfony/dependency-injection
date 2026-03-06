@@ -18,6 +18,7 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\VarExporter\DeepCloner;
 
 /**
  * @author Nicolas Grekas <p@tchwork.com>
@@ -89,7 +90,7 @@ class ResolveDecoratorStackPass implements CompilerPassInterface
         foreach ($stacks[$id] as $k => $definition) {
             if ($definition instanceof ChildDefinition && isset($stacks[$definition->getParent()])) {
                 $path[] = $definition->getParent();
-                $definition = unserialize(serialize($definition)); // deep clone
+                $definition = DeepCloner::deepClone($definition);
             } elseif ($definition instanceof Definition) {
                 $definitions[$decoratedId = $prefix.$k] = $definition;
                 continue;

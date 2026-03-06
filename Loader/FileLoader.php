@@ -28,6 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
+use Symfony\Component\VarExporter\DeepCloner;
 
 /**
  * FileLoader is the abstract class used by all built-in loaders that are file based.
@@ -129,26 +130,7 @@ abstract class FileLoader extends BaseFileLoader
         $autoconfigureAttributes = new RegisterAutoconfigureAttributesPass();
         $autoconfigureAttributes = $autoconfigureAttributes->accept($prototype) ? $autoconfigureAttributes : null;
         $classes = $this->findClasses($namespace, $resource, (array) $exclude, $source);
-
-        $getPrototype = static fn () => clone $prototype;
-        $serialized = serialize($prototype);
-
-        // avoid deep cloning if no definitions are nested
-        if (strpos($serialized, 'O:48:"Symfony\Component\DependencyInjection\Definition"', 55)
-            || strpos($serialized, 'O:53:"Symfony\Component\DependencyInjection\ChildDefinition"', 55)
-        ) {
-            // prepare for deep cloning
-            foreach (['Arguments', 'Properties', 'MethodCalls', 'Configurator', 'Factory', 'Bindings'] as $key) {
-                $serialized = serialize($prototype->{'get'.$key}());
-
-                if (strpos($serialized, 'O:48:"Symfony\Component\DependencyInjection\Definition"')
-                    || strpos($serialized, 'O:53:"Symfony\Component\DependencyInjection\ChildDefinition"')
-                ) {
-                    $getPrototype = static fn () => $getPrototype()->{'set'.$key}(unserialize($serialized));
-                }
-            }
-        }
-        unset($serialized);
+        $getPrototype = (new DeepCloner($prototype))->clone(...);
 
         foreach ($classes as $class => $errorMessage) {
             if (null === $errorMessage && $autoconfigureAttributes) {

@@ -26,6 +26,7 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\VarExporter\DeepCloner;
 use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
@@ -647,7 +648,7 @@ trait ContentLoaderTrait
         if (isset($defaults['bind']) || isset($service['bind'])) {
             // deep clone, to avoid multiple process of the same instance in the passes
             $bindings = $definition->getBindings();
-            $bindings += isset($defaults['bind']) ? unserialize(serialize($defaults['bind'])) : [];
+            $bindings += isset($defaults['bind']) ? DeepCloner::deepClone($defaults['bind']) : [];
 
             if (isset($service['bind'])) {
                 if (!\is_array($service['bind'])) {
