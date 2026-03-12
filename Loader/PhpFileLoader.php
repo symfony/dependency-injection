@@ -144,6 +144,8 @@ class PhpFileLoader extends FileLoader
 
     /**
      * Resolve the parameters to the $callback and execute it.
+     *
+     * @param-immediately-invoked-callable $callback
      */
     private function callConfigurator(callable $callback, ContainerConfigurator $containerConfigurator, string $path): void
     {

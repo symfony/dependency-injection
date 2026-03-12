@@ -28,6 +28,9 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
  */
 trait ExtensionTrait
 {
+    /**
+     * @param-immediately-invoked-callable $callback
+     */
     private function executeConfiguratorCallback(ContainerBuilder $container, \Closure $callback, ConfigurableExtensionInterface $subject, bool $prepend = false): void
     {
         $env = $container->hasParameter('kernel.environment') ? $container->getParameter('kernel.environment') : null;
