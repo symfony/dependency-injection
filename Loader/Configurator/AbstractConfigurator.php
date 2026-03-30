@@ -78,12 +78,12 @@ abstract class AbstractConfigurator
             return (string) $value;
         }
 
-        if ($value instanceof \Closure) {
-            return self::processClosure($value);
-        }
-
         if (\is_scalar($value ?? '') || $value instanceof \UnitEnum) {
             return $value;
+        }
+
+        if ($value instanceof \Closure) {
+            return self::processClosure($value);
         }
 
         if (!$allowServices) {
@@ -107,14 +107,14 @@ abstract class AbstractConfigurator
             throw new InvalidArgumentException(\sprintf('"%s()" can be used only at the root of service configuration files.', $value::FACTORY));
         }
 
-        if ($value instanceof ArgumentInterface
-            || $value instanceof Definition
-            || $value instanceof Expression
-            || $value instanceof Parameter
-            || $value instanceof AbstractArgument
-            || $value instanceof Reference
-        ) {
-            return $value;
+        switch (true) {
+            case $value instanceof ArgumentInterface:
+            case $value instanceof Definition:
+            case $value instanceof Expression:
+            case $value instanceof Parameter:
+            case $value instanceof AbstractArgument:
+            case $value instanceof Reference:
+                return $value;
         }
 
         throw new InvalidArgumentException(\sprintf('Cannot use values of type "%s" in service configuration files.', get_debug_type($value)));
