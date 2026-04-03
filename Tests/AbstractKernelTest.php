@@ -19,6 +19,7 @@ use Symfony\Component\DependencyInjection\Kernel\AbstractBundle;
 use Symfony\Component\DependencyInjection\Kernel\AbstractKernel;
 use Symfony\Component\DependencyInjection\Kernel\BundleInterface;
 use Symfony\Component\DependencyInjection\Kernel\KernelTrait;
+use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -329,6 +330,70 @@ class AbstractKernelTest extends TestCase
         $this->assertTrue($kernel->getContainer()->hasParameter('compiler_pass.processed'));
     }
 
+    public function testRequiredBundleChildrenAreRegisteredBeforeParent()
+    {
+        $kernel = new RequiredBundleKernel('test', true, $this->varDir, [MetaParentBundle::class => ['all' => true]]);
+        $kernel->boot();
+
+        $this->assertSame(['ChildBundle', 'MetaParentBundle'], array_keys($kernel->getBundles()));
+    }
+
+    public function testRequiredBundleDeduplicatesByClass()
+    {
+        // ChildBundle is listed explicitly AND required by MetaParentBundle
+        $kernel = new RequiredBundleKernel('test', true, $this->varDir, [
+            ChildBundle::class => ['all' => true],
+            MetaParentBundle::class => ['all' => true],
+        ]);
+        $kernel->boot();
+
+        $this->assertSame(['ChildBundle', 'MetaParentBundle'], array_keys($kernel->getBundles()));
+    }
+
+    public function testNestedRequiredBundles()
+    {
+        $kernel = new RequiredBundleKernel('test', true, $this->varDir, [TopMetaBundle::class => ['all' => true]]);
+        $kernel->boot();
+
+        $this->assertSame(['LeafBundle', 'MiddleMetaBundle', 'TopMetaBundle'], array_keys($kernel->getBundles()));
+    }
+
+    public function testTwoRequiredBundlesWithSameChild()
+    {
+        $kernel = new RequiredBundleKernel('test', true, $this->varDir, [
+            MetaParentBundle::class => ['all' => true],
+            SecondMetaParentBundle::class => ['all' => true],
+        ]);
+        $kernel->boot();
+
+        $this->assertSame(['ChildBundle', 'MetaParentBundle', 'SecondMetaParentBundle'], array_keys($kernel->getBundles()));
+    }
+
+    public function testRequiredBundleSelfReferenceIsDeduped()
+    {
+        $kernel = new RequiredBundleKernel('test', true, $this->varDir, [SelfReferencingMetaBundle::class => ['all' => true]]);
+        $kernel->boot();
+
+        $this->assertSame(['SelfReferencingMetaBundle'], array_keys($kernel->getBundles()));
+    }
+
+    public function testRequiredBundleCircularReferenceIsDeduped()
+    {
+        $kernel = new RequiredBundleKernel('test', true, $this->varDir, [CircularMetaBundleA::class => ['all' => true]]);
+        $kernel->boot();
+
+        // Both bundles are registered (circular reference doesn't cause infinite loop)
+        $this->assertSame(['CircularMetaBundleB', 'CircularMetaBundleA'], array_keys($kernel->getBundles()));
+    }
+
+    public function testRequiredBundleIgnoreOnInvalid()
+    {
+        $kernel = new RequiredBundleKernel('test', true, $this->varDir, [IgnoreOnInvalidBundle::class => ['all' => true]]);
+        $kernel->boot();
+
+        $this->assertSame(['IgnoreOnInvalidBundle'], array_keys($kernel->getBundles()));
+    }
+
     private function createKernel(string $env = 'test', bool $debug = true): TestKernel
     {
         return new TestKernel($env, $debug, $this->varDir);
@@ -342,7 +407,9 @@ class AbstractKernelTest extends TestCase
 
 class TestKernel extends AbstractKernel
 {
-    use KernelTrait;
+    use KernelTrait {
+        registerBundles as public;
+    }
 
     public function __construct(string $env, bool $debug, private string $dir = '')
     {
@@ -428,5 +495,75 @@ class ImplicitExtensionBundle extends AbstractBundle
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $builder->setParameter('implicit_extension.loaded', true);
+    }
+}
+
+class ChildBundle extends AbstractBundle
+{
+}
+
+#[RequiredBundle(ChildBundle::class)]
+class MetaParentBundle extends AbstractBundle
+{
+}
+
+class LeafBundle extends AbstractBundle
+{
+}
+
+#[RequiredBundle(LeafBundle::class)]
+class MiddleMetaBundle extends AbstractBundle
+{
+}
+
+#[RequiredBundle(MiddleMetaBundle::class)]
+class TopMetaBundle extends AbstractBundle
+{
+}
+
+#[RequiredBundle(ChildBundle::class)]
+class SecondMetaParentBundle extends AbstractBundle
+{
+}
+
+#[RequiredBundle('NonExistent\\Bundle\\ThatDoesNotExist', ignoreOnInvalid: true)]
+class IgnoreOnInvalidBundle extends AbstractBundle
+{
+}
+
+#[RequiredBundle(self::class)]
+class SelfReferencingMetaBundle extends AbstractBundle
+{
+}
+
+#[RequiredBundle(CircularMetaBundleB::class)]
+class CircularMetaBundleA extends AbstractBundle
+{
+}
+
+#[RequiredBundle(CircularMetaBundleA::class)]
+class CircularMetaBundleB extends AbstractBundle
+{
+}
+
+class RequiredBundleKernel extends TestKernel
+{
+    use KernelTrait {
+        registerBundles as public;
+    }
+
+    public function __construct(string $env, bool $debug, private string $testDir, private array $bundlesDefinition)
+    {
+        parent::__construct($env, $debug, $testDir);
+    }
+
+    public function getProjectDir(): string
+    {
+        return $this->testDir;
+    }
+
+    private function getBundlesDefinition(): array
+    {
+        return $this->bundlesDefinition;
     }
 }

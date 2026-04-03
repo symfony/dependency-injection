@@ -47,6 +47,8 @@ class_exists(ConfigCache::class);
  */
 trait KernelTrait
 {
+    private array $bundleClasses = [];
+
     public function getCacheDir(): string
     {
         if (null !== $dir = $_SERVER['APP_CACHE_DIR'] ?? null) {
@@ -95,14 +97,20 @@ trait KernelTrait
 
     protected function initializeBundles(): void
     {
-        $this->bundles = [];
-        foreach ($this->registerBundles() as $bundle) {
-            $name = $bundle->getName();
-            if (isset($this->bundles[$name])) {
-                throw new \LogicException(\sprintf('Trying to register two bundles with the same name "%s".', $name));
-            }
-            $this->bundles[$name] = $bundle;
+        $cachePath = $this->getEffectiveBuildDir().'/'.$this->getContainerClass().'.bundles.php';
+        if (is_file($cachePath)) {
+            $this->bundles = require $cachePath;
+
+            return;
         }
+
+        $this->bundles = [];
+        $registered = [];
+        foreach ($this->registerBundles() as $bundle) {
+            $this->registerBundle($bundle, $registered);
+        }
+
+        $this->bundleClasses = array_map('get_class', $this->bundles);
     }
 
     protected function initializeContainer(): void
@@ -383,6 +391,14 @@ trait KernelTrait
         }
 
         $cache->write($rootCode, $container->getResources());
+
+        // Dump resolved bundle list so initializeBundles() can skip reflection on next boot
+        $code = "<?php\n\nreturn [\n";
+        foreach ($this->bundleClasses as $name => $bundleClass) {
+            $code .= \sprintf("    %s => new \\%s(),\n", var_export($name, true), $bundleClass);
+        }
+        $code .= "];\n";
+        $fs->dumpFile($this->getEffectiveBuildDir().'/'.$class.'.bundles.php', $code);
     }
 
     protected function getContainerLoader(ContainerInterface $container): DelegatingLoader
@@ -463,8 +479,14 @@ trait KernelTrait
     private function getBundlesDefinition(): array
     {
         $bundlesPath = $this->getBundlesPath();
+        $bundles = is_file($bundlesPath) ? require $bundlesPath : [];
 
-        return is_file($bundlesPath) ? require $bundlesPath : [];
+        $resolved = [];
+        foreach ($bundles as $class => $envs) {
+            $this->resolveRequiredBundles($class, $envs, $bundles, $resolved);
+        }
+
+        return $resolved;
     }
 
     private function registerBundles(): iterable
@@ -515,7 +537,8 @@ trait KernelTrait
             }
 
             $file = (new \ReflectionObject($this))->getFileName();
-            $kernelLoader = $loader->getResolver()->resolve($file);
+            $kernelLoader = new PhpFileLoader($container, new FileLocator($this), $this->getEnvironment());
+            $kernelLoader->setResolver($loader->getResolver());
             $kernelLoader->setCurrentDir(\dirname($file));
             $instanceof = &\Closure::bind(fn &() => $this->instanceof, $kernelLoader, $kernelLoader)();
 
@@ -594,5 +617,59 @@ trait KernelTrait
         }
 
         return $this->getProjectDir().'/'.$dir.'/'.$this->environment;
+    }
+
+    private function resolveRequiredBundles(string $class, array $envs, array $bundles, array &$resolved, array &$visiting = []): void
+    {
+        if (isset($resolved[$class]) || isset($visiting[$class])) {
+            return;
+        }
+
+        if (!class_exists($class)) {
+            $resolved[$class] = $envs;
+
+            return;
+        }
+
+        $visiting[$class] = true;
+
+        foreach ((new \ReflectionClass($class))->getAttributes(RequiredBundle::class) as $attribute) {
+            $required = $attribute->newInstance();
+            if ($required->ignoreOnInvalid && !class_exists($required->class)) {
+                continue;
+            }
+            if (!isset($bundles[$required->class])) {
+                $this->resolveRequiredBundles($required->class, $envs, $bundles, $resolved, $visiting);
+            }
+        }
+
+        $resolved[$class] = $envs;
+    }
+
+    private function registerBundle(BundleInterface $bundle, array &$registered): void
+    {
+        $class = $bundle::class;
+
+        if (isset($registered[$class])) {
+            return;
+        }
+        $registered[$class] = true;
+
+        foreach ((new \ReflectionClass($class))->getAttributes(RequiredBundle::class) as $attribute) {
+            $required = $attribute->newInstance();
+            if (isset($registered[$required->class])) {
+                continue;
+            }
+            if ($required->ignoreOnInvalid && !class_exists($required->class)) {
+                continue;
+            }
+            $this->registerBundle(new $required->class(), $registered);
+        }
+
+        $name = $bundle->getName();
+        if (isset($this->bundles[$name])) {
+            throw new \LogicException(\sprintf('Trying to register two bundles with the same name "%s".', $name));
+        }
+        $this->bundles[$name] = $bundle;
     }
 }
