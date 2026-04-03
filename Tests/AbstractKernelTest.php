@@ -246,7 +246,6 @@ class AbstractKernelTest extends TestCase
         $this->assertSame(TestAbstractBundle::class, $bundles['TestAbstractBundle']);
         $this->assertArrayHasKey('TestAbstractBundle', $metadata);
         $this->assertArrayHasKey('path', $metadata['TestAbstractBundle']);
-        $this->assertArrayHasKey('namespace', $metadata['TestAbstractBundle']);
     }
 
     public function testGetStartTime()

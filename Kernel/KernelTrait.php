@@ -547,7 +547,6 @@ trait KernelTrait
             $bundles[$name] = $bundle::class;
             $bundlesMetadata[$name] = [
                 'path' => $bundle->getPath(),
-                'namespace' => $bundle->getNamespace(),
             ];
         }
 

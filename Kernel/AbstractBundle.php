@@ -32,8 +32,6 @@ abstract class AbstractBundle implements BundleInterface, ConfigurableExtensionI
     protected ?ContainerInterface $container;
     protected string $extensionAlias = '';
 
-    private string $namespace;
-
     public function boot(): void
     {
     }
@@ -71,24 +69,10 @@ abstract class AbstractBundle implements BundleInterface, ConfigurableExtensionI
         return $this->extension ??= new BundleExtension($this, $this->extensionAlias);
     }
 
-    public function getNamespace(): string
-    {
-        if (!isset($this->namespace)) {
-            $this->parseClassName();
-        }
-
-        return $this->namespace;
-    }
-
     public function getPath(): string
     {
-        if (!isset($this->path)) {
-            $reflected = new \ReflectionObject($this);
-            // assume the modern directory structure by default
-            $this->path = \dirname($reflected->getFileName(), 2);
-        }
-
-        return $this->path;
+        // assume the modern directory structure by default
+        return $this->path ??= \dirname((new \ReflectionClass($this))->getFileName(), 2);
     }
 
     /**
@@ -96,22 +80,11 @@ abstract class AbstractBundle implements BundleInterface, ConfigurableExtensionI
      */
     final public function getName(): string
     {
-        if (!isset($this->name)) {
-            $this->parseClassName();
-        }
-
-        return $this->name;
+        return $this->name ??= false === ($pos = strrpos(static::class, '\\')) ? static::class : substr(static::class, $pos + 1);
     }
 
     public function setContainer(?ContainerInterface $container): void
     {
         $this->container = $container;
-    }
-
-    private function parseClassName(): void
-    {
-        $pos = strrpos(static::class, '\\');
-        $this->namespace = false === $pos ? '' : substr(static::class, 0, $pos);
-        $this->name ??= false === $pos ? static::class : substr(static::class, $pos + 1);
     }
 }

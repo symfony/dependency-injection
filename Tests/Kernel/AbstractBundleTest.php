@@ -34,13 +34,6 @@ class AbstractBundleTest extends TestCase
         $this->assertSame('CustomName', $bundle->getName());
     }
 
-    public function testGetNamespace()
-    {
-        $bundle = new FooBarBundle();
-
-        $this->assertSame(__NAMESPACE__, $bundle->getNamespace());
-    }
-
     public function testGetPath()
     {
         $bundle = new FooBarBundle();

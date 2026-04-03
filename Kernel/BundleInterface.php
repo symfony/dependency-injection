@@ -48,11 +48,6 @@ interface BundleInterface
     public function getName(): string;
 
     /**
-     * Gets the Bundle namespace.
-     */
-    public function getNamespace(): string;
-
-    /**
      * Gets the Bundle directory path.
      *
      * The path should always be returned as a Unix path (with /).
