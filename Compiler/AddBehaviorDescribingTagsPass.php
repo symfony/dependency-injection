@@ -20,21 +20,27 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class AddBehaviorDescribingTagsPass implements CompilerPassInterface
 {
+    private const DEFAULT_TAGS = [
+        'container.do_not_inline',
+        'container.service_locator',
+        'container.service_subscriber',
+    ];
+
     /**
      * @param list<string> $tags
      */
     public function __construct(
-        private array $tags,
+        private array $tags = [],
     ) {
     }
 
     public function process(ContainerBuilder $container): void
     {
-        $tags = $container->hasParameter('container.behavior_describing_tags') ? $container->getParameter('container.behavior_describing_tags') : [];
+        $tags = $container->hasParameter('container.behavior_describing_tags') ? $container->getParameter('container.behavior_describing_tags') : self::DEFAULT_TAGS;
 
         $container->setParameter(
             'container.behavior_describing_tags',
-            array_merge($tags, $this->tags)
+            array_unique(array_merge($tags, $this->tags))
         );
     }
 }

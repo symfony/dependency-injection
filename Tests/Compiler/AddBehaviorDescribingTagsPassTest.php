@@ -23,7 +23,13 @@ class AddBehaviorDescribingTagsPassTest extends TestCase
 
         (new AddBehaviorDescribingTagsPass(['kernel.event_subscriber', 'kernel.reset']))->process($container);
 
-        $this->assertSame(['kernel.event_subscriber', 'kernel.reset'], $container->getParameter('container.behavior_describing_tags'));
+        $this->assertSame([
+            'container.do_not_inline',
+            'container.service_locator',
+            'container.service_subscriber',
+            'kernel.event_subscriber',
+            'kernel.reset',
+        ], $container->getParameter('container.behavior_describing_tags'));
     }
 
     public function testMultiplePassesMerge()
@@ -33,7 +39,14 @@ class AddBehaviorDescribingTagsPassTest extends TestCase
         (new AddBehaviorDescribingTagsPass(['kernel.event_subscriber', 'kernel.reset']))->process($container);
         (new AddBehaviorDescribingTagsPass(['kernel.locale_aware']))->process($container);
 
-        $this->assertSame(['kernel.event_subscriber', 'kernel.reset', 'kernel.locale_aware'], $container->getParameter('container.behavior_describing_tags'));
+        $this->assertSame([
+            'container.do_not_inline',
+            'container.service_locator',
+            'container.service_subscriber',
+            'kernel.event_subscriber',
+            'kernel.reset',
+            'kernel.locale_aware',
+        ], $container->getParameter('container.behavior_describing_tags'));
     }
 
     public function testProcessWithExistingParameter()
