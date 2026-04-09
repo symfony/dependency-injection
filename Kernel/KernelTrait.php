@@ -98,7 +98,10 @@ trait KernelTrait
     protected function initializeBundles(): void
     {
         $cachePath = $this->getEffectiveBuildDir().'/'.$this->getContainerClass().'.bundles.php';
-        if (is_file($cachePath)) {
+        if (
+            is_file($cachePath)
+            && (!$this->debug || is_file($bundlesPath = $this->getBundlesPath()) && filemtime($cachePath) > filemtime($bundlesPath))
+        ) {
             $this->bundles = require $cachePath;
 
             return;

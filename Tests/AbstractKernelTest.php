@@ -287,6 +287,68 @@ class AbstractKernelTest extends TestCase
         $this->assertCount(0, $kernel->getBundles());
     }
 
+    public function testBundleCacheIsNotUsedInDebugWhenNotFresh()
+    {
+        $dir = $this->varDir;
+        @mkdir($dir.'/config', 0o777, true);
+        file_put_contents($dir.'/config/bundles.php', '<?php return ['.TestAbstractBundle::class.'::class => [\'all\' => true]];');
+
+        $kernel = $this->createKernel();
+        $kernel->boot();
+
+        $this->assertCount(1, $kernel->getBundles());
+        $kernel->shutdown();
+
+        file_put_contents($dir.'/config/bundles.php', '<?php return ['.TestAbstractBundle::class.'::class => [\'all\' => true], '.ChildBundle::class.'::class => [\'all\' => true]];');
+
+        $kernel = $this->createKernel();
+        $kernel->boot();
+
+        $this->assertCount(2, $kernel->getBundles());
+    }
+
+    public function testBundleCacheIsUsedInDebugWhenFresh()
+    {
+        $dir = $this->varDir;
+        @mkdir($dir.'/config', 0o777, true);
+        file_put_contents($dir.'/config/bundles.php', '<?php return ['.TestAbstractBundle::class.'::class => [\'all\' => true]];');
+
+        $kernel = $this->createKernel();
+        $kernel->boot();
+
+        $this->assertCount(1, $kernel->getBundles());
+        $kernel->shutdown();
+
+        // Modify bundles.php but backdate it so the cache file remains newer
+        file_put_contents($dir.'/config/bundles.php', '<?php return ['.TestAbstractBundle::class.'::class => [\'all\' => true], '.ChildBundle::class.'::class => [\'all\' => true]];');
+        touch($dir.'/config/bundles.php', time() - 10);
+
+        $kernel = $this->createKernel();
+        $kernel->boot();
+
+        $this->assertCount(1, $kernel->getBundles(), 'Bundle cache should be used in debug mode when cache is newer than bundles.php');
+    }
+
+    public function testBundleCacheIsUsedInNoDebug()
+    {
+        $dir = $this->varDir;
+        @mkdir($dir.'/config', 0o777, true);
+        file_put_contents($dir.'/config/bundles.php', '<?php return ['.TestAbstractBundle::class.'::class => [\'all\' => true]];');
+
+        $kernel = $this->createKernel('test', false);
+        $kernel->boot();
+
+        $this->assertCount(1, $kernel->getBundles());
+        $kernel->shutdown();
+
+        file_put_contents($dir.'/config/bundles.php', '<?php return ['.TestAbstractBundle::class.'::class => [\'all\' => true], '.ChildBundle::class.'::class => [\'all\' => true]];');
+
+        $kernel = $this->createKernel('test', false);
+        $kernel->boot();
+
+        $this->assertCount(1, $kernel->getBundles(), 'Bundle cache should be used in non-debug mode even when bundles.php changes');
+    }
+
     public function testConfigureContainerHook()
     {
         $kernel = new ConfigureContainerKernel('test', true);
