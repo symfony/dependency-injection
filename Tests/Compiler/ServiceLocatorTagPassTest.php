@@ -308,6 +308,31 @@ class ServiceLocatorTagPassTest extends TestCase
         static::assertInstanceOf(AsTaggedItemServiceDecorator::class, $locator->get('custom_key'));
     }
 
+    public function testExcludeSelfFromTaggedServiceLocator()
+    {
+        $container = new ContainerBuilder();
+
+        $locator = new Definition(Locator::class);
+        $locator->setPublic(true);
+        $locator->addTag('test_tag');
+        $locator->addArgument(new ServiceLocatorArgument(new TaggedIteratorArgument('test_tag', null, null, true)));
+
+        $container->setDefinition(Locator::class, $locator);
+
+        $service = new Definition(Service::class);
+        $service->setPublic(true);
+        $service->addTag('test_tag');
+
+        $container->setDefinition(Service::class, $service);
+
+        $container->compile();
+
+        /** @var ServiceLocator $locator */
+        $locator = $container->get(Locator::class)->locator;
+        static::assertTrue($locator->has(Service::class), 'Other tagged services should be in the locator');
+        static::assertFalse($locator->has(Locator::class), 'The service itself should be excluded via excludeSelf');
+    }
+
     public function testBindingsAreProcessed()
     {
         $container = new ContainerBuilder();
