@@ -2425,6 +2425,8 @@ class PhpDumperTest extends TestCase
     {
         $expectedFile = self::$fixturesPath.'/php/'.$expectedFile;
 
+        $dumpedCode = str_replace("class_exists(\\Symfony\\Component\\VarExporter\\Internal\\Hydrator::class);\n", '', $dumpedCode);
+
         if ($_ENV['TEST_GENERATE_FIXTURES'] ?? false) {
             file_put_contents($expectedFile, $dumpedCode);
             self::markTestIncomplete('TEST_GENERATE_FIXTURES is set');
