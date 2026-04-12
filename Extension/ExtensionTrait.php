@@ -30,7 +30,7 @@ trait ExtensionTrait
 {
     private function executeConfiguratorCallback(ContainerBuilder $container, \Closure $callback, ConfigurableExtensionInterface $subject, bool $prepend = false): void
     {
-        $env = $container->getParameter('kernel.environment');
+        $env = $container->hasParameter('kernel.environment') ? $container->getParameter('kernel.environment') : null;
         $loader = $this->createContainerLoader($container, $env, $prepend);
         $file = (new \ReflectionObject($subject))->getFileName();
         $bundleLoader = $loader->getResolver()->resolve($file);
@@ -48,7 +48,7 @@ trait ExtensionTrait
         }
     }
 
-    private function createContainerLoader(ContainerBuilder $container, string $env, bool $prepend): DelegatingLoader
+    private function createContainerLoader(ContainerBuilder $container, ?string $env, bool $prepend): DelegatingLoader
     {
         $locator = new FileLocator();
         $resolver = new LoaderResolver([
