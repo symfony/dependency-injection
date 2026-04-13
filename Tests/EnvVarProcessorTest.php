@@ -946,11 +946,7 @@ class EnvVarProcessorTest extends TestCase
     {
         $processor = new EnvVarProcessor(new Container());
 
-        $this->assertSame($expected, $processor->getEnv($prefix, 'default::FOO', static function () use ($processor) {
-            return $processor->getEnv('default', ':FOO', static function () {
-                return null;
-            });
-        }));
+        $this->assertSame($expected, $processor->getEnv($prefix, 'default::FOO', static fn () => $processor->getEnv('default', ':FOO', static fn () => null)));
     }
 
     public function testGetEnvWithEmptyStringPrefixCastsToString()

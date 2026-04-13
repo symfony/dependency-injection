@@ -1977,13 +1977,12 @@ class PhpDumper extends Dumper
                 // we do this to deal with non string values (Boolean, integer, ...)
                 // the preg_replace_callback converts them to strings
                 return $this->dumpParameter($match[1]);
-            } else {
-                $replaceParameters = fn ($match) => "'.".$this->dumpParameter($match[2]).".'";
-
-                $code = str_replace('%%', '%', preg_replace_callback('/(?<!%)(%)([^%]+)\1/', $replaceParameters, $this->export($value)));
-
-                return $code;
             }
+            $replaceParameters = fn ($match) => "'.".$this->dumpParameter($match[2]).".'";
+
+            $code = str_replace('%%', '%', preg_replace_callback('/(?<!%)(%)([^%]+)\1/', $replaceParameters, $this->export($value)));
+
+            return $code;
         } elseif ($value instanceof \UnitEnum) {
             return \sprintf('\%s::%s', $value::class, $value->name);
         } elseif ($value instanceof AbstractArgument) {
