@@ -35,8 +35,8 @@ class ServiceLocatorTest extends ServiceLocatorTestCase
     public function testGetThrowsOnUndefinedService()
     {
         $locator = $this->getServiceLocator([
-            'foo' => fn () => 'bar',
-            'bar' => fn () => 'baz',
+            'foo' => static fn () => 'bar',
+            'bar' => static fn () => 'baz',
         ]);
 
         $this->expectException(NotFoundExceptionInterface::class);
@@ -57,7 +57,7 @@ class ServiceLocatorTest extends ServiceLocatorTestCase
         $container = new Container();
         $container->set('foo', new \stdClass());
         $subscriber = new SomeServiceSubscriber();
-        $subscriber->container = $this->getServiceLocator(['bar' => function () {}]);
+        $subscriber->container = $this->getServiceLocator(['bar' => static function () {}]);
         $subscriber->container = $subscriber->container->withContext('caller', $container);
 
         $this->expectException(NotFoundExceptionInterface::class);
@@ -83,8 +83,8 @@ class ServiceLocatorTest extends ServiceLocatorTestCase
     public function testInvoke()
     {
         $locator = $this->getServiceLocator([
-            'foo' => fn () => 'bar',
-            'bar' => fn () => 'baz',
+            'foo' => static fn () => 'bar',
+            'bar' => static fn () => 'baz',
         ]);
 
         $this->assertSame('bar', $locator('foo'));
@@ -95,9 +95,9 @@ class ServiceLocatorTest extends ServiceLocatorTestCase
     public function testProvidesServicesInformation()
     {
         $locator = new ServiceLocator([
-            'foo' => fn () => 'bar',
-            'bar' => fn (): string => 'baz',
-            'baz' => fn (): ?string => 'zaz',
+            'foo' => static fn () => 'bar',
+            'bar' => static fn (): string => 'baz',
+            'baz' => static fn (): ?string => 'zaz',
         ]);
 
         $this->assertSame($locator->getProvidedServices(), [

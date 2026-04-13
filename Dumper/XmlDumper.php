@@ -130,7 +130,7 @@ class XmlDumper extends Dumper
         }
 
         $tags = $definition->getTags();
-        $tags['container.error'] = array_map(fn ($e) => ['message' => $e], $definition->getErrors());
+        $tags['container.error'] = array_map(static fn ($e) => ['message' => $e], $definition->getErrors());
         foreach ($tags as $name => $tags) {
             foreach ($tags as $attributes) {
                 $tag = $this->document->createElement('tag');

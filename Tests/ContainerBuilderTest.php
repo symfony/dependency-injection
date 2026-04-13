@@ -1192,7 +1192,7 @@ class ContainerBuilderTest extends TestCase
 
         $matchingResources = array_filter(
             $container->getResources(),
-            fn (ResourceInterface $resource) => 'reflection.BarClass' === (string) $resource
+            static fn (ResourceInterface $resource) => 'reflection.BarClass' === (string) $resource
         );
 
         $this->assertNotEmpty($matchingResources);
@@ -1373,7 +1373,7 @@ class ContainerBuilderTest extends TestCase
     public function testLazyLoadedService()
     {
         $loader = new ClosureLoader($container = new ContainerBuilder());
-        $loader->load(function (ContainerBuilder $container) {
+        $loader->load(static function (ContainerBuilder $container) {
             $container->set('a', new \BazClass());
             $definition = new Definition('BazClass');
             $definition->setLazy(true);
