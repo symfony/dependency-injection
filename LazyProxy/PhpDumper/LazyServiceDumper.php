@@ -77,23 +77,23 @@ final class LazyServiceDumper implements DumperInterface
 
         if (!$asGhostObject) {
             return <<<EOF
-                    if (true === \$lazyLoad) {
-                        $instantiation \$container->createProxy('$proxyClass', static fn () => \\$proxyClass::createLazyProxy(static fn () => $factoryCode));
-                    }
+                        if (true === \$lazyLoad) {
+                            $instantiation \$container->createProxy('$proxyClass', static fn () => \\$proxyClass::createLazyProxy(static fn () => $factoryCode));
+                        }
 
 
-            EOF;
+                EOF;
         }
 
         $factoryCode = \sprintf('static fn ($proxy) => %s', $factoryCode);
 
         return <<<EOF
-                if (true === \$lazyLoad) {
-                    $instantiation \$container->createProxy('$proxyClass', static fn () => \\$proxyClass::createLazyGhost($factoryCode));
-                }
+                    if (true === \$lazyLoad) {
+                        $instantiation \$container->createProxy('$proxyClass', static fn () => \\$proxyClass::createLazyGhost($factoryCode));
+                    }
 
 
-        EOF;
+            EOF;
     }
 
     public function getProxyCode(Definition $definition, ?string $id = null): string
