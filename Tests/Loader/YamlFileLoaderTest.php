@@ -565,7 +565,7 @@ class YamlFileLoaderTest extends TestCase
         $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
         $loader->load('services_prototype.yml');
 
-        $ids = array_keys(array_filter($container->getDefinitions(), fn ($def) => !$def->hasTag('container.excluded')));
+        $ids = array_keys(array_filter($container->getDefinitions(), static fn ($def) => !$def->hasTag('container.excluded')));
         sort($ids);
         $this->assertSame([Prototype\Foo::class, Prototype\NotFoo::class, Prototype\Sub\Bar::class, 'service_container'], $ids);
 
@@ -617,7 +617,7 @@ class YamlFileLoaderTest extends TestCase
         $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
         $loader->load('services_prototype_namespace.yml');
 
-        $ids = array_keys(array_filter($container->getDefinitions(), fn ($def) => !$def->hasTag('container.excluded')));
+        $ids = array_keys(array_filter($container->getDefinitions(), static fn ($def) => !$def->hasTag('container.excluded')));
         sort($ids);
 
         $this->assertSame([
@@ -951,7 +951,7 @@ class YamlFileLoaderTest extends TestCase
             '$quz' => 'quz',
             '$factory' => 'factory',
             'iterable $baz' => new TaggedIteratorArgument('bar'),
-        ], array_map(fn (BoundArgument $v) => $v->getValues()[0], $definition->getBindings()));
+        ], array_map(static fn (BoundArgument $v) => $v->getValues()[0], $definition->getBindings()));
         $this->assertEquals([
             'quz',
             null,
@@ -969,7 +969,7 @@ class YamlFileLoaderTest extends TestCase
             'NonExistent' => null,
             '$quz' => 'quz',
             '$factory' => 'factory',
-        ], array_map(fn (BoundArgument $v) => $v->getValues()[0], $definition->getBindings()));
+        ], array_map(static fn (BoundArgument $v) => $v->getValues()[0], $definition->getBindings()));
     }
 
     public function testProcessNotExistingActionParam()

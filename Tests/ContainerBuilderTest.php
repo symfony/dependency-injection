@@ -847,7 +847,7 @@ class ContainerBuilderTest extends TestCase
         $container = new ContainerBuilder();
         $container->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c1 = static function (Definition $definition) {});
         $config = new ContainerBuilder();
-        $config->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c2 = function (Definition $definition) {});
+        $config->registerAttributeForAutoconfiguration(AsTaggedItem::class, $c2 = static function (Definition $definition) {});
 
         $container->merge($config);
         $this->assertSame([AsTaggedItem::class => [$c1, $c2]], $container->getAttributeAutoconfigurators());
@@ -1250,7 +1250,7 @@ class ContainerBuilderTest extends TestCase
 
         $matchingResources = array_filter(
             $container->getResources(),
-            fn (ResourceInterface $resource) => 'reflection.BarClass' === (string) $resource
+            static fn (ResourceInterface $resource) => 'reflection.BarClass' === (string) $resource
         );
 
         $this->assertNotEmpty($matchingResources);
@@ -1431,7 +1431,7 @@ class ContainerBuilderTest extends TestCase
     public function testLazyLoadedService()
     {
         $loader = new ClosureLoader($container = new ContainerBuilder());
-        $loader->load(function (ContainerBuilder $container) {
+        $loader->load(static function (ContainerBuilder $container) {
             $container->set('a', new \BazClass());
             $definition = new Definition('BazClass');
             $definition->setLazy(true);

@@ -37,7 +37,7 @@ class MergeExtensionConfigurationPassTest extends TestCase
             ->willReturn('foo');
         $extension->expects($this->once())
             ->method('load')
-            ->willReturnCallback(function (array $config, ContainerBuilder $container) use (&$tmpProviders) {
+            ->willReturnCallback(static function (array $config, ContainerBuilder $container) use (&$tmpProviders) {
                 $tmpProviders = $container->getExpressionLanguageProviders();
             });
 
