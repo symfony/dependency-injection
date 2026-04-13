@@ -134,7 +134,7 @@ class XmlDumper extends Dumper
         $xml = [];
 
         $tags = $definition->getTags();
-        $tags['container.error'] = array_map(fn ($e) => ['message' => $e], $definition->getErrors());
+        $tags['container.error'] = array_map(static fn ($e) => ['message' => $e], $definition->getErrors());
         foreach ($tags as $name => $tags) {
             foreach ($tags as $attributes) {
                 // Check if we have recursive attributes
