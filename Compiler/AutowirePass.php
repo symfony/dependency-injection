@@ -719,7 +719,7 @@ class AutowirePass extends AbstractRecursivePass
         }
 
         if (str_contains($type, '&')) {
-            $types = explode('&', $type);
+            $types = explode('&', trim($type, '()'));
         } elseif (str_contains($type, '|')) {
             $types = explode('|', $type);
         } else {
