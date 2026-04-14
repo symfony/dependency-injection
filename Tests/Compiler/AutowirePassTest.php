@@ -443,7 +443,7 @@ class AutowirePassTest extends TestCase
     /**
      * @requires PHP 8.2
      */
-    public function testParameterWithNullableIntersectionIsSkipped()
+    public function testParameterWithNullableIntersectionIsSkippedWhenAliasDoesNotExist()
     {
         $container = new ContainerBuilder();
 
@@ -454,6 +454,26 @@ class AutowirePassTest extends TestCase
 
         $definition = $container->getDefinition('opt');
         $this->assertNull($definition->getArgument(0));
+    }
+
+    /**
+     * @requires PHP 8.2
+     */
+    public function testParameterWithNullableIntersectionIsAutowiredWhenAliasExists()
+    {
+        $container = new ContainerBuilder();
+
+        $container->register('b', \stdClass::class);
+        $container->setAlias(CollisionInterface::class, 'b');
+        $container->setAlias(AnotherInterface::class, 'b');
+
+        $optDefinition = $container->register('opt', NullableIntersection::class);
+        $optDefinition->setAutowired(true);
+
+        (new AutowirePass())->process($container);
+
+        $definition = $container->getDefinition('opt');
+        $this->assertSame('b', (string) $definition->getArgument(0));
     }
 
     public function testParameterWithNullUnionIsAutowired()
