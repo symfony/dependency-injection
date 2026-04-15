@@ -566,11 +566,13 @@ class ContainerBuilderTest extends TestCase
         $builder->register('qux', 'Bar\FooClass')->setFactory(['Bar\FooClass', 'getInstance']);
         $builder->register('bar', 'Bar\FooClass')->setFactory([new Definition('Bar\FooClass'), 'getInstance']);
         $builder->register('baz', 'Bar\FooClass')->setFactory([new Reference('bar'), 'getInstance']);
+        $builder->register('inline', 'BazClass')->setFactory(new Definition('BazInvokableFactory'));
 
         $this->assertTrue($builder->get('foo')->called, '->createService() calls the factory method to create the service instance');
         $this->assertTrue($builder->get('qux')->called, '->createService() calls the factory method to create the service instance');
         $this->assertTrue($builder->get('bar')->called, '->createService() uses anonymous service as factory');
         $this->assertTrue($builder->get('baz')->called, '->createService() uses another service as factory');
+        $this->assertInstanceOf(\BazClass::class, $builder->get('inline'), '->createService() calls __invoke on inline Definition factory');
     }
 
     public function testCreateServiceMethodCalls()
@@ -610,11 +612,13 @@ class ContainerBuilderTest extends TestCase
         $builder->register('foo3', 'Bar\FooClass')->setConfigurator([new Reference('baz'), 'configure']);
         $builder->register('foo4', 'Bar\FooClass')->setConfigurator([$builder->getDefinition('baz'), 'configure']);
         $builder->register('foo5', 'Bar\FooClass')->setConfigurator('foo');
+        $builder->register('foo6', 'Bar\FooClass')->setConfigurator(new Definition('BazInvokableConfigurator'));
 
         $this->assertTrue($builder->get('foo1')->configured, '->createService() calls the configurator');
         $this->assertTrue($builder->get('foo2')->configured, '->createService() calls the configurator');
         $this->assertTrue($builder->get('foo3')->configured, '->createService() calls the configurator');
         $this->assertTrue($builder->get('foo4')->configured, '->createService() calls the configurator');
+        $this->assertTrue($builder->get('foo6')->configured, '->createService() calls __invoke on inline Definition configurator');
 
         try {
             $builder->get('foo5');
