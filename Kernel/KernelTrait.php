@@ -103,6 +103,7 @@ trait KernelTrait
             && (!$this->debug || is_file($bundlesPath = $this->getBundlesPath()) && filemtime($cachePath) > filemtime($bundlesPath))
         ) {
             $this->bundles = require $cachePath;
+            $this->bundleClasses = array_map('get_class', $this->bundles);
 
             return;
         }
@@ -376,7 +377,7 @@ trait KernelTrait
             'inline_factories' => $buildParameters['.container.dumper.inline_factories'] ?? false,
             'inline_class_loader' => $buildParameters['.container.dumper.inline_class_loader'] ?? $this->debug,
             'build_time' => $container->hasParameter('kernel.container_build_time') ? $container->getParameter('kernel.container_build_time') : $buildTime,
-            'preload_classes' => array_map('get_class', $this->bundles),
+            'preload_classes' => $this->bundleClasses,
         ]);
 
         $rootCode = array_pop($content);

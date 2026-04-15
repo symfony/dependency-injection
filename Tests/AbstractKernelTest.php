@@ -349,6 +349,28 @@ class AbstractKernelTest extends TestCase
         $this->assertCount(1, $kernel->getBundles(), 'Bundle cache should be used in non-debug mode even when bundles.php changes');
     }
 
+    public function testBundleCacheStaysPopulatedWhenContainerIsRebuilt()
+    {
+        $dir = $this->varDir;
+        @mkdir($dir.'/config', 0o777, true);
+        file_put_contents($dir.'/config/bundles.php', '<?php return ['.TestAbstractBundle::class.'::class => [\'all\' => true]];');
+        touch($dir.'/config/bundles.php', time() - 10);
+
+        $kernel = $this->createKernel();
+        @mkdir($kernel->getBuildDir(), 0o777, true);
+        file_put_contents($kernel->getBuildDir().'/'.$kernel->getTestContainerClass().'.bundles.php', '<?php return [\'TestAbstractBundle\' => new \Symfony\Component\DependencyInjection\Tests\TestAbstractBundle()];');
+
+        $kernel->boot();
+
+        $this->assertCount(1, $kernel->getBundles());
+        $kernel->shutdown();
+
+        $kernel = $this->createKernel();
+        $kernel->boot();
+
+        $this->assertCount(1, $kernel->getBundles());
+    }
+
     public function testConfigureContainerHook()
     {
         $kernel = new ConfigureContainerKernel('test', true);
@@ -486,6 +508,11 @@ class TestKernel extends AbstractKernel
     public function isBooted(): bool
     {
         return $this->booted;
+    }
+
+    public function getTestContainerClass(): string
+    {
+        return $this->getContainerClass();
     }
 }
 
