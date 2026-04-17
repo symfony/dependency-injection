@@ -22,6 +22,8 @@ use Symfony\Component\Config\Resource\GlobResource;
 use Symfony\Component\Config\Resource\ReflectionClassResource;
 use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
+use Symfony\Component\DependencyInjection\Argument\EnvClosure;
+use Symfony\Component\DependencyInjection\Argument\EnvClosureArgument;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\LazyClosure;
 use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
@@ -1265,6 +1267,10 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
         } elseif ($value instanceof ServiceClosureArgument) {
             $reference = $value->getValues()[0];
             $value = fn () => $this->resolveServices($reference);
+        } elseif ($value instanceof EnvClosureArgument) {
+            $expr = $value->getValue();
+            $envClosure = new EnvClosure(fn () => $this->resolveEnvPlaceholders($expr, true), $value->getDefault());
+            $value = $value->isStringable() ? $envClosure : $envClosure->__invoke(...);
         } elseif ($value instanceof IteratorArgument) {
             $value = new RewindableGenerator(function () use ($value, &$inlineServices) {
                 foreach ($value->getValues() as $k => $v) {
