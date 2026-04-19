@@ -497,7 +497,7 @@ class RegisterServiceSubscribersPassTest extends TestCase
 
         $expected = [
             'tagged.iterator' => new ServiceClosureArgument(new TaggedIteratorArgument('tag')),
-            'tagged.locator' => new ServiceClosureArgument(new ServiceLocatorArgument(new TaggedIteratorArgument('tag', 'tag', needsIndexes: true))),
+            'tagged.locator' => new ServiceClosureArgument(new ServiceLocatorArgument(new TaggedIteratorArgument('tag', 'tag', null, true))),
         ];
         $this->assertEquals($expected, $container->getDefinition((string) $locator->getFactory()[0])->getArgument(0));
     }
