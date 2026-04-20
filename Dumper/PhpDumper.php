@@ -35,7 +35,6 @@ use Symfony\Component\DependencyInjection\ExpressionLanguage;
 use Symfony\Component\DependencyInjection\LazyProxy\PhpDumper\DumperInterface;
 use Symfony\Component\DependencyInjection\LazyProxy\PhpDumper\LazyServiceDumper;
 use Symfony\Component\DependencyInjection\LazyProxy\PhpDumper\NullDumper;
-use Symfony\Component\DependencyInjection\Loader\FileLoader;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Reference;
@@ -584,21 +583,23 @@ EOF;
             }
             $alreadyGenerated[$asGhostObject][$class] = true;
 
-            foreach (array_column($definition->getTag('proxy'), 'interface') ?: [$class] as $r) {
-                if (!$r = $this->container->getReflectionClass($r)) {
-                    continue;
-                }
-                do {
-                    if ($file = $r->getFileName()) {
-                        if (str_ends_with($file, ') : eval()\'d code')) {
-                            $file = substr($file, 0, strrpos($file, '(', -17));
-                        }
-                        if (is_file($file)) {
-                            $this->container->addResource(new FileResource($file));
-                        }
+            if ($this->container->isTrackingResources()) {
+                foreach (array_column($definition->getTag('proxy'), 'interface') ?: [$class] as $r) {
+                    if (!$r = $this->container->getReflectionClass($r)) {
+                        continue;
                     }
-                    $r = $r->getParentClass() ?: null;
-                } while ($r?->isUserDefined());
+                    do {
+                        if ($file = $r->getFileName()) {
+                            if (str_ends_with($file, ') : eval()\'d code')) {
+                                $file = substr($file, 0, strrpos($file, '(', -17));
+                            }
+                            if (is_file($file)) {
+                                $this->container->addResource(new FileResource($file));
+                            }
+                        }
+                        $r = $r->getParentClass() ?: null;
+                    } while ($r?->isUserDefined());
+                }
             }
 
             if ("\n" === $proxyCode = "\n".$proxyDumper->getProxyCode($definition, $id)) {
@@ -1406,7 +1407,7 @@ EOF;
             $ids = array_keys($ids);
             sort($ids);
             foreach ($ids as $id) {
-                if (preg_match(FileLoader::ANONYMOUS_ID_REGEXP, $id)) {
+                if (preg_match(ContainerBuilder::ANONYMOUS_ID_REGEXP, $id)) {
                     continue;
                 }
                 $code .= '            '.$this->doExport($id)." => true,\n";
