@@ -48,6 +48,7 @@ abstract class AbstractKernel implements KernelInterface
     {
         $this->booted = false;
         $this->container = null;
+        $this->startTime = null;
     }
 
     public function boot(): void
