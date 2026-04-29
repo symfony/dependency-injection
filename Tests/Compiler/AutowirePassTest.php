@@ -1437,7 +1437,7 @@ class AutowirePassTest extends TestCase
         $expected = [
             'decorated' => new Reference(AutowireNestedAttributes::class.'.inner'),
             'iterator' => new TaggedIteratorArgument('foo'),
-            'locator' => new ServiceLocatorArgument(new TaggedIteratorArgument('foo', needsIndexes: true)),
+            'locator' => new ServiceLocatorArgument(new TaggedIteratorArgument('foo', null, null, true)),
             'service' => new Reference('bar'),
         ];
         $this->assertEquals($expected, $container->getDefinition(AutowireNestedAttributes::class)->getArgument(0));
