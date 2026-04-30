@@ -2053,6 +2053,11 @@ class PhpDumperTest extends TestCase
     public function testAutowireClosure()
     {
         $container = new ContainerBuilder();
+        $container->setParameter('env(FOO)', 'foo');
+        $container->setParameter('env(BAR)', 'foo');
+        $container->setParameter('env(HOST)', 'example.com');
+        $container->setParameter('env(PORT)', '6379');
+        $container->setParameter('dsn_template', 'redis://%env(HOST)%:%env(PORT)%');
         $container->register('foo', Foo::class)
             ->setPublic(true);
         $container->register('my_callable', MyCallable::class)
@@ -2078,10 +2083,18 @@ class PhpDumperTest extends TestCase
         $this->assertInstanceOf(\Closure::class, $bar->foo);
         $this->assertInstanceOf(\Closure::class, $bar->baz);
         $this->assertInstanceOf(\Closure::class, $bar->buz);
+        $this->assertInstanceOf(\Closure::class, $bar->getFoo);
+        $this->assertInstanceOf(\Stringable::class, $bar->getBar);
+        $this->assertInstanceOf(\Stringable::class, $bar->getDsn);
+        $this->assertInstanceOf(\Stringable::class, $bar->getDsnFromParam);
         $this->assertSame($container->get('foo'), ($bar->foo)());
         $this->assertSame($container->get('baz'), $bar->baz);
         $this->assertInstanceOf(Foo::class, $fooClone = ($bar->buz)());
         $this->assertNotSame($container->get('foo'), $fooClone);
+        $this->assertSame('foo', ($bar->getFoo)());
+        $this->assertSame('foo', (string) $bar->getBar);
+        $this->assertSame('redis://example.com:6379', (string) $bar->getDsn);
+        $this->assertSame('redis://example.com:6379', (string) $bar->getDsnFromParam);
     }
 
     public function testLazyClosure()
@@ -2479,6 +2492,14 @@ class LazyClosureConsumer
         public \Closure $buz,
         #[AutowireCallable(service: 'my_callable')]
         public \Closure $bar,
+        #[Autowire(env: 'FOO')]
+        public string|\Closure|null $getFoo = null,
+        #[Autowire(env: 'BAR')]
+        public string|\Stringable $getBar = 'bar',
+        #[Autowire('redis://%env(HOST)%:%env(PORT)%')]
+        public ?\Stringable $getDsn = null,
+        #[Autowire('%dsn_template%')]
+        public ?\Stringable $getDsnFromParam = null,
     ) {
     }
 }

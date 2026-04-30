@@ -4,6 +4,8 @@ CHANGELOG
 8.1
 ---
 
+ * Support autowiring env vars as closures or `Stringable` when using `#[Autowire(env: 'FOO')]`
+ * Add `EnvClosureArgument` and `!env_closure` YAML tag to inject env vars as closures or `Stringable` arguments
  * Add `AddBehaviorDescribingTagsPass` to allow bundles to extend the list of behavior-describing tags
  * Add Kernel and Bundle infrastructure in the `Kernel\` subnamespace
  * Add `$extensions` parameter to `MergeExtensionConfigurationPass` to ensure registered extensions are implicitly loaded

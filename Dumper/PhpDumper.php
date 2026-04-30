@@ -15,6 +15,8 @@ use Composer\Autoload\ClassLoader;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
 use Symfony\Component\DependencyInjection\Argument\ArgumentInterface;
+use Symfony\Component\DependencyInjection\Argument\EnvClosure;
+use Symfony\Component\DependencyInjection\Argument\EnvClosureArgument;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\LazyClosure;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
@@ -1893,6 +1895,13 @@ class PhpDumper extends Dumper
                     }
 
                     return \sprintf('%sfn ()%s => %s', $attribute, $returnedType, $code);
+                }
+
+                if ($value instanceof EnvClosureArgument) {
+                    $closure = \sprintf('fn () => %s', $this->export($value->getValue()));
+                    $code = \sprintf('new \\%s(%s, %s)', EnvClosure::class, $closure, $this->export($value->getDefault()));
+
+                    return $value->isStringable() ? $code : (null !== $value->getDefault() ? $code.'->__invoke(...)' : $closure);
                 }
 
                 if ($value instanceof IteratorArgument) {
