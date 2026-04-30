@@ -89,6 +89,7 @@ class PassConfig
             new CheckExceptionOnInvalidReferenceBehaviorPass(),
             new InlineServiceDefinitionsPass(new AnalyzeServiceReferencesPass()),
             new AnalyzeServiceReferencesPass(),
+            new CheckFactoryBuilderCircularReferencePass(),
             new DefinitionErrorExceptionPass(),
         ]];
 
