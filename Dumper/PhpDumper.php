@@ -758,6 +758,20 @@ class PhpDumper extends Dumper
         return true;
     }
 
+    private function getResetMethodsCode(Definition $definition): ?string
+    {
+        if (!$resetTags = $definition->getTag('container.tracked_for_reset')) {
+            return null;
+        }
+
+        $methods = [];
+        foreach ($resetTags as $tag) {
+            $methods[] = $this->export($tag['method']);
+        }
+
+        return implode(', ', $methods);
+    }
+
     private function addServiceMethodCalls(Definition $definition, string $variableName, ?string $sharedNonLazyId): string
     {
         $lastWitherIndex = null;
@@ -1062,6 +1076,8 @@ class PhpDumper extends Dumper
 
         if ($arguments = array_filter([$inlineDef->getProperties(), $inlineDef->getMethodCalls(), $inlineDef->getConfigurator()])) {
             $isSimpleInstance = false;
+        } elseif ($isRootInstance && $this->container->hasDefinition($id) && $this->container->getDefinition($id)->hasTag('container.tracked_for_reset')) {
+            $isSimpleInstance = false;
         } elseif ($definition !== $inlineDef && 2 > $this->inlinedDefinitions[$inlineDef]) {
             return $code;
         }
@@ -1095,6 +1111,10 @@ class PhpDumper extends Dumper
 
         if (!$isRootInstance || $isSimpleInstance) {
             return $code;
+        }
+
+        if ($this->container->hasDefinition($id) && $methodsCode = $this->getResetMethodsCode($this->container->getDefinition($id))) {
+            $code .= \sprintf("\n        \$container->trackForReset(\$instance, [%s]);\n", $methodsCode);
         }
 
         return $code."\n        return \$instance;\n";
@@ -1977,7 +1997,13 @@ class PhpDumper extends Dumper
                 throw new RuntimeException('Cannot dump definitions which have a configurator.');
             }
 
-            return $this->addNewInstance($value);
+            $code = $this->addNewInstance($value);
+
+            if ($methodsCode = $this->getResetMethodsCode($value)) {
+                return \sprintf('$container->trackForReset(%s, [%s])', $code, $methodsCode);
+            }
+
+            return $code;
         } elseif ($value instanceof Variable) {
             return '$'.$value;
         } elseif ($value instanceof Reference) {
@@ -2070,7 +2096,7 @@ class PhpDumper extends Dumper
                 if (!$definition->isShared()) {
                     return $code;
                 }
-            } elseif ($this->isTrivialInstance($definition)) {
+            } elseif ($this->isTrivialInstance($definition) && ($definition->isShared() || !$definition->hasTag('container.tracked_for_reset'))) {
                 if ($definition->hasErrors() && $e = $definition->getErrors()) {
                     return \sprintf('throw new RuntimeException(%s)', $this->export(reset($e)));
                 }

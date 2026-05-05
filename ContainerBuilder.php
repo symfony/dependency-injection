@@ -1249,6 +1249,10 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
             $callable($service);
         }
 
+        if ($resetTags = $definition->getTag('container.tracked_for_reset')) {
+            $this->trackForReset($service, array_column($resetTags, 'method'));
+        }
+
         return $service;
     }
 

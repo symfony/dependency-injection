@@ -26,6 +26,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\DependencyInjection\ReverseContainer;
+use Symfony\Component\DependencyInjection\ServicesResetter;
+use Symfony\Component\DependencyInjection\ServicesResetterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -83,6 +85,10 @@ return static function (ContainerConfigurator $container) {
                 service_locator([]),
             ])
         ->alias(ReverseContainer::class, 'reverse_container')
+
+        ->set('services_resetter', ServicesResetter::class)
+            ->public()
+        ->alias(ServicesResetterInterface::class, 'services_resetter')
 
         ->set('container.env_var_processor', EnvVarProcessor::class)
             ->args([
