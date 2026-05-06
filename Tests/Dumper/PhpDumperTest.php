@@ -2205,6 +2205,32 @@ class PhpDumperTest extends TestCase
         $this->assertSame($container->get('foo'), $r->initializeLazyObject($container->get('bar')->foo));
     }
 
+    public function testLazyAutowireAttributeOnAlreadyLazyService()
+    {
+        $container = new ContainerBuilder();
+        $container->register('foo', Foo::class)
+            ->setPublic(true)
+            ->setLazy(true);
+        $container->setAlias(Foo::class, 'foo');
+        $container->register('bar', LazyServiceConsumer::class)
+            ->setPublic(true)
+            ->setAutowired(true);
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        eval('?>'.$dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Lazy_Autowire_Attribute_Already_Lazy']));
+
+        $container = new \Symfony_DI_PhpDumper_Test_Lazy_Autowire_Attribute_Already_Lazy();
+
+        $bar = $container->get('bar');
+        $this->assertInstanceOf(Foo::class, $bar->foo);
+
+        $r = new \ReflectionClass(Foo::class);
+        $this->assertTrue($r->isUninitializedLazyObject($bar->foo));
+        $this->assertSame(0, $bar->foo->foo);
+        $this->assertFalse($r->isUninitializedLazyObject($bar->foo));
+    }
+
     public function testLazyAutowireAttributeWithIntersection()
     {
         $container = new ContainerBuilder();

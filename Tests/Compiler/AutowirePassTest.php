@@ -1540,6 +1540,18 @@ class AutowirePassTest extends TestCase
         $this->assertEquals($expected, $container->getDefinition('foo')->getArgument(0));
     }
 
+    public function testLazyServiceAttributeOnAlreadyLazyService()
+    {
+        $container = new ContainerBuilder();
+        $container->register(A::class, A::class)->setAutowired(true)->setLazy(true);
+        $container->register('foo', LazyServiceAttributeAutowiring::class)->setAutowired(true);
+
+        (new AutowirePass())->process($container);
+
+        $this->assertSame(A::class, (string) $container->getDefinition('foo')->getArgument(0));
+        $this->assertFalse($container->hasDefinition('.lazy.'.A::class));
+    }
+
     public function testLazyNotCompatibleWithAutowire()
     {
         $container = new ContainerBuilder();
