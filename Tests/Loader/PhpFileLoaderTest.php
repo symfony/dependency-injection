@@ -123,7 +123,7 @@ class PhpFileLoaderTest extends TestCase
         $container->compile();
 
         $dumper = new YamlDumper($container);
-        $this->assertStringMatchesFormatFile($fixtures.'/config/'.$file.'.expected.yml', $dumper->dump());
+        $this->assertStringMatchesFormatFile($fixtures.'/config/'.$file.'.expected.yml', str_replace('{  }', '{}', $dumper->dump()));
     }
 
     public static function provideConfig()

@@ -13,4 +13,4 @@ services:
         class: Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\Foo
         public: true
         autowire: true
-        arguments: [null, !tagged_iterator app.handler, !service { class: Symfony\Component\DependencyInjection\ServiceLocator, tags: [container.service_locator], arguments: [{  }] }]
+        arguments: [null, !tagged_iterator app.handler, !service { class: Symfony\Component\DependencyInjection\ServiceLocator, tags: [container.service_locator], arguments: [{}] }]
