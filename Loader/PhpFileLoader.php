@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\DependencyInjection\Loader;
 
-use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\DependencyInjection\Attribute\WhenNot;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -69,8 +68,6 @@ class PhpFileLoader extends FileLoader
             if (\is_object($result) && \is_callable($result)) {
                 $this->callConfigurator($result, new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource, $this->env), $path);
             } elseif (\is_array($result)) {
-                $yamlLoader = new YamlFileLoader($this->container, $this->locator, $this->env, $this->prepend);
-                $yamlLoader->setResolver($this->resolver ?? new LoaderResolver([$this]));
                 ++$this->importing;
                 try {
                     $this->loadContent([

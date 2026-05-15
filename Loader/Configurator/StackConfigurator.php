@@ -17,12 +17,14 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 /**
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class StackConfigurator extends AliasConfigurator
+class StackConfigurator extends AbstractServiceConfigurator
 {
     use Traits\DecorateTrait {
         decorate as private doDecorate;
         decorateTag as private doDecorateTag;
     }
+    use Traits\DeprecateTrait;
+    use Traits\PublicTrait;
 
     public const FACTORY = 'stack';
 

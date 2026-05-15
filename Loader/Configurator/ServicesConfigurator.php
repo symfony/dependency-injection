@@ -165,14 +165,13 @@ class ServicesConfigurator extends AbstractConfigurator
             }
         }
 
-        $alias = new StackConfigurator($this, $this->container->setAlias($id, ''));
-        $alias->definition = $this->set($id)
+        $definition = $this->set($id)
             ->parent('')
             ->args($services)
             ->tag('container.stack')
             ->definition;
 
-        return $alias;
+        return new StackConfigurator($this, $definition);
     }
 
     /**

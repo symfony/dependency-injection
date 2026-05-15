@@ -206,9 +206,6 @@ abstract class AbstractKernel implements KernelInterface
             throw new \BadMethodCallException('Cannot unserialize '.__CLASS__);
         }
 
-        $this->environment = $environment;
-        $this->debug = $debug;
-
         $this->__construct($environment, $debug);
     }
 

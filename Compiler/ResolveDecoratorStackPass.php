@@ -47,6 +47,7 @@ class ResolveDecoratorStackPass implements CompilerPassInterface
             $stacks[$id] = $stack;
             $definitionCloner = null;
             $stackCloner = null;
+            $hasTagDecorator = false;
 
             foreach ($definition->getTag('container.tag_decorator') as $tag) {
                 if (!$decoratesTag = $tag['decorates_tag'] ?? null) {
@@ -71,6 +72,7 @@ class ResolveDecoratorStackPass implements CompilerPassInterface
                 }
                 $definitionCloner ??= new DeepCloner($definition);
                 $stackCloner ??= new DeepCloner($stack);
+                $hasTagDecorator = true;
 
                 foreach ($taggedServices as $taggedServiceId => $_) {
                     $cloneId = '.stack.'.$taggedServiceId.'.'.$id;
@@ -79,7 +81,9 @@ class ResolveDecoratorStackPass implements CompilerPassInterface
                         ->setDecoratedService($taggedServiceId, null, $priority, $invalidBehavior);
                     $stacks[$cloneId] = $stackCloner->clone();
                 }
+            }
 
+            if ($hasTagDecorator) {
                 $container->removeDefinition($id);
                 unset($stacks[$id]);
             }

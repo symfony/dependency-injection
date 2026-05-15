@@ -20,6 +20,7 @@ use Symfony\Component\Config\Resource\GlobResource;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Exclude;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\DependencyInjection\Attribute\WhenNot;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -228,7 +229,8 @@ abstract class FileLoader extends BaseFileLoader
                     throw new LogicException(\sprintf('#[AsAlias] attributes with a target cannot be public in "%s".', $class));
                 }
                 $this->container->registerAliasForArgument($class, $alias, $attribute->target);
-                $alias = array_key_last($this->container->getAliases());
+                $parsedName = (new Target($attribute->target))->getParsedName();
+                $alias = $alias.' $'.$parsedName;
                 if (isset($this->aliasedTargets[$alias])) {
                     throw new LogicException(\sprintf('The "%s" alias has already been defined with the #[AsAlias] attribute in "%s".', $alias, $class));
                 }

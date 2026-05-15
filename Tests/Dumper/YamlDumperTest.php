@@ -144,6 +144,20 @@ class YamlDumperTest extends TestCase
         $this->assertStringEqualsGeneratedFile('services_with_tagged_argument.yml', $dumper->dump());
     }
 
+    public function testTaggedArgumentsOmitsAutoDerivedDefaultMethods()
+    {
+        $container = new ContainerBuilder();
+        $container->register('foo_service', 'Foo')->addTag('foo');
+        $container->register('with_index', 'Bar')->addArgument(new TaggedIteratorArgument('foo', 'barfoo'));
+
+        $dumper = new YamlDumper($container);
+        $yaml = $dumper->dump();
+
+        $this->assertStringNotContainsString('default_index_method', $yaml);
+        $this->assertStringNotContainsString('default_priority_method', $yaml);
+        $this->assertStringContainsString('index_by: barfoo', $yaml);
+    }
+
     public function testServiceClosure()
     {
         $container = new ContainerBuilder();
