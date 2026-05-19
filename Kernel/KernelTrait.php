@@ -594,7 +594,7 @@ trait KernelTrait
             'kernel.runtime_mode' => '%env(query_string:default:container.runtime_mode:APP_RUNTIME_MODE)%',
             'kernel.runtime_mode.web' => '%env(bool:default::key:web:default:kernel.runtime_mode:)%',
             'kernel.runtime_mode.cli' => '%env(not:default:kernel.runtime_mode.web:)%',
-            'kernel.runtime_mode.worker' => '%env(bool:default::key:worker:default:kernel.runtime_mode:)%',
+            'kernel.runtime_mode.worker' => '%env(int:default::key:worker:default:kernel.runtime_mode:)%',
             'kernel.debug' => $this->debug,
             'kernel.build_dir' => realpath($dir = $this->getEffectiveBuildDir()) ?: $dir,
             'kernel.cache_dir' => realpath($dir = ($this->getCacheDir() === $this->getBuildDir() ? $this->getEffectiveBuildDir() : $this->getCacheDir())) ?: $dir,
