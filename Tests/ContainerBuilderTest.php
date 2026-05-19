@@ -1148,7 +1148,7 @@ class ContainerBuilderTest extends TestCase
             ->addTag('foo', ['foofoo' => 'foofoo']);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The resource "myservice" tagged "foo" is missing the "container.excluded" tag.');
+        $this->expectExceptionMessage('The resource "myservice" tagged "foo" is missing the "container.excluded" tag; did you mean to use "resource_tags" instead of "tags"?');
         $builder->findTaggedResourceIds('foo');
     }
 

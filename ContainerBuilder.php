@@ -1394,7 +1394,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
                 continue;
             }
             if (!$definition->hasTag('container.excluded')) {
-                throw new InvalidArgumentException(\sprintf('The resource "%s" tagged "%s" is missing the "container.excluded" tag.', $id, $tagName));
+                throw new InvalidArgumentException(\sprintf('The resource "%s" tagged "%s" is missing the "container.excluded" tag; did you mean to use "resource_tags" instead of "tags"?', $id, $tagName));
             }
             $class = $this->parameterBag->resolveValue($definition->getClass());
             if (!$class || $throwOnAbstract && $definition->isAbstract()) {
