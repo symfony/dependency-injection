@@ -709,6 +709,10 @@ trait ContentLoaderTrait
      */
     private function parseCallable(mixed $callable, string $parameter, string $id, string $file): string|array|Reference
     {
+        if ($callable instanceof Reference) {
+            return [$callable, '__invoke'];
+        }
+
         if (\is_string($callable)) {
             if (str_starts_with($callable, '@=')) {
                 if ('factory' !== $parameter) {

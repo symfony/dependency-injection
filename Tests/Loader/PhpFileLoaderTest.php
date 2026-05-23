@@ -177,6 +177,20 @@ class PhpFileLoaderTest extends TestCase
         $this->assertTrue($container->getDefinition('child_service')->isAutoconfigured());
     }
 
+    public function testArrayConfigInvokableFactoryAndConfigurator()
+    {
+        $fixtures = realpath(__DIR__.'/../Fixtures');
+        $container = new ContainerBuilder();
+        $loader = new PhpFileLoader($container, new FileLocator());
+        $loader->load($fixtures.'/config/array_config_factory.php');
+
+        $barFactoryRef = new Reference('Symfony\Component\DependencyInjection\Tests\Fixtures\BarFactory');
+
+        $this->assertEquals([$barFactoryRef, '__invoke'], $container->getDefinition('invokable_factory')->getFactory());
+        $this->assertEquals([$barFactoryRef, 'getDefaultBar'], $container->getDefinition('array_factory')->getFactory());
+        $this->assertEquals([$barFactoryRef, '__invoke'], $container->getDefinition('invokable_configurator')->getConfigurator());
+    }
+
     public function testFactoryShortNotationNotAllowed()
     {
         $this->expectException(InvalidArgumentException::class);
