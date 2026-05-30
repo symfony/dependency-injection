@@ -17,7 +17,7 @@ CHANGELOG
  * Allow environment variables with `.` in them
  * Add argument `exclude` to `ContainerConfigurator::import()`
  * Add `target` parameter to `#[AsAlias]` to create target-specific autowiring aliases
- * Deprecate named autowiring alias that don't use `#[Target]`
+ * Deprecate named autowiring aliases that don't use `#[Target]`
  * Allow passing a `Definition` instance to `Definition::setFactory()` and `Definition::setConfigurator()`, its `__invoke()` method will be called
  * Add `ServicesResetter`, `ServicesResetterInterface`, and `Compiler\ResettableServicePass` (moved from HttpKernel)
  * Allow resetting non-shared services tagged with `kernel.reset`
