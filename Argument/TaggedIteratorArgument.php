@@ -43,7 +43,7 @@ class TaggedIteratorArgument extends IteratorArgument
 
         if (\func_num_args() > 5 || !\is_bool($needsIndexes) || !\is_array($exclude) || !\is_bool($excludeSelf)) {
             [, , $defaultIndexMethod, $needsIndexes, $defaultPriorityMethod, $exclude, $excludeSelf] = \func_get_args() + [2 => null, false, null, [], true];
-            trigger_deprecation('symfony/dependency-injection', '8.1', 'The $defaultIndexMethod and $defaultPriorityMethod arguments of tagged locators and iterators are deprecated, use the #[AsTaggedItem] attribute instead.');
+            trigger_deprecation('symfony/dependency-injection', '8.1', 'The $defaultIndexMethod and $defaultPriorityMethod arguments of tagged locators and iterators are deprecated, use the #[AsTaggedItem] attribute instead. (tag: "%s")', $tag);
         } else {
             $defaultIndexMethod = $defaultPriorityMethod = false;
         }
