@@ -379,7 +379,7 @@ class XmlFileLoader extends FileLoader
         }
 
         // deep clone, to avoid multiple process of the same instance in the passes
-        $bindings = array_merge(unserialize(serialize($defaults->getBindings())), $bindings);
+        $bindings = array_merge(unserialize(serialize($defaults->getBindings()), ['allowed_classes' => true]), $bindings);
 
         if ($bindings) {
             $definition->setBindings($bindings);

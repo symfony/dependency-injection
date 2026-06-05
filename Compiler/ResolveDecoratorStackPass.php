@@ -92,7 +92,7 @@ class ResolveDecoratorStackPass implements CompilerPassInterface
         foreach ($stacks[$id] as $k => $definition) {
             if ($definition instanceof ChildDefinition && isset($stacks[$definition->getParent()])) {
                 $path[] = $definition->getParent();
-                $definition = unserialize(serialize($definition)); // deep clone
+                $definition = unserialize(serialize($definition), ['allowed_classes' => true]); // deep clone
             } elseif ($definition instanceof Definition) {
                 $definitions[$decoratedId = $prefix.$k] = $definition;
                 continue;
