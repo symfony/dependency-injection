@@ -670,7 +670,7 @@ class YamlFileLoader extends FileLoader
         if (isset($defaults['bind']) || isset($service['bind'])) {
             // deep clone, to avoid multiple process of the same instance in the passes
             $bindings = $definition->getBindings();
-            $bindings += isset($defaults['bind']) ? unserialize(serialize($defaults['bind'])) : [];
+            $bindings += isset($defaults['bind']) ? unserialize(serialize($defaults['bind']), ['allowed_classes' => true]) : [];
 
             if (isset($service['bind'])) {
                 if (!\is_array($service['bind'])) {
