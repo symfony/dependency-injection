@@ -21,9 +21,11 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 class AddBehaviorDescribingTagsPass implements CompilerPassInterface
 {
     private const DEFAULT_TAGS = [
+        'proxy',
         'container.do_not_inline',
         'container.service_locator',
         'container.service_subscriber',
+        'container.service_subscriber.locator',
     ];
 
     /**
