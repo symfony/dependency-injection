@@ -53,6 +53,7 @@ class ServicesBundle extends AbstractBundle
         if (class_exists(RegisterListenersPass::class)) {
             $container->addCompilerPass(new RegisterListenersPass(), PassConfig::TYPE_BEFORE_REMOVING);
         }
+        // Must run before ResolveInstanceofConditionalsPass which consumes and removes the parameter
         $container->addCompilerPass(new AddBehaviorDescribingTagsPass([
             'container.do_not_inline',
             'container.service_locator',
@@ -60,7 +61,7 @@ class ServicesBundle extends AbstractBundle
             'kernel.event_subscriber',
             'kernel.event_listener',
             'kernel.reset',
-        ]));
+        ]), PassConfig::TYPE_BEFORE_OPTIMIZATION, 200);
         $container->addCompilerPass(new ResettableServicePass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -32);
     }
 
