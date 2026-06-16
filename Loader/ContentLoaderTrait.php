@@ -825,7 +825,7 @@ trait ContentLoaderTrait
                         $argument = new TaggedIteratorArgument($tag, $indexBy, $forLocator, $exclude, $excludeSelf);
                     }
                 } elseif (\is_string($argument) && $argument) {
-                    $argument = new TaggedIteratorArgument($argument, null, null, $forLocator);
+                    $argument = new TaggedIteratorArgument($argument, null, $forLocator);
                 } else {
                     throw new InvalidArgumentException(\sprintf('"!%s" tags only accept a non empty string or an array with a key "tag" in "%s".', $value->getTag(), $file));
                 }
