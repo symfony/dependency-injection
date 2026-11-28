@@ -351,7 +351,7 @@ class XmlFileLoaderTest extends TestCase
         $ids = [];
 
         foreach (['project_a', 'project_b'] as $project) {
-            $dir = sys_get_temp_dir().'/sf_anonymous_services_'.$project;
+            $dir = sys_get_temp_dir().'/sf_dependency-injection_'.hash('xxh32', __FILE__).'/'.$project;
             $filesystem->copy(self::$fixturesPath.'/xml/services5.xml', $dir.'/config/services.xml', true);
 
             $container = new ContainerBuilder();
@@ -360,7 +360,7 @@ class XmlFileLoaderTest extends TestCase
             try {
                 (new XmlFileLoader($container, new FileLocator($dir.'/config')))->load('services.xml');
             } finally {
-                $filesystem->remove($dir);
+                $filesystem->remove(\dirname($dir));
             }
 
             $ids[$project] = array_keys($container->getDefinitions());

@@ -176,7 +176,7 @@ class PhpFileLoaderTest extends TestCase
         $ids = [];
 
         foreach (['project_a', 'project_b'] as $project) {
-            $dir = sys_get_temp_dir().'/sf_anonymous_services_'.$project;
+            $dir = sys_get_temp_dir().'/sf_dependency-injection_'.hash('xxh32', __FILE__).'/'.$project;
             $filesystem->copy(__DIR__.'/../Fixtures/config/anonymous.php', $dir.'/config/services.php', true);
 
             $container = new ContainerBuilder();
@@ -185,7 +185,7 @@ class PhpFileLoaderTest extends TestCase
             try {
                 (new PhpFileLoader($container, new FileLocator($dir.'/config')))->load('services.php');
             } finally {
-                $filesystem->remove($dir);
+                $filesystem->remove(\dirname($dir));
             }
 
             $ids[$project] = array_keys($container->getDefinitions());

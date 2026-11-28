@@ -832,7 +832,7 @@ class YamlFileLoaderTest extends TestCase
         $ids = [];
 
         foreach (['project_a', 'project_b'] as $project) {
-            $dir = sys_get_temp_dir().'/sf_anonymous_services_'.$project;
+            $dir = sys_get_temp_dir().'/sf_dependency-injection_'.hash('xxh32', __FILE__).'/'.$project;
             $filesystem->copy(self::$fixturesPath.'/yaml/anonymous_services.yml', $dir.'/config/services.yml', true);
             $filesystem->copy(self::$fixturesPath.'/yaml/anonymous_services_in_instanceof.yml', $dir.'/config/anonymous_services_in_instanceof.yml', true);
 
@@ -842,7 +842,7 @@ class YamlFileLoaderTest extends TestCase
             try {
                 (new YamlFileLoader($container, new FileLocator($dir.'/config')))->load('services.yml');
             } finally {
-                $filesystem->remove($dir);
+                $filesystem->remove(\dirname($dir));
             }
 
             $ids[$project] = array_keys($container->getDefinitions());
